@@ -21,7 +21,7 @@ public class GamePanel extends JPanel implements MouseListener, KeyListener, Run
     MainMenu menu = new MainMenu();
     CharacterCreation characterCreation = new CharacterCreation();
     KeyHandler keyH = new KeyHandler();
-    Camera camera = new Camera(800, 600);
+    Camera camera = new Camera(1920, 1080);
     HomeScene homeScene = new HomeScene(keyH, camera);
     Thread gameThread;
     int FPS = 60;

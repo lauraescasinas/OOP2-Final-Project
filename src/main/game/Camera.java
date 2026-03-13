@@ -4,8 +4,8 @@ public class Camera {
 
     public int cameraX;
     public int cameraY;
-    int screenWidth;
-    int screenHeight;
+    public int screenWidth;
+    public  int screenHeight;
 
     public Camera(int screenWidth, int screenHeight) {
 

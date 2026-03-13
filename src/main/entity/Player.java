@@ -18,11 +18,10 @@ public class Player {
     public void draw(Graphics g, Camera camera) {
 
         g.setColor(Color.BLUE);
-        g.fillRect(
-                x - camera.cameraX,
-                y - camera.cameraY,
-                40,
-                40
-        );
+
+        int screenX = camera.screenWidth / 2 - 20;
+        int screenY = camera.screenHeight / 2 - 20;
+
+        g.fillRect(screenX, screenY, 40, 40);
     }
 }
