@@ -115,6 +115,7 @@ public class GamePanel extends JPanel implements MouseListener, KeyListener, Run
 
             System.exit(0);
         }
+
         //enter ang game
         if(gameState == GameState.CHARACTER_CREATION) {
 
