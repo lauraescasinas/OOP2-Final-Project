@@ -71,7 +71,8 @@ public class GamePanel extends JPanel implements MouseListener, KeyListener, Run
         super.paintComponent(g);
 
         if(gameState == GameState.MENU) {
-            menu.draw(g, getWidth());
+            // Change: Added getHeight() so the square can be centered vertically
+            menu.draw(g, getWidth(), getHeight());
         }
 
         if(gameState == GameState.CHARACTER_CREATION) {
@@ -84,11 +85,12 @@ public class GamePanel extends JPanel implements MouseListener, KeyListener, Run
     }
 
     public void update() {
-
+        if(gameState == GameState.MENU) {
+            menu.update(); // This makes the animation actually move
+        }
         if(gameState == GameState.HOME) {
             homeScene.update();
         }
-
     }
 
     @Override
