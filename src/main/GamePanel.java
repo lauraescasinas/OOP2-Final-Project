@@ -3,6 +3,7 @@ package main;
 import entity.Player;
 import object.SuperObject;
 import object.BlackroseObject;
+import object.GlasseyeObject;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -66,6 +67,7 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void setupGame(){
+        // blackroses in greenhouse
         obj[0] = new BlackroseObject();
         obj[0].x = 150; obj[0].y = 450;
         obj[0].hitbox.x = 150; obj[0].hitbox.y = 450;
@@ -85,6 +87,27 @@ public class GamePanel extends JPanel implements Runnable {
         obj[4] = new BlackroseObject();
         obj[4].x = 650; obj[4].y = 520;
         obj[4].hitbox.x = 650; obj[4].hitbox.y = 520;
+
+        // glass eyes in workshop
+        obj[5] = new GlasseyeObject();
+        obj[5].x = 100; obj[5].y = 200;
+        obj[5].hitbox.x = 100; obj[5].hitbox.y = 200;
+
+        obj[6] = new GlasseyeObject();
+        obj[6].x = 200; obj[6].y = 450;
+        obj[6].hitbox.x = 200; obj[6].hitbox.y = 450;
+
+        obj[7] = new GlasseyeObject();
+        obj[7].x = 550; obj[7].y = 150;
+        obj[7].hitbox.x = 550; obj[7].hitbox.y = 150;
+
+        obj[8] = new GlasseyeObject();
+        obj[8].x = 650; obj[8].y = 350;
+        obj[8].hitbox.x = 650; obj[8].hitbox.y = 350;
+
+        obj[9] = new GlasseyeObject();
+        obj[9].x = 750; obj[9].y = 500;
+        obj[9].hitbox.x = 750; obj[9].hitbox.y = 500;
     }
 
     public void startGameThread(){
@@ -149,11 +172,20 @@ public class GamePanel extends JPanel implements Runnable {
             g2.drawImage(streetBg, 0, 0, screenWidth, screenHeight, null);
         } else if (currentMap == MAP_WORKSHOP && workshopBg != null){
             g2.drawImage(workshopBg, 0, 0, screenWidth, screenHeight, null);
+            //scatter the glass eyes in workshop
+            for (int i = 0; i < obj.length; i++){
+                if (obj[i] != null && obj[i].name.equals("Glass Eye")){
+                    obj[i].draw(g2, this);
+                    //visible hitboxes for debugging
+                    g2.setColor(new Color(255, 255, 0, 150));
+                    g2.fillRect(obj[i].hitbox.x, obj[i].hitbox.y, obj[i].hitbox.width, obj[i].hitbox.height);
+                }
+            }
         } else if (currentMap == MAP_GREENHOUSE && greenhouseBg != null){
             g2.drawImage(greenhouseBg, 0, 0, screenWidth, screenHeight, null);
             // scatter the roses in greenhoues
             for (int i = 0; i < obj.length; i++) {
-                if (obj[i] != null) {
+                if (obj[i] != null && obj[i].name.equals("Black Rose")) {
                     obj[i].draw(g2, this);
                     //visible hitboxes for debugging
                     g2.setColor(new Color(255, 255, 0, 150));

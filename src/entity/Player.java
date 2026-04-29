@@ -13,6 +13,7 @@ public class Player extends Entity{
     GamePanel gp;
     KeyHandler keyH;
     public int blackRosesCollected = 0;
+    public int glassEyesCollected = 0;
 
     public Player(GamePanel gp, KeyHandler keyH){
         this.gp = gp;
@@ -48,19 +49,19 @@ public class Player extends Entity{
         if(keyH.upPressed == true || keyH.downPressed == true ||
                 keyH.leftPressed == true || keyH.rightPressed == true) {
             if (keyH.upPressed == true) {
-                System.out.println("up pressed");
+//                System.out.println("up pressed");
                 direction = "up";
                 y -= speed;
             } else if (keyH.downPressed == true) {
-                System.out.println("down pressed");
+//                System.out.println("down pressed");
                 direction = "down";
                 y += speed;
             } else if (keyH.leftPressed == true) {
-                System.out.println("left pressed");
+//                System.out.println("left pressed");
                 direction = "left";
                 x -= speed;
             } else if (keyH.rightPressed == true) {
-                System.out.println("right pressed");
+//                System.out.println("right pressed");
                 direction = "right";
                 x += speed;
             }
@@ -148,9 +149,8 @@ public class Player extends Entity{
         }
 
         if (gp.mouseH.leftClicked){
+            Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
             if(gp.currentMap == gp.MAP_GREENHOUSE){
-                Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
-
                 for (int i = 0; i < gp.obj.length; i++){
                     if (gp.obj[i] != null){
                         if (mouseHitbox.intersects(gp.obj[i].hitbox)){
@@ -158,6 +158,17 @@ public class Player extends Entity{
                             blackRosesCollected++; // add inventory
                             //debug print
                             System.out.println("black roses collected: " + blackRosesCollected + "/5");
+                        }
+                    }
+                }
+            } else if (gp.currentMap == gp.MAP_WORKSHOP){
+                for (int i = 0; i < gp.obj.length; i++){
+                    if (gp.obj[i] != null && gp.obj[i].name.equals("Glass Eye")){
+                        if (mouseHitbox.intersects(gp.obj[i].hitbox)){
+                            gp.obj[i] = null;
+                            glassEyesCollected++;
+                            //debug print
+                            System.out.println("glass eyes collected: " + glassEyesCollected + "/5");
                         }
                     }
                 }
