@@ -1,180 +1,154 @@
 package main;
 
-import java.awt.Graphics;
-import javax.swing.JPanel;
+import entity.Player;
 
-import main.game.GameState;
-import main.game.KeyHandler;
-import main.ui.MainMenu;
-import main.ui.CharacterCreation;
-import main.scene.HomeScene;
-import main.game.Camera;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.IOException;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+public class GamePanel extends JPanel implements Runnable {
 
-import java.awt.event.MouseListener;
-import java.awt.event.MouseEvent;
+    final int originalTileSize = 16;    // 16x16 tile for characters
+    final int scale = 3;
 
-public class GamePanel extends JPanel implements MouseListener, KeyListener, Runnable {
-    int gameState = GameState.MENU;
-    MainMenu menu = new MainMenu();
-    CharacterCreation characterCreation = new CharacterCreation();
-    KeyHandler keyH = new KeyHandler();
-    Camera camera = new Camera(1920, 1080);
-    HomeScene homeScene = new HomeScene(keyH, camera);
-    Thread gameThread;
+    public final int tileSize = originalTileSize * scale;  // 48x48 tile
+    final int maxScreenCol = 18;
+    final int maxScreenRow = 14;
+    public final int screenWidth = tileSize * maxScreenCol;  // 864 pixels
+    public final int screenHeight = tileSize * maxScreenRow;  // 672 pixels
+
+    public final int MAP_HOUSE = 0;
+    public final int MAP_STREET = 1;
+    public final int MAP_WORKSHOP = 2;
+    public final int MAP_GREENHOUSE = 3;
+    public final int MAP_MUSEUM = 4;
+    public int currentMap = MAP_HOUSE; // start in the house
+
+
+    BufferedImage houseBg;
+    BufferedImage streetBg;
+    BufferedImage workshopBg;
+    BufferedImage greenhouseBg;
+    BufferedImage museumBg;
+
     int FPS = 60;
-//    int gameState = GameState.MENU;
+    KeyHandler keyH = new KeyHandler();
+    Thread gameThread;
+    Player player = new Player(this, keyH);
 
-    public GamePanel() {
+    // inside doors
+    public Rectangle houseDoorHitbox = new Rectangle(350, 520, 164, 100);
+    public Rectangle workshopDoorHitbox = new Rectangle(350, 520, 164, 100);
+    public Rectangle greenhouseDoorHitbox = new Rectangle(350, 520, 164, 100);
+    public Rectangle museumDoorHitbox = new Rectangle(350, 520, 164, 100);
 
-        addMouseListener(this);
-        addKeyListener(this);   //para menu type
-        addKeyListener(keyH);   // para player movement
-        setFocusable(true);
+    // outside doors
+    public Rectangle streetHouseDoorHitbox = new Rectangle(230, 170, 85, 45);
+    public Rectangle streetMuseumDoorHitbox = new Rectangle(230, 170, 85, 45);
+    public Rectangle streetWorkshopDoorHitbox = new Rectangle(230, 170, 85, 45);
+    public Rectangle streetGreenhouseDoorHitbox = new Rectangle(230, 170, 85, 45);
+
+    public GamePanel(){
+        this.setPreferredSize(new Dimension(screenWidth, screenHeight));
+        this.setBackground(Color.black);
+        this.setDoubleBuffered(true);
+
+        this.addKeyListener(keyH);
+        this.setFocusable(true);
+        loadBackgrounds();
     }
 
-    public void startGameMethod() {
-
+    public void startGameThread(){
         gameThread = new Thread(this);
         gameThread.start();
-
     }
 
     @Override
-    public void run() {
-
+    public void run(){
         double drawInterval = 1000000000 / FPS;
         double delta = 0;
         long lastTime = System.nanoTime();
         long currentTime;
+        long timer = 0;
+        int drawCount = 0;
 
-        while(gameThread != null) {
+        while(gameThread != null){
 
             currentTime = System.nanoTime();
-
             delta += (currentTime - lastTime) / drawInterval;
+            timer += (currentTime - lastTime);
             lastTime = currentTime;
 
-            if(delta >= 1) {
-
+            if(delta >= 1){
                 update();
                 repaint();
-
                 delta--;
+                drawCount++;
+            }
+
+            if (timer >= 1000000000){
+                System.out.println("FPS: " + drawCount);
+                drawCount = 0;
+                timer = 0;
             }
         }
     }
 
-    public void paintComponent(Graphics g) {
+    public void loadBackgrounds() {
+        try {
+            // Make sure these match the names in your "res" folder!
+            houseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/House_bg.png"));
+            streetBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Street_bg.png"));
+            workshopBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Workshop_bg.png"));
+            greenhouseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Greenhouse_bg.png"));
+            museumBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Museum_bg.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void update(){
+        player.update();
+    }
+
+    public void paintComponent(Graphics g){
         super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D)g;
 
-        if(gameState == GameState.MENU) {
-            menu.draw(g, getWidth());
+        if (currentMap == MAP_HOUSE && houseBg != null) {
+            g2.drawImage(houseBg, 0, 0, screenWidth, screenHeight, null);
+        } else if (currentMap == MAP_STREET && streetBg != null) {
+            g2.drawImage(streetBg, 0, 0, screenWidth, screenHeight, null);
+        } else if (currentMap == MAP_WORKSHOP && workshopBg != null){
+            g2.drawImage(workshopBg, 0, 0, screenWidth, screenHeight, null);
+        } else if (currentMap == MAP_GREENHOUSE && greenhouseBg != null){
+            g2.drawImage(greenhouseBg, 0, 0, screenWidth, screenHeight, null);
+        } else if (currentMap == MAP_MUSEUM && museumBg != null){
+            g2.drawImage(museumBg, 0, 0, screenWidth, screenHeight, null);
         }
 
-        if(gameState == GameState.CHARACTER_CREATION) {
-            characterCreation.draw(g, getWidth());
+        // temporary: visible door hitboxes for debugging nyahahhaa
+        g2.setColor(new Color(255, 0, 0, 100));
+        if (currentMap == MAP_HOUSE) {
+            g2.fillRect(houseDoorHitbox.x, houseDoorHitbox.y, houseDoorHitbox.width, houseDoorHitbox.height);
+        } else if (currentMap == MAP_STREET) {
+            g2.fillRect(streetHouseDoorHitbox.x, streetHouseDoorHitbox.y, streetHouseDoorHitbox.width, streetHouseDoorHitbox.height);
+            g2.fillRect(streetMuseumDoorHitbox.x, streetMuseumDoorHitbox.y, streetMuseumDoorHitbox.width, streetMuseumDoorHitbox.height);
+            g2.fillRect(streetWorkshopDoorHitbox.x, streetWorkshopDoorHitbox.y, streetWorkshopDoorHitbox.width, streetWorkshopDoorHitbox.height);
+            g2.fillRect(streetGreenhouseDoorHitbox.x, streetGreenhouseDoorHitbox.y, streetGreenhouseDoorHitbox.width, streetGreenhouseDoorHitbox.height);
+        } else if(currentMap == MAP_WORKSHOP){
+            g2.fillRect(workshopDoorHitbox.x, workshopDoorHitbox.y, workshopDoorHitbox.width, workshopDoorHitbox.height );
+        } else if (currentMap == MAP_GREENHOUSE){
+            g2.fillRect(greenhouseDoorHitbox.x, greenhouseDoorHitbox.y, greenhouseDoorHitbox.width, greenhouseDoorHitbox.height );
+        } else if(currentMap == MAP_GREENHOUSE){
+            g2.fillRect(museumDoorHitbox.x, museumDoorHitbox.y, museumDoorHitbox.width, museumDoorHitbox.height );
         }
 
-        if(gameState == GameState.HOME) {
-            homeScene.draw(g);
-        }
+        player.draw(g2);
+        g2.dispose();
+
+
     }
-
-    public void update() {
-
-        if(gameState == GameState.HOME) {
-            homeScene.update();
-        }
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-
-        int mouseX = e.getX();
-        int mouseY = e.getY();
-
-        //start button
-        if(mouseX > menu.startX &&
-                mouseX < menu.startX + menu.startButton.getWidth() &&
-                mouseY > menu.startY &&
-                mouseY < menu.startY + menu.startButton.getHeight()) {
-
-            gameState = GameState.CHARACTER_CREATION;
-            repaint();
-        }
-
-        //exit button
-        if(mouseX > menu.exitX &&
-                mouseX < menu.exitX + menu.exitButton.getWidth() &&
-                mouseY > menu.exitY &&
-                mouseY < menu.exitY + menu.exitButton.getHeight()) {
-
-            System.exit(0);
-        }
-
-        //enter ang game
-        if(gameState == GameState.CHARACTER_CREATION) {
-
-            if(mouseX > characterCreation.enterX &&
-                    mouseX < characterCreation.enterX + characterCreation.enterWidth &&
-                    mouseY > characterCreation.enterY &&
-                    mouseY < characterCreation.enterY + characterCreation.enterHeight) {
-
-                if(!characterCreation.playerName.isEmpty()) {
-                    gameState = GameState.HOME;
-                    repaint();
-                }
-
-            }
-
-        }
-    }
-
-    //required empty methods
-    public void mouseClicked(MouseEvent e) {}
-    public void mouseReleased(MouseEvent e) {}
-    public void mouseEntered(MouseEvent e) {}
-    public void mouseExited(MouseEvent e) {}
-
-    public void keyTyped(KeyEvent e){
-
-        if(gameState == GameState.CHARACTER_CREATION) {
-
-            char c = e.getKeyChar();
-
-            if(Character.isLetterOrDigit(c) && characterCreation.playerName.length() < 12) {
-                characterCreation.playerName += c;
-            }
-
-            repaint();
-        }
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e){
-        if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE &&
-                characterCreation.playerName.length() > 0) {
-
-            characterCreation.playerName =
-                    characterCreation.playerName.substring(0,
-                    characterCreation.playerName.length() - 1);
-
-            repaint();
-        }
-
-        if(e.getKeyCode() == KeyEvent.VK_ENTER &&
-                gameState == GameState.CHARACTER_CREATION &&
-                !characterCreation.playerName.isEmpty()) {
-
-            gameState = GameState.HOME;
-            repaint();
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {}
 }
