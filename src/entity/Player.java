@@ -76,54 +76,75 @@ public class Player extends Entity{
 
         Rectangle playerHitbox = new Rectangle(x, y, gp.tileSize, gp.tileSize);
 
-        // house
+        //  exit house
         if (gp.currentMap == gp.MAP_HOUSE) {
             // check if player hitbox touches the house door hitbox
             if (playerHitbox.intersects(gp.houseDoorHitbox)) {
                 gp.currentMap = gp.MAP_STREET; // Change Map
 
-                // teleport player to stand perfectly below the street (outside) house door
+                // teleport player to stand right below the street (outside) house door
                 x = gp.streetHouseDoorHitbox.x;
                 y = gp.streetHouseDoorHitbox.y + gp.streetHouseDoorHitbox.height + 5;
             }
-        // workshop
+        // exit workshop
         } else if (gp.currentMap == gp.MAP_WORKSHOP){
             if (playerHitbox.intersects(gp.workshopDoorHitbox)){
                 gp.currentMap = gp.MAP_STREET;
                 x = gp.streetWorkshopDoorHitbox.x;
-                y = gp.streetWorkshopDoorHitbox.y - gp.tileSize - 5;
+                y = gp.streetWorkshopDoorHitbox.y - gp.tileSize - 20;
             }
-        // greenhouse
+        // exit greenhouse
         } else if (gp.currentMap == gp.MAP_GREENHOUSE){
             if (playerHitbox.intersects(gp.greenhouseDoorHitbox)) {
                 gp.currentMap = gp.MAP_STREET;
                 x = gp.streetGreenhouseDoorHitbox.x;
-                y = gp.streetGreenhouseDoorHitbox.y - gp.tileSize - 5;
+                y = gp.streetGreenhouseDoorHitbox.y - gp.tileSize - 20;
             }
-        // museum
+        // exit museum
         } else if (gp.currentMap == gp.MAP_MUSEUM){
             if (playerHitbox.intersects(gp.museumDoorHitbox)){
                 gp.currentMap = gp.MAP_STREET;
                 x = gp.streetMuseumDoorHitbox.x;
-                y = gp.streetMuseumDoorHitbox.y - 5;
+                y = gp.streetMuseumDoorHitbox.y + gp.streetMuseumDoorHitbox.height + 5;
             }
-        // street
         } else if (gp.currentMap == gp.MAP_STREET) {
-            // check if player hitbox touches the street (outside) house door hitbox
-            if (playerHitbox.intersects(gp.streetHouseDoorHitbox)) {
-                gp.currentMap = gp.MAP_HOUSE; // Change Map
 
-                // teleport player to stand perfectly above house (inside) door
+            // enter house
+            if (playerHitbox.intersects(gp.streetHouseDoorHitbox)) {
+                gp.currentMap = gp.MAP_HOUSE;
                 x = gp.houseDoorHitbox.x + (gp.houseDoorHitbox.width / 2) - (gp.tileSize / 2);
                 y = gp.houseDoorHitbox.y - gp.tileSize - 5;
             }
+            // enter museum
+            else if (playerHitbox.intersects(gp.streetMuseumDoorHitbox)) {
+                gp.currentMap = gp.MAP_MUSEUM;
+                x = gp.museumDoorHitbox.x + (gp.museumDoorHitbox.width / 2) - (gp.tileSize / 2);
+                y = gp.museumDoorHitbox.y - gp.tileSize - 5;
+            }
+            // enter workshop
+            else if (playerHitbox.intersects(gp.streetWorkshopDoorHitbox)) {
+                gp.currentMap = gp.MAP_WORKSHOP;
+                x = gp.workshopDoorHitbox.x + (gp.workshopDoorHitbox.width / 2) - (gp.tileSize / 2);
+                y = gp.workshopDoorHitbox.y - gp.tileSize - 20;
+            }
+            // enter greenhouse
+            else if (playerHitbox.intersects(gp.streetGreenhouseDoorHitbox)) {
+                gp.currentMap = gp.MAP_GREENHOUSE;
+                x = gp.greenhouseDoorHitbox.x + (gp.greenhouseDoorHitbox.width / 2) - (gp.tileSize / 2);
+                y = gp.greenhouseDoorHitbox.y - gp.tileSize - 20;
+            }
         }
 
+        // boundaries to prevvent walking off screen
         if (x < 0) x = 0;
         if (y < 0) y = 0;
-        if (x > gp.screenWidth - gp.tileSize) x = gp.screenWidth - gp.tileSize;
-        if (y > gp.screenHeight - gp.tileSize && gp.currentMap != gp.MAP_HOUSE) y = gp.screenHeight - gp.tileSize;
-
+        if (x > gp.screenWidth - gp.tileSize){
+            x = gp.screenWidth - gp.tileSize;
+        }
+        // for interior maps - allow player to walk to the bottom of the screen
+        if (y > gp.screenHeight - gp.tileSize && gp.currentMap == gp.MAP_STREET){
+            y = gp.screenHeight - gp.tileSize;
+        }
     }
 
     public void draw(Graphics2D g2){

@@ -11,7 +11,7 @@ public class Game {
         gamePanel = new GamePanel();
         gameWindow = new GameWindow(gamePanel);
 
-        gamePanel.startGameMethod(); // start game loop
+//        gamePanel.startGameMethod(); // start game loop
 
     }
 }

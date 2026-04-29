@@ -46,9 +46,9 @@ public class GamePanel extends JPanel implements Runnable {
 
     // outside doors
     public Rectangle streetHouseDoorHitbox = new Rectangle(230, 170, 85, 45);
-    public Rectangle streetMuseumDoorHitbox = new Rectangle(230, 170, 85, 45);
-    public Rectangle streetWorkshopDoorHitbox = new Rectangle(230, 170, 85, 45);
-    public Rectangle streetGreenhouseDoorHitbox = new Rectangle(230, 170, 85, 45);
+    public Rectangle streetMuseumDoorHitbox = new Rectangle(550, 170, 85, 45);
+    public Rectangle streetWorkshopDoorHitbox = new Rectangle(230, 480, 85, 45);
+    public Rectangle streetGreenhouseDoorHitbox = new Rectangle(550, 480, 85, 45);
 
     public GamePanel(){
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -98,7 +98,6 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void loadBackgrounds() {
         try {
-            // Make sure these match the names in your "res" folder!
             houseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/House_bg.png"));
             streetBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Street_bg.png"));
             workshopBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Workshop_bg.png"));
@@ -142,7 +141,7 @@ public class GamePanel extends JPanel implements Runnable {
             g2.fillRect(workshopDoorHitbox.x, workshopDoorHitbox.y, workshopDoorHitbox.width, workshopDoorHitbox.height );
         } else if (currentMap == MAP_GREENHOUSE){
             g2.fillRect(greenhouseDoorHitbox.x, greenhouseDoorHitbox.y, greenhouseDoorHitbox.width, greenhouseDoorHitbox.height );
-        } else if(currentMap == MAP_GREENHOUSE){
+        } else if(currentMap == MAP_MUSEUM){
             g2.fillRect(museumDoorHitbox.x, museumDoorHitbox.y, museumDoorHitbox.width, museumDoorHitbox.height );
         }
 
