@@ -34,6 +34,8 @@ public class GamePanel extends JPanel implements Runnable {
     BufferedImage workshopBg;
     BufferedImage greenhouseBg;
     BufferedImage museumBg;
+    BufferedImage bouquetInv;
+    BufferedImage jarInv;
 
     int FPS = 60;
     KeyHandler keyH = new KeyHandler();
@@ -153,6 +155,10 @@ public class GamePanel extends JPanel implements Runnable {
             workshopBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Workshop_bg.png"));
             greenhouseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Greenhouse_bg.png"));
             museumBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Museum_bg.png"));
+
+            // bouquet roses & glass eyes in inventory once collected
+            bouquetInv = ImageIO.read(getClass().getResourceAsStream("/Objects/bouquet_roses.png"));
+            jarInv = ImageIO.read(getClass().getResourceAsStream("/Objects/jar_eyes.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -215,6 +221,11 @@ public class GamePanel extends JPanel implements Runnable {
         }
 
         player.draw(g2);
+        // bouquet appears after all 5 roses are collected
+        if (player.blackRosesCollected >= 5 && bouquetInv != null){
+            g2.drawImage(bouquetInv, 20, 300, tileSize, tileSize, null);
+        }
+
         g2.dispose();
 
 
