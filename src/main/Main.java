@@ -17,6 +17,8 @@ public class Main {
         window.setLocationRelativeTo(null);
         window.setVisible(true);
 
+        // make roses appear
+        gamePanel.setupGame();
         gamePanel.startGameThread();
     }
 }

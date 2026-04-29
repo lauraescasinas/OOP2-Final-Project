@@ -12,6 +12,7 @@ public class Player extends Entity{
 
     GamePanel gp;
     KeyHandler keyH;
+    public int blackRosesCollected = 0;
 
     public Player(GamePanel gp, KeyHandler keyH){
         this.gp = gp;
@@ -144,6 +145,25 @@ public class Player extends Entity{
         // for interior maps - allow player to walk to the bottom of the screen
         if (y > gp.screenHeight - gp.tileSize && gp.currentMap == gp.MAP_STREET){
             y = gp.screenHeight - gp.tileSize;
+        }
+
+        if (gp.mouseH.leftClicked){
+            if(gp.currentMap == gp.MAP_GREENHOUSE){
+                Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
+
+                for (int i = 0; i < gp.obj.length; i++){
+                    if (gp.obj[i] != null){
+                        if (mouseHitbox.intersects(gp.obj[i].hitbox)){
+                            gp.obj[i] = null; // remove clicked rose from greenhouse map
+                            blackRosesCollected++; // add inventory
+                            //debug print
+                            System.out.println("black roses collected: " + blackRosesCollected + "/5");
+                        }
+                    }
+                }
+            }
+            // reset click every collect
+            gp.mouseH.leftClicked = false;
         }
     }
 

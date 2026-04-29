@@ -1,7 +1,8 @@
 package main;
 
 import entity.Player;
-
+import object.SuperObject;
+import object.BlackroseObject;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -35,8 +36,11 @@ public class GamePanel extends JPanel implements Runnable {
 
     int FPS = 60;
     KeyHandler keyH = new KeyHandler();
+    public MouseHandler mouseH = new MouseHandler();
     Thread gameThread;
     Player player = new Player(this, keyH);
+
+    public SuperObject obj[] = new SuperObject[10];
 
     // inside doors
     public Rectangle houseDoorHitbox = new Rectangle(350, 520, 164, 100);
@@ -56,8 +60,31 @@ public class GamePanel extends JPanel implements Runnable {
         this.setDoubleBuffered(true);
 
         this.addKeyListener(keyH);
+        this.addMouseListener(mouseH);
         this.setFocusable(true);
         loadBackgrounds();
+    }
+
+    public void setupGame(){
+        obj[0] = new BlackroseObject();
+        obj[0].x = 150; obj[0].y = 450;
+        obj[0].hitbox.x = 150; obj[0].hitbox.y = 450;
+
+        obj[1] = new BlackroseObject();
+        obj[1].x = 250; obj[1].y = 300;
+        obj[1].hitbox.x = 250; obj[1].hitbox.y = 300;
+
+        obj[2] = new BlackroseObject();
+        obj[2].x = 600; obj[2].y = 300;
+        obj[2].hitbox.x = 600; obj[2].hitbox.y = 300;
+
+        obj[3] = new BlackroseObject();
+        obj[3].x = 700; obj[3].y = 400;
+        obj[3].hitbox.x = 700; obj[3].hitbox.y = 400;
+
+        obj[4] = new BlackroseObject();
+        obj[4].x = 650; obj[4].y = 520;
+        obj[4].hitbox.x = 650; obj[4].hitbox.y = 520;
     }
 
     public void startGameThread(){
@@ -89,7 +116,7 @@ public class GamePanel extends JPanel implements Runnable {
             }
 
             if (timer >= 1000000000){
-                System.out.println("FPS: " + drawCount);
+//                System.out.println("FPS: " + drawCount);
                 drawCount = 0;
                 timer = 0;
             }
@@ -124,9 +151,19 @@ public class GamePanel extends JPanel implements Runnable {
             g2.drawImage(workshopBg, 0, 0, screenWidth, screenHeight, null);
         } else if (currentMap == MAP_GREENHOUSE && greenhouseBg != null){
             g2.drawImage(greenhouseBg, 0, 0, screenWidth, screenHeight, null);
+            // scatter the roses in greenhoues
+            for (int i = 0; i < obj.length; i++) {
+                if (obj[i] != null) {
+                    obj[i].draw(g2, this);
+                    //visible hitboxes for debugging
+                    g2.setColor(new Color(255, 255, 0, 150));
+                    g2.fillRect(obj[i].hitbox.x, obj[i].hitbox.y, obj[i].hitbox.width, obj[i].hitbox.height);
+                }
+            }
         } else if (currentMap == MAP_MUSEUM && museumBg != null){
             g2.drawImage(museumBg, 0, 0, screenWidth, screenHeight, null);
         }
+
 
         // temporary: visible door hitboxes for debugging nyahahhaa
         g2.setColor(new Color(255, 0, 0, 100));
