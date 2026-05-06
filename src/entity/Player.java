@@ -46,17 +46,19 @@ public class Player extends Entity{
 
     public void update(){
 
-        if (gp.passwordUIOpen == true) {
+        if (gp.passwordUIOpen || gp.clue1_Open || gp.clue2_Open || gp.clue3_Open) {
             if (gp.mouseH.leftClicked) {
                 Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
 
-                // back button
+                // back button closes EVERYTHING
                 if (mouseHitbox.intersects(gp.backButtonHitbox)) {
-                    gp.passwordUIOpen = false; // Close UI
+                    gp.passwordUIOpen = false;
+                    gp.clue1_Open = false;
+                    gp.clue2_Open = false;
+                    gp.clue3_Open = false;
                 }
-                // submit button (green circle)
-                else if (mouseHitbox.intersects(gp.submitButtonHitbox)) {
-                    // Check if password matches exactly
+                // submit button (green circle) ONLY works if password UI is open
+                else if (gp.passwordUIOpen && mouseHitbox.intersects(gp.submitButtonHitbox)) {
                     if (keyH.currentInput.equals("Password123")) {
                         gp.locketUnlocked = true;
                         gp.passwordUIOpen = false;
@@ -204,6 +206,13 @@ public class Player extends Entity{
                         gp.passwordUIOpen = true;
                         keyH.currentInput = "";
                     }
+                }
+                if (mouseHitbox.intersects(gp.clue1Hitbox)) {
+                    gp.clue1_Open = true;
+                } else if (mouseHitbox.intersects(gp.clue2Hitbox)) {
+                    gp.clue2_Open = true;
+                } else if (mouseHitbox.intersects(gp.clue3Hitbox)) {
+                    gp.clue3_Open = true;
                 }
             }
             // reset click every collect

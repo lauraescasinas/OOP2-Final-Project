@@ -26,7 +26,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int MAP_WORKSHOP = 2;
     public final int MAP_GREENHOUSE = 3;
     public final int MAP_MUSEUM = 4;
-    public int currentMap = MAP_HOUSE; // start in the house
+    public int currentMap = MAP_MUSEUM; // start in the house
 
 
     BufferedImage houseBg;
@@ -37,13 +37,21 @@ public class GamePanel extends JPanel implements Runnable {
     BufferedImage bouquetInv;
     BufferedImage jarInv;
     BufferedImage lockedCase, clue1, clue2, clue3, passwordUI, backBtn, locketInv, unlockedCase;
+    BufferedImage openClue1, openClue2, openClue3;
+
 
     public boolean passwordUIOpen = false;
     public boolean locketUnlocked = false;
+    public boolean clue1_Open = false;
+    public boolean clue2_Open = false;
+    public boolean clue3_Open = false;
 
     public Rectangle glassCaseHitbox = new Rectangle(150, 250, 100, 150);
     public Rectangle backButtonHitbox = new Rectangle(50, 50, 60, 60);
-    public Rectangle submitButtonHitbox = new Rectangle(620, 420, 60, 60);
+    public Rectangle submitButtonHitbox = new Rectangle(560, 400, 60, 60);
+    public Rectangle clue1Hitbox = new Rectangle(100, 400, 48, 48);
+    public Rectangle clue2Hitbox = new Rectangle(300, 350, 48, 48);
+    public Rectangle clue3Hitbox = new Rectangle(250, 500, 48, 48);
 
     int FPS = 60;
     KeyHandler keyH = new KeyHandler();
@@ -164,17 +172,23 @@ public class GamePanel extends JPanel implements Runnable {
             greenhouseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Greenhouse_bg.png"));
             museumBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Museum_bg.png"));
 
-            // bouquet roses & glass eyes in inventory once collected
+            // bouquet roses, glass eyes, locket in inventory once collected
             bouquetInv = ImageIO.read(getClass().getResourceAsStream("/Objects/bouquet_roses.png"));
             jarInv = ImageIO.read(getClass().getResourceAsStream("/Objects/jar_eyes.png"));
+            locketInv = ImageIO.read(getClass().getResourceAsStream("/Objects/memento_locket.png"));
+
             lockedCase = ImageIO.read(getClass().getResourceAsStream("/Objects/locked_GlassCase.png"));
+            passwordUI = ImageIO.read(getClass().getResourceAsStream("/Objects/password_input.png"));
+            backBtn = ImageIO.read(getClass().getResourceAsStream("/Objects/back_button.png"));
+            unlockedCase = ImageIO.read(getClass().getResourceAsStream("/Objects/unlocked_GlassCase.png"));
+
+            // clues
             clue1 = ImageIO.read(getClass().getResourceAsStream("/Objects/clue1.png"));
             clue2 = ImageIO.read(getClass().getResourceAsStream("/Objects/clue2.png"));
             clue3 = ImageIO.read(getClass().getResourceAsStream("/Objects/clue3.png"));
-            passwordUI = ImageIO.read(getClass().getResourceAsStream("/Objects/password_input.png"));
-            backBtn = ImageIO.read(getClass().getResourceAsStream("/Objects/back_button.png"));
-            locketInv = ImageIO.read(getClass().getResourceAsStream("/Objects/memento_locket.png"));
-            unlockedCase = ImageIO.read(getClass().getResourceAsStream("/Objects/unlocked_GlassCase.png"));
+            openClue1 = ImageIO.read(getClass().getResourceAsStream("/Objects/open_clue1.png"));
+            openClue2 = ImageIO.read(getClass().getResourceAsStream("/Objects/open_clue2.png"));
+            openClue3 = ImageIO.read(getClass().getResourceAsStream("/Objects/open_clue3.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -219,6 +233,12 @@ public class GamePanel extends JPanel implements Runnable {
             if (clue1 != null) g2.drawImage(clue1, 100, 400, tileSize, tileSize, null);
             if (clue2 != null) g2.drawImage(clue2, 300, 350, tileSize, tileSize, null);
             if (clue3 != null) g2.drawImage(clue3, 250, 500, tileSize, tileSize, null);
+
+            // clue hitboxes
+            g2.setColor(new Color(0, 0, 255, 100)); // Blue debug boxes
+            g2.fillRect(clue1Hitbox.x, clue1Hitbox.y, clue1Hitbox.width, clue1Hitbox.height);
+            g2.fillRect(clue2Hitbox.x, clue2Hitbox.y, clue2Hitbox.width, clue2Hitbox.height);
+            g2.fillRect(clue3Hitbox.x, clue3Hitbox.y, clue3Hitbox.width, clue3Hitbox.height);
 
             if (locketUnlocked == false) {
                 if (lockedCase != null) g2.drawImage(lockedCase, 150, 250, tileSize*2, tileSize*3, null);
@@ -279,9 +299,10 @@ public class GamePanel extends JPanel implements Runnable {
             //  typed text inside the white box
             g2.setFont(new Font("Arial", Font.BOLD, 36));
             g2.setColor(Color.BLACK);
-            // Adjust +100 and +250 to make the text align perfectly inside your white box
+
+            // adjust text input box
             int textX = uiX + 100;
-            int textY = uiY + 250;
+            int textY = uiY + 300;
             g2.drawString(keyH.currentInput, textX, textY);
 
             g2.setColor(Color.MAGENTA);
@@ -292,6 +313,27 @@ public class GamePanel extends JPanel implements Runnable {
             // debug hitboxes
             g2.setColor(new Color(255, 255, 0, 150));
             g2.fillRect(submitButtonHitbox.x, submitButtonHitbox.y, submitButtonHitbox.width, submitButtonHitbox.height);
+            g2.fillRect(backButtonHitbox.x, backButtonHitbox.y, backButtonHitbox.width, backButtonHitbox.height);
+        }
+
+        if (clue1_Open || clue2_Open || clue3_Open) {
+            // Low opacity black bg to dim background
+            g2.setColor(new Color(0, 0, 0, 150));
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+
+            // Draw the UI centered
+            int uiX = screenWidth/2 - 250;
+            int uiY = screenHeight/2 - 200;
+
+            if (clue1_Open && openClue1 != null) g2.drawImage(openClue1, uiX, uiY, 500, 400, null);
+            if (clue2_Open && openClue2 != null) g2.drawImage(openClue2, uiX, uiY, 500, 400, null);
+            if (clue3_Open && openClue3 != null) g2.drawImage(openClue3, uiX, uiY, 500, 400, null);
+
+            // Draw Back Button
+            if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
+
+            // Debug hitbox for back button
+            g2.setColor(new Color(255, 255, 0, 150));
             g2.fillRect(backButtonHitbox.x, backButtonHitbox.y, backButtonHitbox.width, backButtonHitbox.height);
         }
 
