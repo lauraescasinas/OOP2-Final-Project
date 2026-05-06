@@ -7,8 +7,21 @@ public class KeyHandler implements KeyListener {
 
     public boolean upPressed, downPressed, leftPressed, rightPressed;
 
+    public String currentInput = "";
+
     @Override
     public void keyTyped(KeyEvent e) {
+        char c = e.getKeyChar();
+
+        if (c == '\b') {
+            if (currentInput.length() > 0) {
+                currentInput = currentInput.substring(0, currentInput.length() - 1);
+            }
+        }
+
+        else if (Character.isLetterOrDigit(c) && currentInput.length() < 15) {
+            currentInput += c;
+        }
     }
 
     @Override

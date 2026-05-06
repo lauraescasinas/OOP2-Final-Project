@@ -46,6 +46,31 @@ public class Player extends Entity{
 
     public void update(){
 
+        if (gp.passwordUIOpen == true) {
+            if (gp.mouseH.leftClicked) {
+                Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
+
+                // back button
+                if (mouseHitbox.intersects(gp.backButtonHitbox)) {
+                    gp.passwordUIOpen = false; // Close UI
+                }
+                // submit button (green circle)
+                else if (mouseHitbox.intersects(gp.submitButtonHitbox)) {
+                    // Check if password matches exactly
+                    if (keyH.currentInput.equals("Password123")) {
+                        gp.locketUnlocked = true;
+                        gp.passwordUIOpen = false;
+                        System.out.println("Success! Locket Unlocked.");
+                    } else {
+                        System.out.println("Access Denied. Wrong Password.");
+                    }
+                }
+                gp.mouseH.leftClicked = false;
+            }
+            return;
+        }
+
+
         if(keyH.upPressed == true || keyH.downPressed == true ||
                 keyH.leftPressed == true || keyH.rightPressed == true) {
             if (keyH.upPressed == true) {
@@ -170,6 +195,14 @@ public class Player extends Entity{
                             //debug print
                             System.out.println("glass eyes collected: " + glassEyesCollected + "/5");
                         }
+                    }
+                }
+            } else if (gp.currentMap == gp.MAP_MUSEUM){
+                if (gp.locketUnlocked == false) {
+                    // If we click the glass case, open the UI and clear the text
+                    if (mouseHitbox.intersects(gp.glassCaseHitbox)){
+                        gp.passwordUIOpen = true;
+                        keyH.currentInput = "";
                     }
                 }
             }

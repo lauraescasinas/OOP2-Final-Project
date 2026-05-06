@@ -17,7 +17,6 @@ public class Main {
         window.setLocationRelativeTo(null);
         window.setVisible(true);
 
-        // make roses and glass eyes appear
         gamePanel.setupGame();
         gamePanel.startGameThread();
     }

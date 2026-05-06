@@ -36,6 +36,14 @@ public class GamePanel extends JPanel implements Runnable {
     BufferedImage museumBg;
     BufferedImage bouquetInv;
     BufferedImage jarInv;
+    BufferedImage lockedCase, clue1, clue2, clue3, passwordUI, backBtn, locketInv, unlockedCase;
+
+    public boolean passwordUIOpen = false;
+    public boolean locketUnlocked = false;
+
+    public Rectangle glassCaseHitbox = new Rectangle(150, 250, 100, 150);
+    public Rectangle backButtonHitbox = new Rectangle(50, 50, 60, 60);
+    public Rectangle submitButtonHitbox = new Rectangle(620, 420, 60, 60);
 
     int FPS = 60;
     KeyHandler keyH = new KeyHandler();
@@ -159,6 +167,14 @@ public class GamePanel extends JPanel implements Runnable {
             // bouquet roses & glass eyes in inventory once collected
             bouquetInv = ImageIO.read(getClass().getResourceAsStream("/Objects/bouquet_roses.png"));
             jarInv = ImageIO.read(getClass().getResourceAsStream("/Objects/jar_eyes.png"));
+            lockedCase = ImageIO.read(getClass().getResourceAsStream("/Objects/locked_GlassCase.png"));
+            clue1 = ImageIO.read(getClass().getResourceAsStream("/Objects/clue1.png"));
+            clue2 = ImageIO.read(getClass().getResourceAsStream("/Objects/clue2.png"));
+            clue3 = ImageIO.read(getClass().getResourceAsStream("/Objects/clue3.png"));
+            passwordUI = ImageIO.read(getClass().getResourceAsStream("/Objects/password_input.png"));
+            backBtn = ImageIO.read(getClass().getResourceAsStream("/Objects/back_button.png"));
+            locketInv = ImageIO.read(getClass().getResourceAsStream("/Objects/memento_locket.png"));
+            unlockedCase = ImageIO.read(getClass().getResourceAsStream("/Objects/unlocked_GlassCase.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -200,6 +216,20 @@ public class GamePanel extends JPanel implements Runnable {
             }
         } else if (currentMap == MAP_MUSEUM && museumBg != null){
             g2.drawImage(museumBg, 0, 0, screenWidth, screenHeight, null);
+            if (clue1 != null) g2.drawImage(clue1, 100, 400, tileSize, tileSize, null);
+            if (clue2 != null) g2.drawImage(clue2, 300, 350, tileSize, tileSize, null);
+            if (clue3 != null) g2.drawImage(clue3, 250, 500, tileSize, tileSize, null);
+
+            if (locketUnlocked == false) {
+                if (lockedCase != null) g2.drawImage(lockedCase, 150, 250, tileSize*2, tileSize*3, null);
+
+                // for debug locked glass case
+                g2.setColor(new Color(255, 0, 0, 100));
+                g2.fillRect(glassCaseHitbox.x, glassCaseHitbox.y, glassCaseHitbox.width, glassCaseHitbox.height);
+            } else {
+                // replace locked glass case with unlocked glass case
+                if (unlockedCase != null) g2.drawImage(unlockedCase, 150, 250, tileSize*2, tileSize*3, null);
+            }
         }
 
 
@@ -224,6 +254,45 @@ public class GamePanel extends JPanel implements Runnable {
         // bouquet appears after all 5 roses are collected
         if (player.blackRosesCollected >= 5 && bouquetInv != null){
             g2.drawImage(bouquetInv, 20, 300, tileSize, tileSize, null);
+        }
+        // jar appears after all 5 glass eyes are collected
+        if (player.glassEyesCollected >= 5 && jarInv != null){
+            g2.drawImage(jarInv, 20, 300 + tileSize + 10, tileSize, tileSize, null);
+        }
+
+        if (locketUnlocked == true && locketInv != null){
+            // Drawn below the jar of eyes
+            g2.drawImage(locketInv, 20, 300 + (tileSize*2) + 20, tileSize, tileSize, null);
+        }
+
+        if (passwordUIOpen == true) {
+            // low opacity black bg to dim background
+            g2.setColor(new Color(0, 0, 0, 150));
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+
+            // Draw the UI centered (adjust coordinates if needed)
+            int uiX = screenWidth/2 - 250;
+            int uiY = screenHeight/2 - 200;
+            if (passwordUI != null) g2.drawImage(passwordUI, uiX, uiY, 500, 400, null);
+            if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
+
+            //  typed text inside the white box
+            g2.setFont(new Font("Arial", Font.BOLD, 36));
+            g2.setColor(Color.BLACK);
+            // Adjust +100 and +250 to make the text align perfectly inside your white box
+            int textX = uiX + 100;
+            int textY = uiY + 250;
+            g2.drawString(keyH.currentInput, textX, textY);
+
+            g2.setColor(Color.MAGENTA);
+            int[] xPoints = {textX, textX - 15, textX + 15}; // The 3 X coordinates of the triangle
+            int[] yPoints = {textY, textY + 20, textY + 20}; // The 3 Y coordinates of the triangle
+            g2.fillPolygon(xPoints, yPoints, 3);
+
+            // debug hitboxes
+            g2.setColor(new Color(255, 255, 0, 150));
+            g2.fillRect(submitButtonHitbox.x, submitButtonHitbox.y, submitButtonHitbox.width, submitButtonHitbox.height);
+            g2.fillRect(backButtonHitbox.x, backButtonHitbox.y, backButtonHitbox.width, backButtonHitbox.height);
         }
 
         g2.dispose();
