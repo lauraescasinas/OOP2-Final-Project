@@ -38,6 +38,7 @@ public class GamePanel extends JPanel implements Runnable {
     BufferedImage jarInv;
     BufferedImage lockedCase, clue1, clue2, clue3, passwordUI, backBtn, locketInv, unlockedCase;
     BufferedImage openClue1, openClue2, openClue3;
+    BufferedImage statueRotateScreen, statueLeft, statueBackLeft, statueBackRight, statueRight;
 
 
     public boolean passwordUIOpen = false;
@@ -45,13 +46,29 @@ public class GamePanel extends JPanel implements Runnable {
     public boolean clue1_Open = false;
     public boolean clue2_Open = false;
     public boolean clue3_Open = false;
+    public boolean statue_Open = false;
+    public boolean chronosWatchUnlocked = false;
 
+    public int statue1State = 0; // default state: left
+    public int statue2State = 3; // default state: right
+    public int statue3State = 2; // default state:  back_right
+
+    // hitboxs
     public Rectangle glassCaseHitbox = new Rectangle(150, 250, 100, 150);
     public Rectangle backButtonHitbox = new Rectangle(50, 50, 60, 60);
     public Rectangle submitButtonHitbox = new Rectangle(560, 400, 60, 60);
+    // clue hitboxes
     public Rectangle clue1Hitbox = new Rectangle(100, 400, 48, 48);
     public Rectangle clue2Hitbox = new Rectangle(300, 350, 48, 48);
     public Rectangle clue3Hitbox = new Rectangle(250, 500, 48, 48);
+    // statue in map hitboxes
+    public Rectangle mapStatue1Hitbox = new Rectangle(550, 350, 60, 100);
+    public Rectangle mapStatue2Hitbox = new Rectangle(650, 450, 60, 100);
+    public Rectangle mapStatue3Hitbox = new Rectangle(750, 350, 60, 100);
+    // statue in screen hitboxes
+    public Rectangle uiStatue1Hitbox = new Rectangle(120, 250, 150, 200);
+    public Rectangle uiStatue2Hitbox = new Rectangle(350, 250, 150, 200);
+    public Rectangle uiStatue3Hitbox = new Rectangle(580, 250, 150, 200);
 
     int FPS = 60;
     KeyHandler keyH = new KeyHandler();
@@ -164,6 +181,7 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
+    // backgrounds
     public void loadBackgrounds() {
         try {
             houseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/House_bg.png"));
@@ -189,9 +207,24 @@ public class GamePanel extends JPanel implements Runnable {
             openClue1 = ImageIO.read(getClass().getResourceAsStream("/Objects/open_clue1.png"));
             openClue2 = ImageIO.read(getClass().getResourceAsStream("/Objects/open_clue2.png"));
             openClue3 = ImageIO.read(getClass().getResourceAsStream("/Objects/open_clue3.png"));
+
+            // statues
+            statueRotateScreen = ImageIO.read(getClass().getResourceAsStream("/Objects/statuerotate_Screen.png"));
+            statueLeft = ImageIO.read(getClass().getResourceAsStream("/Objects/statue_left.png"));
+            statueBackLeft = ImageIO.read(getClass().getResourceAsStream("/Objects/statue_back_left.png"));
+            statueBackRight = ImageIO.read(getClass().getResourceAsStream("/Objects/statue_back_right.png"));
+            statueRight = ImageIO.read(getClass().getResourceAsStream("/Objects/statue_right.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public BufferedImage getStatueImage(int state) {
+        if (state == 0) return statueLeft;
+        if (state == 1) return statueBackLeft;
+        if (state == 2) return statueBackRight;
+        if (state == 3) return statueRight;
+        return null;
     }
 
     public void update(){
@@ -239,6 +272,17 @@ public class GamePanel extends JPanel implements Runnable {
             g2.fillRect(clue1Hitbox.x, clue1Hitbox.y, clue1Hitbox.width, clue1Hitbox.height);
             g2.fillRect(clue2Hitbox.x, clue2Hitbox.y, clue2Hitbox.width, clue2Hitbox.height);
             g2.fillRect(clue3Hitbox.x, clue3Hitbox.y, clue3Hitbox.width, clue3Hitbox.height);
+
+            // statue hitboxes
+            g2.setColor(new Color(255, 100, 0, 100)); // Orange
+            g2.fillRect(mapStatue1Hitbox.x, mapStatue1Hitbox.y, mapStatue1Hitbox.width, mapStatue1Hitbox.height);
+            g2.fillRect(mapStatue2Hitbox.x, mapStatue2Hitbox.y, mapStatue2Hitbox.width, mapStatue2Hitbox.height);
+            g2.fillRect(mapStatue3Hitbox.x, mapStatue3Hitbox.y, mapStatue3Hitbox.width, mapStatue3Hitbox.height);
+
+
+            g2.drawImage(getStatueImage(statue1State), 550, 350, 80, 120, null);
+            g2.drawImage(getStatueImage(statue2State), 650, 450, 80, 120, null);
+            g2.drawImage(getStatueImage(statue3State), 750, 350, 80, 120, null);
 
             if (locketUnlocked == false) {
                 if (lockedCase != null) g2.drawImage(lockedCase, 150, 250, tileSize*2, tileSize*3, null);
@@ -317,11 +361,10 @@ public class GamePanel extends JPanel implements Runnable {
         }
 
         if (clue1_Open || clue2_Open || clue3_Open) {
-            // Low opacity black bg to dim background
+            // low opacity bg
             g2.setColor(new Color(0, 0, 0, 150));
             g2.fillRect(0, 0, screenWidth, screenHeight);
 
-            // Draw the UI centered
             int uiX = screenWidth/2 - 250;
             int uiY = screenHeight/2 - 200;
 
@@ -329,12 +372,35 @@ public class GamePanel extends JPanel implements Runnable {
             if (clue2_Open && openClue2 != null) g2.drawImage(openClue2, uiX, uiY, 500, 400, null);
             if (clue3_Open && openClue3 != null) g2.drawImage(openClue3, uiX, uiY, 500, 400, null);
 
-            // Draw Back Button
             if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
 
-            // Debug hitbox for back button
+            // back button hitbox
             g2.setColor(new Color(255, 255, 0, 150));
             g2.fillRect(backButtonHitbox.x, backButtonHitbox.y, backButtonHitbox.width, backButtonHitbox.height);
+        }
+
+        if (statue_Open == true) {
+
+            g2.setColor(new Color(0, 0, 0, 150));
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+
+            // bg screen
+            if (statueRotateScreen != null) {
+                g2.drawImage(statueRotateScreen, screenWidth/2 - 350, screenHeight/2 - 250, 700, 500, null);
+            }
+
+            // draw 3 statues
+            g2.drawImage(getStatueImage(statue1State), uiStatue1Hitbox.x, uiStatue1Hitbox.y, uiStatue1Hitbox.width, uiStatue1Hitbox.height, null);
+            g2.drawImage(getStatueImage(statue2State), uiStatue2Hitbox.x, uiStatue2Hitbox.y, uiStatue2Hitbox.width, uiStatue2Hitbox.height, null);
+            g2.drawImage(getStatueImage(statue3State), uiStatue3Hitbox.x, uiStatue3Hitbox.y, uiStatue3Hitbox.width, uiStatue3Hitbox.height, null);
+
+            if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
+
+            // statue hitboxes
+            g2.setColor(new Color(0, 255, 0, 100)); // Green
+            g2.fillRect(uiStatue1Hitbox.x, uiStatue1Hitbox.y, uiStatue1Hitbox.width, uiStatue1Hitbox.height);
+            g2.fillRect(uiStatue2Hitbox.x, uiStatue2Hitbox.y, uiStatue2Hitbox.width, uiStatue2Hitbox.height);
+            g2.fillRect(uiStatue3Hitbox.x, uiStatue3Hitbox.y, uiStatue3Hitbox.width, uiStatue3Hitbox.height);
         }
 
         g2.dispose();

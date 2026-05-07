@@ -46,7 +46,7 @@ public class Player extends Entity{
 
     public void update(){
 
-        if (gp.passwordUIOpen || gp.clue1_Open || gp.clue2_Open || gp.clue3_Open) {
+        if (gp.passwordUIOpen || gp.clue1_Open || gp.clue2_Open || gp.clue3_Open || gp.statue_Open) {
             if (gp.mouseH.leftClicked) {
                 Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
 
@@ -56,6 +56,25 @@ public class Player extends Entity{
                     gp.clue1_Open = false;
                     gp.clue2_Open = false;
                     gp.clue3_Open = false;
+                    gp.statue_Open = false;
+                }
+                else if (gp.statue_Open && gp.chronosWatchUnlocked == false) {
+
+                    // Rotate Clockwise (Add 1, if it hits 4 it wraps back to 0)
+                    if (mouseHitbox.intersects(gp.uiStatue1Hitbox)) {
+                        gp.statue1State = (gp.statue1State + 1) % 4;
+                    } else if (mouseHitbox.intersects(gp.uiStatue2Hitbox)) {
+                        gp.statue2State = (gp.statue2State + 1) % 4;
+                    } else if (mouseHitbox.intersects(gp.uiStatue3Hitbox)) {
+                        gp.statue3State = (gp.statue3State + 1) % 4;
+                    }
+
+                    // Check Winning Condition: 3 (Right), 1 (Back-Left), 0 (Left)
+                    if (gp.statue1State == 3 && gp.statue2State == 1 && gp.statue3State == 0) {
+                        gp.chronosWatchUnlocked = true;
+                        gp.statue_Open = false;
+                        System.out.println("Success! Chronos Watch Unlocked.");
+                    }
                 }
                 // submit button (green circle) ONLY works if password UI is open
                 else if (gp.passwordUIOpen && mouseHitbox.intersects(gp.submitButtonHitbox)) {
@@ -213,6 +232,14 @@ public class Player extends Entity{
                     gp.clue2_Open = true;
                 } else if (mouseHitbox.intersects(gp.clue3Hitbox)) {
                     gp.clue3_Open = true;
+                }
+                if (gp.chronosWatchUnlocked == false) {
+                    if (mouseHitbox.intersects(gp.mapStatue1Hitbox) ||
+                            mouseHitbox.intersects(gp.mapStatue2Hitbox) ||
+                            mouseHitbox.intersects(gp.mapStatue3Hitbox)) {
+
+                        gp.statue_Open = true;
+                    }
                 }
             }
             // reset click every collect
