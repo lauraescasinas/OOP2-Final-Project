@@ -36,7 +36,7 @@ public class GamePanel extends JPanel implements Runnable {
     BufferedImage museumBg;
     BufferedImage bouquetInv;
     BufferedImage jarInv;
-    BufferedImage lockedCase, clue1, clue2, clue3, passwordUI, backBtn, locketInv, unlockedCase;
+    BufferedImage lockedCase, clue1, clue2, clue3, passwordUI, backBtn, locketInv, unlockedCase, watchInv;;
     BufferedImage openClue1, openClue2, openClue3;
     BufferedImage statueRotateScreen, statueLeft, statueBackLeft, statueBackRight, statueRight;
 
@@ -190,10 +190,12 @@ public class GamePanel extends JPanel implements Runnable {
             greenhouseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Greenhouse_bg.png"));
             museumBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Museum_bg.png"));
 
-            // bouquet roses, glass eyes, locket in inventory once collected
+            // bouquet roses, glass eyes, locket, watch in inventory once collected || quest items loaded
             bouquetInv = ImageIO.read(getClass().getResourceAsStream("/Objects/bouquet_roses.png"));
             jarInv = ImageIO.read(getClass().getResourceAsStream("/Objects/jar_eyes.png"));
             locketInv = ImageIO.read(getClass().getResourceAsStream("/Objects/memento_locket.png"));
+            watchInv = ImageIO.read(getClass().getResourceAsStream("/Objects/chronos_watch.png"));
+
 
             lockedCase = ImageIO.read(getClass().getResourceAsStream("/Objects/locked_GlassCase.png"));
             passwordUI = ImageIO.read(getClass().getResourceAsStream("/Objects/password_input.png"));
@@ -327,6 +329,11 @@ public class GamePanel extends JPanel implements Runnable {
         if (locketUnlocked == true && locketInv != null){
             // Drawn below the jar of eyes
             g2.drawImage(locketInv, 20, 300 + (tileSize*2) + 20, tileSize, tileSize, null);
+        }
+
+        if (chronosWatchUnlocked == true && watchInv != null){
+            // Drawn below the locket (Notice it's tileSize*3 and +30 to keep the exact same spacing!)
+            g2.drawImage(watchInv, 20, 300 + (tileSize*3) + 30, tileSize, tileSize, null);
         }
 
         if (passwordUIOpen == true) {
