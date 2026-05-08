@@ -26,7 +26,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int MAP_WORKSHOP = 2;
     public final int MAP_GREENHOUSE = 3;
     public final int MAP_MUSEUM = 4;
-    public int currentMap = MAP_MUSEUM; // start in the house
+    public int currentMap = MAP_HOUSE; // start in the house
 
 
     BufferedImage houseBg;
@@ -39,6 +39,7 @@ public class GamePanel extends JPanel implements Runnable {
     BufferedImage lockedCase, clue1, clue2, clue3, passwordUI, backBtn, locketInv, unlockedCase, watchInv;;
     BufferedImage openClue1, openClue2, openClue3;
     BufferedImage statueRotateScreen, statueLeft, statueBackLeft, statueBackRight, statueRight;
+    BufferedImage tempBtn, listScreen1, listScreen2, listScreen3, nextBtn, prevBtn;
 
 
     public boolean passwordUIOpen = false;
@@ -47,11 +48,14 @@ public class GamePanel extends JPanel implements Runnable {
     public boolean clue2_Open = false;
     public boolean clue3_Open = false;
     public boolean statue_Open = false;
+    public boolean introPuzzleOpen = false;
     public boolean chronosWatchUnlocked = false;
 
     public int statue1State = 0; // default state: left
     public int statue2State = 3; // default state: right
     public int statue3State = 2; // default state:  back_right
+    public int introPuzzlePage = 1;
+
 
     // hitboxs
     public Rectangle glassCaseHitbox = new Rectangle(150, 250, 100, 150);
@@ -69,6 +73,21 @@ public class GamePanel extends JPanel implements Runnable {
     public Rectangle uiStatue1Hitbox = new Rectangle(120, 250, 150, 200);
     public Rectangle uiStatue2Hitbox = new Rectangle(350, 250, 150, 200);
     public Rectangle uiStatue3Hitbox = new Rectangle(580, 250, 150, 200);
+
+    // temporary button hitbox
+    public Rectangle tempBtnHitbox = new Rectangle(550, 300, 48, 48);
+    // button hitboxes
+    public Rectangle nextButtonHitbox = new Rectangle(650, 350, 60, 80);
+    public Rectangle prevButtonHitbox = new Rectangle(50, 350, 60, 80);
+    // list screen1 row1
+    public Rectangle r1c1Hitbox = new Rectangle(280, 250, 60, 60); // Jar
+    public Rectangle r1c2Hitbox = new Rectangle(400, 250, 60, 60); // Bouquet
+    public Rectangle r1c3Hitbox = new Rectangle(520, 250, 60, 60); // Watch
+    //list screen1 row2
+    public Rectangle r2c1Hitbox = new Rectangle(280, 420, 60, 60); // Locket
+    public Rectangle r2c2Hitbox = new Rectangle(400, 420, 60, 60); // Watch
+    public Rectangle r2c3Hitbox = new Rectangle(520, 420, 60, 60); // Bouquet
+
 
     int FPS = 60;
     KeyHandler keyH = new KeyHandler();
@@ -190,6 +209,12 @@ public class GamePanel extends JPanel implements Runnable {
             greenhouseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Greenhouse_bg.png"));
             museumBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Museum_bg.png"));
 
+            // for intro list
+            tempBtn = ImageIO.read(getClass().getResourceAsStream("/Objects/temporary_button.png"));
+            listScreen1 = ImageIO.read(getClass().getResourceAsStream("/Objects/list_screen1.png"));
+            nextBtn = ImageIO.read(getClass().getResourceAsStream("/Objects/next_button.png"));
+
+
             // bouquet roses, glass eyes, locket, watch in inventory once collected || quest items loaded
             bouquetInv = ImageIO.read(getClass().getResourceAsStream("/Objects/bouquet_roses.png"));
             jarInv = ImageIO.read(getClass().getResourceAsStream("/Objects/jar_eyes.png"));
@@ -216,6 +241,11 @@ public class GamePanel extends JPanel implements Runnable {
             statueBackLeft = ImageIO.read(getClass().getResourceAsStream("/Objects/statue_back_left.png"));
             statueBackRight = ImageIO.read(getClass().getResourceAsStream("/Objects/statue_back_right.png"));
             statueRight = ImageIO.read(getClass().getResourceAsStream("/Objects/statue_right.png"));
+
+            listScreen2 = ImageIO.read(getClass().getResourceAsStream("/Objects/list_screen2.png"));
+            listScreen3 = ImageIO.read(getClass().getResourceAsStream("/Objects/list_screen3.png"));
+            prevBtn = ImageIO.read(getClass().getResourceAsStream("/Objects/prev_button.png"));
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -239,6 +269,13 @@ public class GamePanel extends JPanel implements Runnable {
 
         if (currentMap == MAP_HOUSE && houseBg != null) {
             g2.drawImage(houseBg, 0, 0, screenWidth, screenHeight, null);
+            // temporary button
+            if (tempBtn != null) g2.drawImage(tempBtn, tempBtnHitbox.x, tempBtnHitbox.y, tempBtnHitbox.width, tempBtnHitbox.height, null);
+
+            // debug hitbox for temporary button
+            g2.setColor(new Color(0, 0, 255, 100)); // Blue
+            g2.fillRect(tempBtnHitbox.x, tempBtnHitbox.y, tempBtnHitbox.width, tempBtnHitbox.height);
+
         } else if (currentMap == MAP_STREET && streetBg != null) {
             g2.drawImage(streetBg, 0, 0, screenWidth, screenHeight, null);
         } else if (currentMap == MAP_WORKSHOP && workshopBg != null){
@@ -408,6 +445,71 @@ public class GamePanel extends JPanel implements Runnable {
             g2.fillRect(uiStatue1Hitbox.x, uiStatue1Hitbox.y, uiStatue1Hitbox.width, uiStatue1Hitbox.height);
             g2.fillRect(uiStatue2Hitbox.x, uiStatue2Hitbox.y, uiStatue2Hitbox.width, uiStatue2Hitbox.height);
             g2.fillRect(uiStatue3Hitbox.x, uiStatue3Hitbox.y, uiStatue3Hitbox.width, uiStatue3Hitbox.height);
+        }
+
+        if (introPuzzleOpen == true) {
+            // dim bg
+            g2.setColor(new Color(0, 0, 0, 150));
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+
+            // bg screen
+//            int uiX = screenWidth/2 - 250;
+//            int uiY = screenHeight/2 - 300;
+//            if (listScreen1 != null) g2.drawImage(listScreen1, uiX, uiY, 500, 600, null);
+            if (introPuzzlePage == 1 && listScreen1 != null) {
+                g2.drawImage(listScreen1, 0, 0, screenWidth, screenHeight, null);
+
+                // Row 1 (Desc 1): Jar, Bouquet, Watch
+                if (jarInv != null) g2.drawImage(jarInv, r1c1Hitbox.x, r1c1Hitbox.y, r1c1Hitbox.width, r1c1Hitbox.height, null);
+                if (bouquetInv != null) g2.drawImage(bouquetInv, r1c2Hitbox.x, r1c2Hitbox.y, r1c2Hitbox.width, r1c2Hitbox.height, null);
+                if (watchInv != null) g2.drawImage(watchInv, r1c3Hitbox.x, r1c3Hitbox.y, r1c3Hitbox.width, r1c3Hitbox.height, null);
+
+                // Row 2 (Desc 2): Locket, Watch, Bouquet
+                if (locketInv != null) g2.drawImage(locketInv, r2c1Hitbox.x, r2c1Hitbox.y, r2c1Hitbox.width, r2c1Hitbox.height, null);
+                if (watchInv != null) g2.drawImage(watchInv, r2c2Hitbox.x, r2c2Hitbox.y, r2c2Hitbox.width, r2c2Hitbox.height, null);
+                if (bouquetInv != null) g2.drawImage(bouquetInv, r2c3Hitbox.x, r2c3Hitbox.y, r2c3Hitbox.width, r2c3Hitbox.height, null);
+
+                // Navigation (Only Next on Page 1)
+                if (nextBtn != null) g2.drawImage(nextBtn, nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height, null);
+            }
+            // PAGE 2
+            else if (introPuzzlePage == 2 && listScreen2 != null) {
+                g2.drawImage(listScreen2, 0, 0, screenWidth, screenHeight, null);
+
+                // Row 1 (Desc 3): Watch, Locket, Bouquet
+                if (watchInv != null) g2.drawImage(watchInv, r1c1Hitbox.x, r1c1Hitbox.y, r1c1Hitbox.width, r1c1Hitbox.height, null);
+                if (locketInv != null) g2.drawImage(locketInv, r1c2Hitbox.x, r1c2Hitbox.y, r1c2Hitbox.width, r1c2Hitbox.height, null);
+                if (bouquetInv != null) g2.drawImage(bouquetInv, r1c3Hitbox.x, r1c3Hitbox.y, r1c3Hitbox.width, r1c3Hitbox.height, null);
+
+                // Row 2 (Desc 4): Jar, Bouquet, Locket
+                if (jarInv != null) g2.drawImage(jarInv, r2c1Hitbox.x, r2c1Hitbox.y, r2c1Hitbox.width, r2c1Hitbox.height, null);
+                if (bouquetInv != null) g2.drawImage(bouquetInv, r2c2Hitbox.x, r2c2Hitbox.y, r2c2Hitbox.width, r2c2Hitbox.height, null);
+                if (locketInv != null) g2.drawImage(locketInv, r2c3Hitbox.x, r2c3Hitbox.y, r2c3Hitbox.width, r2c3Hitbox.height, null);
+
+                // Navigation (Both on Page 2)
+                if (prevBtn != null) g2.drawImage(prevBtn, prevButtonHitbox.x, prevButtonHitbox.y, prevButtonHitbox.width, prevButtonHitbox.height, null);
+                if (nextBtn != null) g2.drawImage(nextBtn, nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height, null);
+            }
+            // PAGE 3
+            else if (introPuzzlePage == 3 && listScreen3 != null) {
+                g2.drawImage(listScreen3, 0, 0, screenWidth, screenHeight, null);
+
+                // Navigation (Both on Page 3)
+                if (prevBtn != null) g2.drawImage(prevBtn, prevButtonHitbox.x, prevButtonHitbox.y, prevButtonHitbox.width, prevButtonHitbox.height, null);
+                if (nextBtn != null) g2.drawImage(nextBtn, nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height, null);
+            }
+
+            if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
+
+            // debug hitboxes
+            g2.setColor(new Color(255, 255, 0, 150));
+            g2.fillRect(r1c1Hitbox.x, r1c1Hitbox.y, r1c1Hitbox.width, r1c1Hitbox.height);
+            g2.fillRect(r1c2Hitbox.x, r1c2Hitbox.y, r1c2Hitbox.width, r1c2Hitbox.height);
+            g2.fillRect(r1c3Hitbox.x, r1c3Hitbox.y, r1c3Hitbox.width, r1c3Hitbox.height);
+            g2.fillRect(r2c1Hitbox.x, r2c1Hitbox.y, r2c1Hitbox.width, r2c1Hitbox.height);
+            g2.fillRect(r2c2Hitbox.x, r2c2Hitbox.y, r2c2Hitbox.width, r2c2Hitbox.height);
+            g2.fillRect(r2c3Hitbox.x, r2c3Hitbox.y, r2c3Hitbox.width, r2c3Hitbox.height);
+            g2.fillRect(nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height);
         }
 
         g2.dispose();

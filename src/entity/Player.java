@@ -46,7 +46,7 @@ public class Player extends Entity{
 
     public void update(){
 
-        if (gp.passwordUIOpen || gp.clue1_Open || gp.clue2_Open || gp.clue3_Open || gp.statue_Open) {
+        if (gp.passwordUIOpen || gp.clue1_Open || gp.clue2_Open || gp.clue3_Open || gp.statue_Open || gp.introPuzzleOpen) {
             if (gp.mouseH.leftClicked) {
                 Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
 
@@ -57,6 +57,8 @@ public class Player extends Entity{
                     gp.clue2_Open = false;
                     gp.clue3_Open = false;
                     gp.statue_Open = false;
+                    gp.introPuzzleOpen = false;
+                    gp.introPuzzlePage = 1;
                 }
                 else if (gp.statue_Open && gp.chronosWatchUnlocked == false) {
 
@@ -84,6 +86,50 @@ public class Player extends Entity{
                         System.out.println("Success! Locket Unlocked.");
                     } else {
                         System.out.println("Access Denied. Wrong Password.");
+                    }
+                }
+                else if (gp.introPuzzleOpen) {
+                    if (gp.introPuzzlePage == 1) {
+                        if (mouseHitbox.intersects(gp.nextButtonHitbox)) {
+                            gp.introPuzzlePage = 2; // Go to Page 2
+                        }
+                        else if (mouseHitbox.intersects(gp.r1c1Hitbox)) {
+                            System.out.println("Desc 1: Correct! (Jar of Eyes)");
+                        } else if (mouseHitbox.intersects(gp.r1c2Hitbox) || mouseHitbox.intersects(gp.r1c3Hitbox)) {
+                            System.out.println("Desc 1: Incorrect.");
+                        }
+                        else if (mouseHitbox.intersects(gp.r2c3Hitbox)) {
+                            System.out.println("Desc 2: Correct! (Black Baccara Roses)");
+                        } else if (mouseHitbox.intersects(gp.r2c1Hitbox) || mouseHitbox.intersects(gp.r2c2Hitbox)) {
+                            System.out.println("Desc 2: Incorrect.");
+                        }
+                    }
+                    // PAGE 2 CLICKS
+                    else if (gp.introPuzzlePage == 2) {
+                        if (mouseHitbox.intersects(gp.nextButtonHitbox)) {
+                            gp.introPuzzlePage = 3; // Go to Page 3
+                        } else if (mouseHitbox.intersects(gp.prevButtonHitbox)) {
+                            gp.introPuzzlePage = 1; // Go back to Page 1
+                        }
+                        // Correct for Desc 3 is Watch (r1c1)
+                        else if (mouseHitbox.intersects(gp.r1c1Hitbox)) {
+                            System.out.println("Desc 3: Correct! (Chronos Watch)");
+                        } else if (mouseHitbox.intersects(gp.r1c2Hitbox) || mouseHitbox.intersects(gp.r1c3Hitbox)) {
+                            System.out.println("Desc 3: Incorrect.");
+                        }
+                        // Correct for Desc 4 is Locket (r2c3)
+                        else if (mouseHitbox.intersects(gp.r2c3Hitbox)) {
+                            System.out.println("Desc 4: Correct! (Memento Locket)");
+                        } else if (mouseHitbox.intersects(gp.r2c1Hitbox) || mouseHitbox.intersects(gp.r2c2Hitbox)) {
+                            System.out.println("Desc 4: Incorrect.");
+                        }
+                    }
+                    // PAGE 3 CLICKS
+                    else if (gp.introPuzzlePage == 3) {
+                        if (mouseHitbox.intersects(gp.prevButtonHitbox)) {
+                            gp.introPuzzlePage = 2; // Go back to Page 2
+                        }
+                        // Next button does nothing here right now!
                     }
                 }
                 gp.mouseH.leftClicked = false;
@@ -196,7 +242,13 @@ public class Player extends Entity{
 
         if (gp.mouseH.leftClicked){
             Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
-            if(gp.currentMap == gp.MAP_GREENHOUSE){
+
+
+            if (gp.currentMap == gp.MAP_HOUSE) {
+                if (mouseHitbox.intersects(gp.tempBtnHitbox)) {
+                    gp.introPuzzleOpen = true;
+                }
+            } else if(gp.currentMap == gp.MAP_GREENHOUSE){
                 for (int i = 0; i < gp.obj.length; i++){
                     if (gp.obj[i] != null){
                         if (mouseHitbox.intersects(gp.obj[i].hitbox)){
@@ -241,6 +293,8 @@ public class Player extends Entity{
                         gp.statue_Open = true;
                     }
                 }
+
+
             }
             // reset click every collect
             gp.mouseH.leftClicked = false;
