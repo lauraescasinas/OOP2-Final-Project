@@ -36,11 +36,12 @@ public class GamePanel extends JPanel implements Runnable {
     BufferedImage museumBg;
     BufferedImage bouquetInv;
     BufferedImage jarInv;
-    BufferedImage lockedCase, clue1, clue2, clue3, passwordUI, backBtn, locketInv, unlockedCase, watchInv;;
+    BufferedImage lockedCase, clue1, clue2, clue3, passwordUI, backBtn, locketInv, unlockedCase, watchInv;
     BufferedImage openClue1, openClue2, openClue3;
     BufferedImage statueRotateScreen, statueLeft, statueBackLeft, statueBackRight, statueRight;
     BufferedImage tempBtn, listScreen1, listScreen2, listScreen3, nextBtn, prevBtn;
-
+    BufferedImage objTab1, objTab2, objTab3, objTab4, objTab5;
+    BufferedImage endScreen, againBtn;
 
     public boolean passwordUIOpen = false;
     public boolean locketUnlocked = false;
@@ -50,11 +51,13 @@ public class GamePanel extends JPanel implements Runnable {
     public boolean statue_Open = false;
     public boolean introPuzzleOpen = false;
     public boolean chronosWatchUnlocked = false;
+    public boolean introAns1 = false, introAns2 = false, introAns3 = false, introAns4 = false;
 
     public int statue1State = 0; // default state: left
     public int statue2State = 3; // default state: right
     public int statue3State = 2; // default state:  back_right
     public int introPuzzlePage = 1;
+    public int currentQuest = 0;
 
 
     // hitboxs
@@ -88,6 +91,8 @@ public class GamePanel extends JPanel implements Runnable {
     public Rectangle r2c2Hitbox = new Rectangle(400, 420, 60, 60); // Watch
     public Rectangle r2c3Hitbox = new Rectangle(520, 420, 60, 60); // Bouquet
 
+    // again button -- TEMPORARY!
+    public Rectangle againBtnHitbox = new Rectangle(screenWidth/2 - 80, screenHeight/2 + 80, 160, 80);
 
     int FPS = 60;
     KeyHandler keyH = new KeyHandler();
@@ -246,6 +251,14 @@ public class GamePanel extends JPanel implements Runnable {
             listScreen3 = ImageIO.read(getClass().getResourceAsStream("/Objects/list_screen3.png"));
             prevBtn = ImageIO.read(getClass().getResourceAsStream("/Objects/prev_button.png"));
 
+            // quest system
+            objTab1 = ImageIO.read(getClass().getResourceAsStream("/Objects/objective_tab1.png"));
+            objTab2 = ImageIO.read(getClass().getResourceAsStream("/Objects/objective_tab2.png"));
+            objTab3 = ImageIO.read(getClass().getResourceAsStream("/Objects/objective_tab3.png"));
+            objTab4 = ImageIO.read(getClass().getResourceAsStream("/Objects/objective_tab4.png"));
+            objTab5 = ImageIO.read(getClass().getResourceAsStream("/Objects/objective_tab5.png"));
+            endScreen = ImageIO.read(getClass().getResourceAsStream("/Objects/end_screen.png"));
+            againBtn = ImageIO.read(getClass().getResourceAsStream("/Objects/again_button.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -510,6 +523,32 @@ public class GamePanel extends JPanel implements Runnable {
             g2.fillRect(r2c2Hitbox.x, r2c2Hitbox.y, r2c2Hitbox.width, r2c2Hitbox.height);
             g2.fillRect(r2c3Hitbox.x, r2c3Hitbox.y, r2c3Hitbox.width, r2c3Hitbox.height);
             g2.fillRect(nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height);
+        }
+
+        if (currentQuest >= 1 && currentQuest <= 5) {
+            int tabX = screenWidth - 180; // Top right corner
+            int tabY = 20;
+
+            if (currentQuest == 1 && objTab1 != null) g2.drawImage(objTab1, tabX, tabY, 150, 150, null);
+            else if (currentQuest == 2 && objTab2 != null) g2.drawImage(objTab2, tabX, tabY, 150, 150, null);
+            else if (currentQuest == 3 && objTab3 != null) g2.drawImage(objTab3, tabX, tabY, 150, 150, null);
+            else if (currentQuest == 4 && objTab4 != null) g2.drawImage(objTab4, tabX, tabY, 150, 150, null);
+            else if (currentQuest == 5 && objTab5 != null) g2.drawImage(objTab5, tabX, tabY, 150, 150, null);
+        }
+
+        // --- NEW: DRAW END SCREEN ---
+        if (currentQuest == 6) {
+            // Dim background heavily
+            g2.setColor(new Color(0, 0, 0, 200));
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+
+            // Draw End Screen and Again Button
+            if (endScreen != null) g2.drawImage(endScreen, screenWidth/2 - 250, screenHeight/2 - 150, 500, 200, null);
+            if (againBtn != null) g2.drawImage(againBtn, againBtnHitbox.x, againBtnHitbox.y, againBtnHitbox.width, againBtnHitbox.height, null);
+
+            // Debug Hitbox for Again Button
+            g2.setColor(new Color(255, 255, 0, 150));
+            g2.fillRect(againBtnHitbox.x, againBtnHitbox.y, againBtnHitbox.width, againBtnHitbox.height);
         }
 
         g2.dispose();

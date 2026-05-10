@@ -46,6 +46,28 @@ public class Player extends Entity{
 
     public void update(){
 
+        if (gp.currentQuest == 6) {
+            if (gp.mouseH.leftClicked) {
+                Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
+                // Restart the Game!
+                if (mouseHitbox.intersects(gp.againBtnHitbox)) {
+                    gp.currentQuest = 0;
+                    gp.introAns1 = false; gp.introAns2 = false; gp.introAns3 = false; gp.introAns4 = false;
+                    blackRosesCollected = 0; glassEyesCollected = 0;
+                    gp.statue1State = 0; gp.statue2State = 3; gp.statue3State = 2;
+                    gp.chronosWatchUnlocked = false; gp.locketUnlocked = false;
+
+                    gp.setupGame(); // Respawns items
+                    setDefaultValues(); // Teleport to start
+                    gp.currentMap = gp.MAP_HOUSE;
+                }
+
+
+                gp.mouseH.leftClicked = false;
+            }
+            return; // Freeze player
+        }
+
         if (gp.passwordUIOpen || gp.clue1_Open || gp.clue2_Open || gp.clue3_Open || gp.statue_Open || gp.introPuzzleOpen) {
             if (gp.mouseH.leftClicked) {
                 Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
@@ -73,8 +95,11 @@ public class Player extends Entity{
 
                     // Check Winning Condition: 3 (Right), 1 (Back-Left), 0 (Left)
                     if (gp.statue1State == 3 && gp.statue2State == 1 && gp.statue3State == 0) {
-                        gp.chronosWatchUnlocked = true;
-                        gp.statue_Open = false;
+                        if (gp.chronosWatchUnlocked == false) {
+                            gp.chronosWatchUnlocked = true;
+                            gp.statue_Open = false;
+                            if (gp.currentQuest == 3) gp.currentQuest = 4; // Advance to Quest 4
+                        }
                         System.out.println("Success! Chronos Watch Unlocked.");
                     }
                 }
@@ -83,6 +108,7 @@ public class Player extends Entity{
                     if (keyH.currentInput.equals("Password123")) {
                         gp.locketUnlocked = true;
                         gp.passwordUIOpen = false;
+                        if (gp.currentQuest == 4) gp.currentQuest = 5;
                         System.out.println("Success! Locket Unlocked.");
                     } else {
                         System.out.println("Access Denied. Wrong Password.");
@@ -94,11 +120,13 @@ public class Player extends Entity{
                             gp.introPuzzlePage = 2; // Go to Page 2
                         }
                         else if (mouseHitbox.intersects(gp.r1c1Hitbox)) {
+                            gp.introAns1 = true;
                             System.out.println("Desc 1: Correct! (Jar of Eyes)");
                         } else if (mouseHitbox.intersects(gp.r1c2Hitbox) || mouseHitbox.intersects(gp.r1c3Hitbox)) {
                             System.out.println("Desc 1: Incorrect.");
                         }
                         else if (mouseHitbox.intersects(gp.r2c3Hitbox)) {
+                            gp.introAns2 = true;
                             System.out.println("Desc 2: Correct! (Black Baccara Roses)");
                         } else if (mouseHitbox.intersects(gp.r2c1Hitbox) || mouseHitbox.intersects(gp.r2c2Hitbox)) {
                             System.out.println("Desc 2: Incorrect.");
@@ -113,12 +141,14 @@ public class Player extends Entity{
                         }
                         // Correct for Desc 3 is Watch (r1c1)
                         else if (mouseHitbox.intersects(gp.r1c1Hitbox)) {
+                            gp.introAns3 = true;
                             System.out.println("Desc 3: Correct! (Chronos Watch)");
                         } else if (mouseHitbox.intersects(gp.r1c2Hitbox) || mouseHitbox.intersects(gp.r1c3Hitbox)) {
                             System.out.println("Desc 3: Incorrect.");
                         }
                         // Correct for Desc 4 is Locket (r2c3)
                         else if (mouseHitbox.intersects(gp.r2c3Hitbox)) {
+                            gp.introAns4 = true;
                             System.out.println("Desc 4: Correct! (Memento Locket)");
                         } else if (mouseHitbox.intersects(gp.r2c1Hitbox) || mouseHitbox.intersects(gp.r2c2Hitbox)) {
                             System.out.println("Desc 4: Incorrect.");
@@ -129,7 +159,13 @@ public class Player extends Entity{
                         if (mouseHitbox.intersects(gp.prevButtonHitbox)) {
                             gp.introPuzzlePage = 2; // Go back to Page 2
                         }
-                        // Next button does nothing here right now!
+
+                    }
+
+                    if (gp.introAns1 && gp.introAns2 && gp.introAns3 && gp.introAns4 && gp.currentQuest == 0) {
+                        gp.currentQuest = 1; // Unlock Quest 1!
+                        gp.introPuzzleOpen = false; // Close UI automatically
+                        System.out.println("Intro Complete! You may now leave the house.");
                     }
                 }
                 gp.mouseH.leftClicked = false;
@@ -174,12 +210,16 @@ public class Player extends Entity{
         if (gp.currentMap == gp.MAP_HOUSE) {
             // check if player hitbox touches the house door hitbox
             if (playerHitbox.intersects(gp.houseDoorHitbox)) {
-                gp.currentMap = gp.MAP_STREET; // Change Map
-
-                // teleport player to stand right below the street (outside) house door
-                x = gp.streetHouseDoorHitbox.x;
-                y = gp.streetHouseDoorHitbox.y + gp.streetHouseDoorHitbox.height + 5;
+                if (gp.currentQuest >= 1) { // MUST COMPLETE INTRO TO LEAVE
+                    gp.currentMap = gp.MAP_STREET;
+                    x = gp.streetHouseDoorHitbox.x;
+                    y = gp.streetHouseDoorHitbox.y + gp.streetHouseDoorHitbox.height + 5;
+                } else {
+                    System.out.println("The door is locked. I must finish the list first.");
+                    y -= speed * 2; // Bounce back
+                }
             }
+
         // exit workshop
         } else if (gp.currentMap == gp.MAP_WORKSHOP){
             if (playerHitbox.intersects(gp.workshopDoorHitbox)){
@@ -208,24 +248,39 @@ public class Player extends Entity{
                 gp.currentMap = gp.MAP_HOUSE;
                 x = gp.houseDoorHitbox.x + (gp.houseDoorHitbox.width / 2) - (gp.tileSize / 2);
                 y = gp.houseDoorHitbox.y - gp.tileSize - 5;
+
+                // TRIGGER ENDING IF ALL QUESTS ARE DONE!
+                if (gp.currentQuest == 5) {
+                    gp.currentQuest = 6;
+                }
             }
             // enter museum
             else if (playerHitbox.intersects(gp.streetMuseumDoorHitbox)) {
-                gp.currentMap = gp.MAP_MUSEUM;
-                x = gp.museumDoorHitbox.x + (gp.museumDoorHitbox.width / 2) - (gp.tileSize / 2);
-                y = gp.museumDoorHitbox.y - gp.tileSize - 5;
+                if (gp.currentQuest >= 3) { // MUST COMPLETE ROSES TO ENTER
+                    gp.currentMap = gp.MAP_MUSEUM;
+                    x = gp.museumDoorHitbox.x + (gp.museumDoorHitbox.width / 2) - (gp.tileSize / 2);
+                    y = gp.museumDoorHitbox.y - gp.tileSize - 5;
+                } else {
+                    y += speed * 2; // Bounce back
+                }
             }
             // enter workshop
             else if (playerHitbox.intersects(gp.streetWorkshopDoorHitbox)) {
-                gp.currentMap = gp.MAP_WORKSHOP;
-                x = gp.workshopDoorHitbox.x + (gp.workshopDoorHitbox.width / 2) - (gp.tileSize / 2);
-                y = gp.workshopDoorHitbox.y - gp.tileSize - 20;
+                if (gp.currentQuest >= 1) { // MUST COMPLETE INTRO TO ENTER
+                    gp.currentMap = gp.MAP_WORKSHOP;
+                    x = gp.workshopDoorHitbox.x + (gp.workshopDoorHitbox.width / 2) - (gp.tileSize / 2);
+                    y = gp.workshopDoorHitbox.y - gp.tileSize - 20;
+                }
             }
             // enter greenhouse
             else if (playerHitbox.intersects(gp.streetGreenhouseDoorHitbox)) {
-                gp.currentMap = gp.MAP_GREENHOUSE;
-                x = gp.greenhouseDoorHitbox.x + (gp.greenhouseDoorHitbox.width / 2) - (gp.tileSize / 2);
-                y = gp.greenhouseDoorHitbox.y - gp.tileSize - 20;
+                if (gp.currentQuest >= 2) { // MUST COMPLETE GLASS EYES TO ENTER
+                    gp.currentMap = gp.MAP_GREENHOUSE;
+                    x = gp.greenhouseDoorHitbox.x + (gp.greenhouseDoorHitbox.width / 2) - (gp.tileSize / 2);
+                    y = gp.greenhouseDoorHitbox.y - gp.tileSize - 20;
+                } else {
+                    y -= speed * 2; // Bounce back
+                }
             }
         }
 
@@ -252,10 +307,11 @@ public class Player extends Entity{
                 for (int i = 0; i < gp.obj.length; i++){
                     if (gp.obj[i] != null){
                         if (mouseHitbox.intersects(gp.obj[i].hitbox)){
-                            gp.obj[i] = null; // remove clicked rose from greenhouse map
-                            blackRosesCollected++; // add inventory
-                            //debug print
-                            System.out.println("black roses collected: " + blackRosesCollected + "/5");
+                            gp.obj[i] = null;
+                            blackRosesCollected++;
+                            if (blackRosesCollected >= 5 && gp.currentQuest == 2) {
+                                gp.currentQuest = 3; // Advance to Quest 3!
+                            }
                         }
                     }
                 }
@@ -265,8 +321,9 @@ public class Player extends Entity{
                         if (mouseHitbox.intersects(gp.obj[i].hitbox)){
                             gp.obj[i] = null;
                             glassEyesCollected++;
-                            //debug print
-                            System.out.println("glass eyes collected: " + glassEyesCollected + "/5");
+                            if (glassEyesCollected >= 5 && gp.currentQuest == 1) {
+                                gp.currentQuest = 2; // Advance to Quest 2!
+                            }
                         }
                     }
                 }
