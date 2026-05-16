@@ -14,6 +14,9 @@ public class Player extends Entity{
     KeyHandler keyH;
     public int blackRosesCollected = 0;
     public int glassEyesCollected = 0;
+    public BufferedImage frontImage, leftImage, rightImage, backImage;
+    public BufferedImage frontWalk1, frontWalk2, backWalk1, backWalk2;
+    public BufferedImage leftWalk1, leftWalk2, rightWalk1, rightWalk2;
 
     public Player(GamePanel gp, KeyHandler keyH){
         this.gp = gp;
@@ -23,22 +26,29 @@ public class Player extends Entity{
     }
 
     public void setDefaultValues(){
-        x = 100;
-        y = 100;
+        x = (gp.screenWidth / 2) - (gp.tileSize / 2);
+        y = (gp.screenHeight / 2) - (gp.tileSize / 2) + 10;
         speed = 4;
         direction = "down";
     }
 
     public void getPlayerImage(){
         try{
-            up1 = ImageIO.read(getClass().getResourceAsStream("/Player/boy_up_1.png"));
-            up2 = ImageIO.read(getClass().getResourceAsStream("/Player/boy_up_2.png"));
-            down1 = ImageIO.read(getClass().getResourceAsStream("/Player/boy_down_1.png"));
-            down2 = ImageIO.read(getClass().getResourceAsStream("/Player/boy_down_2.png"));
-            left1 = ImageIO.read(getClass().getResourceAsStream("/Player/boy_left_1.png"));
-            left2 = ImageIO.read(getClass().getResourceAsStream("/Player/boy_left_2.png"));
-            right1 = ImageIO.read(getClass().getResourceAsStream("/Player/boy_right_1.png"));
-            right2 = ImageIO.read(getClass().getResourceAsStream("/Player/boy_right_2.png"));
+            // Loading Profiles (Idle States)
+            frontImage = ImageIO.read(getClass().getResourceAsStream("/Player/FrontProfile.png"));
+            backImage = ImageIO.read(getClass().getResourceAsStream("/Player/BackProfile.png"));
+            leftImage = ImageIO.read(getClass().getResourceAsStream("/Player/LeftSideProfile.png"));
+            rightImage = ImageIO.read(getClass().getResourceAsStream("/Player/RightSideProfile.png"));
+
+            // Loading Walking Frames
+            frontWalk1 = ImageIO.read(getClass().getResourceAsStream("/Player/FrontWalk_1.png"));
+            frontWalk2 = ImageIO.read(getClass().getResourceAsStream("/Player/FrontWalk_2.png"));
+            backWalk1 = ImageIO.read(getClass().getResourceAsStream("/Player/BackWalk_1.png"));
+            backWalk2 = ImageIO.read(getClass().getResourceAsStream("/Player/BackProfile_2.png"));
+            leftWalk1 = ImageIO.read(getClass().getResourceAsStream("/Player/LeftWalk_1.png"));
+            leftWalk2 = ImageIO.read(getClass().getResourceAsStream("/Player/LeftWalk_2.png"));
+            rightWalk1 = ImageIO.read(getClass().getResourceAsStream("/Player/RightWalk_1.png"));
+            rightWalk2 = ImageIO.read(getClass().getResourceAsStream("/Player/RightWalk_2.png"));
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -194,7 +204,7 @@ public class Player extends Entity{
                 x += speed;
             }
             spriteCounter++;
-            if (spriteCounter > 15) {
+            if (spriteCounter > 25) {
                 if (spriteNum == 1) {
                     spriteNum = 2;
                 } else if (spriteNum == 2) {
@@ -212,8 +222,9 @@ public class Player extends Entity{
             if (playerHitbox.intersects(gp.houseDoorHitbox)) {
                 if (gp.currentQuest >= 1) { // MUST COMPLETE INTRO TO LEAVE
                     gp.currentMap = gp.MAP_STREET;
-                    x = gp.streetHouseDoorHitbox.x;
-                    y = gp.streetHouseDoorHitbox.y + gp.streetHouseDoorHitbox.height + 5;
+                    x = gp.streetHouseDoorHitbox.x + (gp.streetHouseDoorHitbox.width / 2) - (gp.tileSize / 2);
+                    y = gp.streetHouseDoorHitbox.y + gp.streetHouseDoorHitbox.height + 10;
+                    direction = "down";
                 } else {
                     System.out.println("The door is locked. I must finish the list first.");
                     y -= speed * 2; // Bounce back
@@ -224,30 +235,34 @@ public class Player extends Entity{
         } else if (gp.currentMap == gp.MAP_WORKSHOP){
             if (playerHitbox.intersects(gp.workshopDoorHitbox)){
                 gp.currentMap = gp.MAP_STREET;
-                x = gp.streetWorkshopDoorHitbox.x;
-                y = gp.streetWorkshopDoorHitbox.y - gp.tileSize - 20;
+                x = gp.streetWorkshopDoorHitbox.x + gp.streetWorkshopDoorHitbox.width + 10;
+                y = gp.streetWorkshopDoorHitbox.y + (gp.streetWorkshopDoorHitbox.height / 2) - (gp.tileSize / 2);
+                direction = "left";
             }
         // exit greenhouse
         } else if (gp.currentMap == gp.MAP_GREENHOUSE){
             if (playerHitbox.intersects(gp.greenhouseDoorHitbox)) {
                 gp.currentMap = gp.MAP_STREET;
-                x = gp.streetGreenhouseDoorHitbox.x;
-                y = gp.streetGreenhouseDoorHitbox.y - gp.tileSize - 20;
+                x = gp.streetGreenhouseDoorHitbox.x - gp.tileSize - 10;
+                y = gp.streetGreenhouseDoorHitbox.y + (gp.streetGreenhouseDoorHitbox.height / 2) - (gp.tileSize / 2);
+                direction = "right";
             }
         // exit museum
         } else if (gp.currentMap == gp.MAP_MUSEUM){
             if (playerHitbox.intersects(gp.museumDoorHitbox)){
                 gp.currentMap = gp.MAP_STREET;
-                x = gp.streetMuseumDoorHitbox.x;
-                y = gp.streetMuseumDoorHitbox.y + gp.streetMuseumDoorHitbox.height + 5;
+                x = gp.streetMuseumDoorHitbox.x + (gp.streetMuseumDoorHitbox.width / 2) - (gp.tileSize / 2);
+                y = gp.streetMuseumDoorHitbox.y + gp.streetMuseumDoorHitbox.height + 10;
+                direction = "down";
             }
         } else if (gp.currentMap == gp.MAP_STREET) {
 
             // enter house
             if (playerHitbox.intersects(gp.streetHouseDoorHitbox)) {
                 gp.currentMap = gp.MAP_HOUSE;
-                x = gp.houseDoorHitbox.x + (gp.houseDoorHitbox.width / 2) - (gp.tileSize / 2);
-                y = gp.houseDoorHitbox.y - gp.tileSize - 5;
+                x = gp.houseDoorHitbox.x + gp.houseDoorHitbox.width + 10;
+                y = gp.houseDoorHitbox.y + (gp.houseDoorHitbox.height / 2) - (gp.tileSize / 2);
+                direction = "right";
 
                 // TRIGGER ENDING IF ALL QUESTS ARE DONE!
                 if (gp.currentQuest == 5) {
@@ -260,6 +275,7 @@ public class Player extends Entity{
                     gp.currentMap = gp.MAP_MUSEUM;
                     x = gp.museumDoorHitbox.x + (gp.museumDoorHitbox.width / 2) - (gp.tileSize / 2);
                     y = gp.museumDoorHitbox.y - gp.tileSize - 5;
+                    direction = "up";
                 } else {
                     y += speed * 2; // Bounce back
                 }
@@ -269,7 +285,8 @@ public class Player extends Entity{
                 if (gp.currentQuest >= 1) { // MUST COMPLETE INTRO TO ENTER
                     gp.currentMap = gp.MAP_WORKSHOP;
                     x = gp.workshopDoorHitbox.x + (gp.workshopDoorHitbox.width / 2) - (gp.tileSize / 2);
-                    y = gp.workshopDoorHitbox.y - gp.tileSize - 20;
+                    y = gp.workshopDoorHitbox.y - gp.tileSize - 10;
+                    direction = "up";
                 }
             }
             // enter greenhouse
@@ -277,7 +294,8 @@ public class Player extends Entity{
                 if (gp.currentQuest >= 2) { // MUST COMPLETE GLASS EYES TO ENTER
                     gp.currentMap = gp.MAP_GREENHOUSE;
                     x = gp.greenhouseDoorHitbox.x + (gp.greenhouseDoorHitbox.width / 2) - (gp.tileSize / 2);
-                    y = gp.greenhouseDoorHitbox.y - gp.tileSize - 20;
+                    y = gp.greenhouseDoorHitbox.y - gp.tileSize - 10;
+                    direction = "up";
                 } else {
                     y -= speed * 2; // Bounce back
                 }
@@ -363,38 +381,28 @@ public class Player extends Entity{
 //        g2.fillRect(x, y, gp.tileSize, gp.tileSize);
 
         BufferedImage image = null;
+        boolean isMoving = keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed;
+
         switch(direction){
             case "up":
-                if(spriteNum == 1){
-                    image = up1;
-                }
-                if(spriteNum == 2){
-                    image = up2;
-                }
+                if (!isMoving) image = backImage; // Standing still
+                else if (spriteNum == 1) image = backWalk1;
+                else image = backWalk2;
                 break;
             case "down":
-                if(spriteNum == 1){
-                    image = down1;
-                }
-                if(spriteNum == 2){
-                    image = down2;
-                }
+                if (!isMoving) image = frontImage; // Standing still
+                else if (spriteNum == 1) image = frontWalk1;
+                else image = frontWalk2;
                 break;
             case "left":
-                if(spriteNum == 1){
-                    image = left1;
-                }
-                if(spriteNum == 2){
-                    image = left2;
-                }
+                if (!isMoving) image = leftImage; // Standing still
+                else if (spriteNum == 1) image = leftWalk1;
+                else image = leftWalk2;
                 break;
             case "right":
-                if(spriteNum == 1){
-                    image = right1;
-                }
-                if(spriteNum == 2){
-                    image = right2;
-                }
+                if (!isMoving) image = rightImage; // Standing still
+                else if (spriteNum == 1) image = rightWalk1;
+                else image = rightWalk2;
                 break;
         }
 

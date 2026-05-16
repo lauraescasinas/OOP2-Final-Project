@@ -27,7 +27,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int MAP_WORKSHOP = 2;
     public final int MAP_GREENHOUSE = 3;
     public final int MAP_MUSEUM = 4;
-    public int currentMap = MAP_HOUSE; // start in the house
+    public int currentMap = MAP_STREET; // start in the house
 
 
     BufferedImage houseBg;
@@ -104,16 +104,16 @@ public class GamePanel extends JPanel implements Runnable {
     public SuperObject obj[] = new SuperObject[10];
 
     // inside doors
-    public Rectangle houseDoorHitbox = new Rectangle(350, 520, 164, 100);
-    public Rectangle workshopDoorHitbox = new Rectangle(350, 520, 164, 100);
-    public Rectangle greenhouseDoorHitbox = new Rectangle(350, 520, 164, 100);
+    public Rectangle houseDoorHitbox = new Rectangle(1, 400, 164, 100);
+    public Rectangle workshopDoorHitbox = new Rectangle(80, 600, 164, 100);
+    public Rectangle greenhouseDoorHitbox = new Rectangle(350, 620, 164, 100);
     public Rectangle museumDoorHitbox = new Rectangle(350, 520, 164, 100);
 
     // outside doors
-    public Rectangle streetHouseDoorHitbox = new Rectangle(230, 170, 85, 45);
-    public Rectangle streetMuseumDoorHitbox = new Rectangle(550, 170, 85, 45);
-    public Rectangle streetWorkshopDoorHitbox = new Rectangle(230, 480, 85, 45);
-    public Rectangle streetGreenhouseDoorHitbox = new Rectangle(550, 480, 85, 45);
+    public Rectangle streetHouseDoorHitbox = new Rectangle(50, 260, 85, 45);
+    public Rectangle streetMuseumDoorHitbox = new Rectangle(650, 180, 85, 45);
+    public Rectangle streetWorkshopDoorHitbox = new Rectangle(200, 630, 85, 45);
+    public Rectangle streetGreenhouseDoorHitbox = new Rectangle(750, 630, 85, 45);
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
