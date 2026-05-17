@@ -28,12 +28,12 @@ public class GamePanel extends JPanel implements Runnable {
     public final int MAP_GREENHOUSE = 3;
     public final int MAP_MUSEUM = 4;
     public final int MAP_ROOM = 5; // <--- NEW: Room Map
-    public int currentMap = MAP_ROOM;// start in the house
+    public int currentMap = MAP_STREET;// start in the house
 
     BufferedImage roomBg;
     BufferedImage houseBg;
     BufferedImage streetBg;
-    BufferedImage workshopBg;
+    BufferedImage workshopBg, toolboxWorkshop, sofaWorkshop;
     BufferedImage greenhouseBg;
     BufferedImage museumBg, tableMuseum, glasscaseMuseum;
     BufferedImage bouquetInv;
@@ -71,9 +71,9 @@ public class GamePanel extends JPanel implements Runnable {
     public Rectangle clue2Hitbox = new Rectangle(510, 430, 48, 48);
     public Rectangle clue3Hitbox = new Rectangle(695, 320, 48, 48);
     // statue in map hitboxes
-    public Rectangle mapStatue1Hitbox = new Rectangle(560, 250, 60, 100);
-    public Rectangle mapStatue2Hitbox = new Rectangle(630, 340, 60, 100);
-    public Rectangle mapStatue3Hitbox = new Rectangle(670, 220, 60, 100);
+    public Rectangle mapStatue1Hitbox = new Rectangle(560, 250, 70, 100);
+    public Rectangle mapStatue2Hitbox = new Rectangle(630, 340, 70, 100);
+    public Rectangle mapStatue3Hitbox = new Rectangle(670, 220, 70, 100);
     // statue in screen hitboxes
     public Rectangle uiStatue1Hitbox = new Rectangle(120, 250, 150, 200);
     public Rectangle uiStatue2Hitbox = new Rectangle(350, 250, 150, 200);
@@ -116,7 +116,7 @@ public class GamePanel extends JPanel implements Runnable {
     public Rectangle streetHouseDoorHitbox = new Rectangle(50, 260, 85, 45);
     public Rectangle streetMuseumDoorHitbox = new Rectangle(650, 180, 85, 45);
     public Rectangle streetWorkshopDoorHitbox = new Rectangle(200, 630, 85, 45);
-    public Rectangle streetGreenhouseDoorHitbox = new Rectangle(750, 630, 85, 45);
+    public Rectangle streetGreenhouseDoorHitbox = new Rectangle(736, 435, 85, 45);
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -183,34 +183,54 @@ public class GamePanel extends JPanel implements Runnable {
 
         // glass eyes in workshop
         obj[5] = new GlasseyeObject();
-        obj[5].x = 100;
-        obj[5].y = 200;
-        obj[5].hitbox.x = 100;
-        obj[5].hitbox.y = 200;
+        obj[5].x = 102;
+        obj[5].y = 265;
+        obj[5].hitbox.x = 102;
+        obj[5].hitbox.y = 265;
+        obj[5].width = 20;
+        obj[5].height = 20;
+        obj[5].hitbox.width = 20;
+        obj[5].hitbox.height = 20;
 
         obj[6] = new GlasseyeObject();
-        obj[6].x = 200;
-        obj[6].y = 450;
-        obj[6].hitbox.x = 200;
-        obj[6].hitbox.y = 450;
+        obj[6].x = 340;
+        obj[6].y = 170;
+        obj[6].hitbox.x = 340;
+        obj[6].hitbox.y = 170;
+        obj[6].width = 26;
+        obj[6].height = 26;
+        obj[6].hitbox.width = 26;
+        obj[6].hitbox.height = 26;
 
         obj[7] = new GlasseyeObject();
-        obj[7].x = 550;
-        obj[7].y = 150;
-        obj[7].hitbox.x = 550;
-        obj[7].hitbox.y = 150;
+        obj[7].x = 563;
+        obj[7].y = 146;
+        obj[7].hitbox.x = 563;
+        obj[7].hitbox.y = 146;
+        obj[7].width = 27;
+        obj[7].height = 27;
+        obj[7].hitbox.width = 27;
+        obj[7].hitbox.height = 27;
 
         obj[8] = new GlasseyeObject();
-        obj[8].x = 650;
-        obj[8].y = 350;
-        obj[8].hitbox.x = 650;
-        obj[8].hitbox.y = 350;
+        obj[8].x = 530;
+        obj[8].y = 545;
+        obj[8].hitbox.x = 530;
+        obj[8].hitbox.y = 545;
+        obj[8].width = 20;
+        obj[8].height = 20;
+        obj[8].hitbox.width = 20;
+        obj[8].hitbox.height = 20;
 
         obj[9] = new GlasseyeObject();
-        obj[9].x = 750;
-        obj[9].y = 500;
-        obj[9].hitbox.x = 750;
-        obj[9].hitbox.y = 500;
+        obj[9].x = 789;
+        obj[9].y = 546;
+        obj[9].hitbox.x = 789;
+        obj[9].hitbox.y = 546;
+        obj[9].width = 28;
+        obj[9].height = 28;
+        obj[9].hitbox.width = 28;
+        obj[9].hitbox.height = 28;
     }
 
     public void startGameThread() {
@@ -255,6 +275,8 @@ public class GamePanel extends JPanel implements Runnable {
             houseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/House_bg.png"));
             streetBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Street_bg.png"));
             workshopBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Workshop_bg.png"));
+            toolboxWorkshop = ImageIO.read(getClass().getResourceAsStream("/Objects/toolbox_Workshop_bg.png"));
+            sofaWorkshop = ImageIO.read(getClass().getResourceAsStream("/Objects/sofa_Workshop_bg.png"));
             greenhouseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Greenhouse_bg.png"));
             roomBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Room_bg.png"));
             houseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/House_bg.png"));
@@ -382,13 +404,13 @@ public class GamePanel extends JPanel implements Runnable {
             g2.fillRect(mapStatue3Hitbox.x, mapStatue3Hitbox.y, mapStatue3Hitbox.width, mapStatue3Hitbox.height);
 
 
-            g2.drawImage(getStatueImage(statue1State), 560, 250, 80, 120, null);
+            g2.drawImage(getStatueImage(statue1State), 560, 250, 70, 100, null);
 
-            g2.drawImage(getStatueImage(statue2State), 630, 340, 80, 120, null);
+            g2.drawImage(getStatueImage(statue2State), 630, 340, 70, 100, null);
 
 //            g2.drawImage(glasscaseMuseum, 647, 385, tileSize * 2, tileSize * 4, null);
 
-            g2.drawImage(getStatueImage(statue3State), 670, 213, 80, 120, null);
+            g2.drawImage(getStatueImage(statue3State), 670, 228, 70, 100, null);
 
             if (locketUnlocked == false) {
                 if (lockedCase != null) g2.drawImage(lockedCase, 170, 280, tileSize + 2, tileSize+ 2, null);
@@ -415,6 +437,8 @@ public class GamePanel extends JPanel implements Runnable {
             g2.fillRect(streetGreenhouseDoorHitbox.x, streetGreenhouseDoorHitbox.y, streetGreenhouseDoorHitbox.width, streetGreenhouseDoorHitbox.height);
         } else if (currentMap == MAP_WORKSHOP) {
             g2.fillRect(workshopDoorHitbox.x, workshopDoorHitbox.y, workshopDoorHitbox.width, workshopDoorHitbox.height);
+            g2.drawImage(toolboxWorkshop, 113, 263, 37, 23, null);
+            g2.drawImage(sofaWorkshop, 509, 369, 88, 190, null);
         } else if (currentMap == MAP_GREENHOUSE) {
             g2.fillRect(greenhouseDoorHitbox.x, greenhouseDoorHitbox.y, greenhouseDoorHitbox.width, greenhouseDoorHitbox.height);
         } else if (currentMap == MAP_MUSEUM) {
