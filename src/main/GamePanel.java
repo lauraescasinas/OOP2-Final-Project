@@ -67,9 +67,9 @@ public class GamePanel extends JPanel implements Runnable {
     public Rectangle backButtonHitbox = new Rectangle(50, 50, 60, 60);
     public Rectangle submitButtonHitbox = new Rectangle(560, 360, 60, 60);
     // clue hitboxes
-    public Rectangle clue1Hitbox = new Rectangle(100, 400, 48, 48);
-    public Rectangle clue2Hitbox = new Rectangle(300, 350, 48, 48);
-    public Rectangle clue3Hitbox = new Rectangle(250, 500, 48, 48);
+    public Rectangle clue1Hitbox = new Rectangle(260, 280, 48, 48);
+    public Rectangle clue2Hitbox = new Rectangle(510, 430, 48, 48);
+    public Rectangle clue3Hitbox = new Rectangle(695, 320, 48, 48);
     // statue in map hitboxes
     public Rectangle mapStatue1Hitbox = new Rectangle(560, 250, 60, 100);
     public Rectangle mapStatue2Hitbox = new Rectangle(630, 340, 60, 100);
@@ -345,9 +345,9 @@ public class GamePanel extends JPanel implements Runnable {
             }
         } else if (currentMap == MAP_MUSEUM && museumBg != null) {
             g2.drawImage(museumBg, 0, 0, screenWidth, screenHeight, null);
-            if (clue1 != null) g2.drawImage(clue1, 100, 400, tileSize, tileSize, null);
-            if (clue2 != null) g2.drawImage(clue2, 300, 350, tileSize, tileSize, null);
-            if (clue3 != null) g2.drawImage(clue3, 250, 500, tileSize, tileSize, null);
+            if (clue1 != null) g2.drawImage(clue1, 260, 280, tileSize, tileSize, null);
+            if (clue2 != null) g2.drawImage(clue2, 510, 430, tileSize, tileSize, null);
+            if (clue3 != null) g2.drawImage(clue3, 695, 320, tileSize, tileSize, null);
 
             // clue hitboxes
             g2.setColor(new Color(0, 0, 255, 100)); // Blue debug boxes

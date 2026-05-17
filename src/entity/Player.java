@@ -122,6 +122,7 @@ public class Player extends Entity{
                         System.out.println("Success! Locket Unlocked.");
                     } else {
                         System.out.println("Access Denied. Wrong Password.");
+                        keyH.currentInput = "";
                     }
                 }
                 else if (gp.introPuzzleOpen) {
