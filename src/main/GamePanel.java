@@ -28,7 +28,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int MAP_GREENHOUSE = 3;
     public final int MAP_MUSEUM = 4;
     public final int MAP_ROOM = 5; // <--- NEW: Room Map
-    public int currentMap = MAP_MUSEUM;// start in the house
+    public int currentMap = MAP_ROOM;// start in the house
 
     BufferedImage roomBg;
     BufferedImage houseBg;
@@ -63,11 +63,11 @@ public class GamePanel extends JPanel implements Runnable {
 
 
     // hitboxs
-    public Rectangle glassCaseHitbox = new Rectangle(150, 250, 100, 150);
+    public Rectangle glassCaseHitbox = new Rectangle(170, 280, tileSize + 2, tileSize + 2);
     public Rectangle backButtonHitbox = new Rectangle(50, 50, 60, 60);
     public Rectangle submitButtonHitbox = new Rectangle(560, 360, 60, 60);
     // clue hitboxes
-    public Rectangle clue1Hitbox = new Rectangle(260, 280, 48, 48);
+    public Rectangle clue1Hitbox = new Rectangle(290, 280, 48, 48);
     public Rectangle clue2Hitbox = new Rectangle(510, 430, 48, 48);
     public Rectangle clue3Hitbox = new Rectangle(695, 320, 48, 48);
     // statue in map hitboxes
@@ -132,34 +132,54 @@ public class GamePanel extends JPanel implements Runnable {
     public void setupGame() {
         // blackroses in greenhouse
         obj[0] = new BlackroseObject();
-        obj[0].x = 150;
-        obj[0].y = 450;
-        obj[0].hitbox.x = 150;
-        obj[0].hitbox.y = 450;
+        obj[0].x = 245;
+        obj[0].y = 240;
+        obj[0].hitbox.x = 245;
+        obj[0].hitbox.y = 240;
+        obj[0].width = 24;
+        obj[0].height = 24;
+        obj[0].hitbox.width = 24;
+        obj[0].hitbox.height = 24;
 
         obj[1] = new BlackroseObject();
-        obj[1].x = 250;
-        obj[1].y = 300;
-        obj[1].hitbox.x = 250;
-        obj[1].hitbox.y = 300;
+        obj[1].x = 265;
+        obj[1].y = 490;
+        obj[1].hitbox.x = 265;
+        obj[1].hitbox.y = 487;
+        obj[1].width = 32;
+        obj[1].height = 32;
+        obj[1].hitbox.width = 32;
+        obj[1].hitbox.height = 32;
 
         obj[2] = new BlackroseObject();
-        obj[2].x = 600;
-        obj[2].y = 300;
-        obj[2].hitbox.x = 600;
-        obj[2].hitbox.y = 300;
+        obj[2].x = 606;
+        obj[2].y = 510;
+        obj[2].hitbox.x = 606;
+        obj[2].hitbox.y = 510;
+        obj[2].width = 34;
+        obj[2].height = 34;
+        obj[2].hitbox.width = 34;
+        obj[2].hitbox.height = 34;
 
         obj[3] = new BlackroseObject();
-        obj[3].x = 700;
-        obj[3].y = 400;
-        obj[3].hitbox.x = 700;
-        obj[3].hitbox.y = 400;
+        obj[3].x = 565;
+        obj[3].y = 368;
+        obj[3].hitbox.x = 565;
+        obj[3].hitbox.y = 365;
+        obj[3].width = 20;
+        obj[3].height = 20;
+        obj[3].hitbox.width = 20;
+        obj[3].hitbox.height = 20;
 
         obj[4] = new BlackroseObject();
-        obj[4].x = 650;
-        obj[4].y = 520;
-        obj[4].hitbox.x = 650;
-        obj[4].hitbox.y = 520;
+        obj[4].x = 660;
+        obj[4].y = 120;
+        obj[4].hitbox.x = 660;
+        obj[4].hitbox.y = 120;
+        obj[4].width = 38;
+        obj[4].height = 38;
+        obj[4].hitbox.width = 38;
+        obj[4].hitbox.height = 38;
 
         // glass eyes in workshop
         obj[5] = new GlasseyeObject();
@@ -345,7 +365,7 @@ public class GamePanel extends JPanel implements Runnable {
             }
         } else if (currentMap == MAP_MUSEUM && museumBg != null) {
             g2.drawImage(museumBg, 0, 0, screenWidth, screenHeight, null);
-            if (clue1 != null) g2.drawImage(clue1, 260, 280, tileSize, tileSize, null);
+            if (clue1 != null) g2.drawImage(clue1, 290, 280, tileSize, tileSize, null);
             if (clue2 != null) g2.drawImage(clue2, 510, 430, tileSize, tileSize, null);
             if (clue3 != null) g2.drawImage(clue3, 695, 320, tileSize, tileSize, null);
 
@@ -371,14 +391,14 @@ public class GamePanel extends JPanel implements Runnable {
             g2.drawImage(getStatueImage(statue3State), 670, 213, 80, 120, null);
 
             if (locketUnlocked == false) {
-                if (lockedCase != null) g2.drawImage(lockedCase, 150, 280, tileSize * 2, tileSize * 2, null);
+                if (lockedCase != null) g2.drawImage(lockedCase, 170, 280, tileSize + 2, tileSize+ 2, null);
 
                 // for debug locked glass case
                 g2.setColor(new Color(255, 0, 0, 100));
                 g2.fillRect(glassCaseHitbox.x, glassCaseHitbox.y, glassCaseHitbox.width, glassCaseHitbox.height);
             } else {
-                // replace locked glass case with unlocked glass case
-                if (unlockedCase != null) g2.drawImage(unlockedCase, 150, 280, tileSize * 2, tileSize * 2, null);
+                // replace locked glass case with unlocked glass case* 2,
+                if (unlockedCase != null) g2.drawImage(unlockedCase, 150, 280, tileSize+ 2, tileSize+ 2,  null);
             }
         }
 
