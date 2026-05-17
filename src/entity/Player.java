@@ -26,8 +26,8 @@ public class Player extends Entity{
     }
 
     public void setDefaultValues(){
-        x = (gp.screenWidth / 2) - (gp.tileSize / 2);
-        y = (gp.screenHeight / 2) - (gp.tileSize / 2) + 10;
+        x = 280;
+        y = 380;
         speed = 4;
         direction = "down";
     }
@@ -216,8 +216,19 @@ public class Player extends Entity{
 
         Rectangle playerHitbox = new Rectangle(x, y, gp.tileSize, gp.tileSize);
 
+        if (gp.currentMap == gp.MAP_ROOM) {
+            if (playerHitbox.intersects(gp.bedroomDoorHitbox)) {
+                gp.currentMap = gp.MAP_HOUSE;
+
+                // Spawn in the House (left hallway), facing right into the living room
+                x = gp.outsideBedroomDoorHitbox.x + gp.outsideBedroomDoorHitbox.width + 10;
+                y = gp.outsideBedroomDoorHitbox.y + (gp.outsideBedroomDoorHitbox.height / 2) - (gp.tileSize / 2);
+                direction = "right";
+            }
+        }
+
         //  exit house
-        if (gp.currentMap == gp.MAP_HOUSE) {
+        else if (gp.currentMap == gp.MAP_HOUSE) {
             // check if player hitbox touches the house door hitbox
             if (playerHitbox.intersects(gp.houseDoorHitbox)) {
                 if (gp.currentQuest >= 1) { // MUST COMPLETE INTRO TO LEAVE
@@ -229,7 +240,14 @@ public class Player extends Entity{
                     System.out.println("The door is locked. I must finish the list first.");
                     y -= speed * 2; // Bounce back
                 }
-            }
+            } else if (playerHitbox.intersects(gp.outsideBedroomDoorHitbox)) {
+                    gp.currentMap = gp.MAP_ROOM;
+
+                    // Spawn in the Room (right edge), facing left into the bedroom
+                    x = gp.bedroomDoorHitbox.x - gp.tileSize - 10;
+                    y = gp.bedroomDoorHitbox.y + (gp.bedroomDoorHitbox.height / 2) - (gp.tileSize / 2);
+                    direction = "left";
+                }
 
         // exit workshop
         } else if (gp.currentMap == gp.MAP_WORKSHOP){
@@ -260,9 +278,9 @@ public class Player extends Entity{
             // enter house
             if (playerHitbox.intersects(gp.streetHouseDoorHitbox)) {
                 gp.currentMap = gp.MAP_HOUSE;
-                x = gp.houseDoorHitbox.x + gp.houseDoorHitbox.width + 10;
+                x = gp.houseDoorHitbox.x - gp.tileSize - 10;
                 y = gp.houseDoorHitbox.y + (gp.houseDoorHitbox.height / 2) - (gp.tileSize / 2);
-                direction = "right";
+                direction = "up";
 
                 // TRIGGER ENDING IF ALL QUESTS ARE DONE!
                 if (gp.currentQuest == 5) {
