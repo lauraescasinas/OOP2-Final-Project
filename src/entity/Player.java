@@ -78,6 +78,38 @@ public class Player extends Entity{
             return; // Freeze player
         }
 
+        if (gp.isDialogueActive) {
+            if (gp.mouseH.leftClicked) {
+                Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
+
+                if (mouseHitbox.intersects(gp.dialogueNextHitbox)) {
+                    if (gp.dialogueCharIndex < gp.fullDialogue.length()) {
+                        // Instantly finish typing
+                        gp.currentDialogue = gp.fullDialogue;
+                        gp.dialogueCharIndex = gp.fullDialogue.length();
+                    } else {
+                        // Move to the next string in the array
+                        gp.currentDialogueListIndex++;
+                        if (gp.currentDialogueListIndex < gp.currentDialogueArray.length) {
+                            gp.fullDialogue = gp.currentDialogueArray[gp.currentDialogueListIndex];
+                            gp.currentDialogue = "";
+                            gp.dialogueCharIndex = 0;
+                        } else {
+                            // Array is empty, close dialogue box
+                            gp.isDialogueActive = false;
+
+                            // Advance State Machine
+                            if (gp.houseEventState == 1) gp.houseEventState = 2;
+                            else if (gp.houseEventState == 4) gp.houseEventState = 5;
+                        }
+                    }
+                }
+                gp.mouseH.leftClicked = false;
+            }
+            return; // Freeze player
+        }
+
+
         if (gp.passwordUIOpen || gp.clue1_Open || gp.clue2_Open || gp.clue3_Open || gp.statue_Open || gp.introPuzzleOpen) {
             if (gp.mouseH.leftClicked) {
                 Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
@@ -217,6 +249,13 @@ public class Player extends Entity{
 
         Rectangle playerHitbox = new Rectangle(x, y, gp.tileSize, gp.tileSize);
 
+        if (gp.currentMap == gp.MAP_HOUSE && gp.houseEventState == 0) {
+            if (playerHitbox.intersects(gp.tempBtnHitbox)) {
+                gp.houseEventState = 1; // Start event
+                gp.startDialogue(gp.houseDialogue1);
+            }
+        }
+
         if (gp.currentMap == gp.MAP_ROOM) {
             if (playerHitbox.intersects(gp.bedroomDoorHitbox)) {
                 gp.currentMap = gp.MAP_HOUSE;
@@ -337,8 +376,12 @@ public class Player extends Entity{
 
 
             if (gp.currentMap == gp.MAP_HOUSE) {
-                if (mouseHitbox.intersects(gp.tempBtnHitbox)) {
+//                if (mouseHitbox.intersects(gp.tempBtnHitbox)) {
+//                    gp.introPuzzleOpen = true;
+//                }
+                if (mouseHitbox.intersects(gp.debugIntroHitbox)) {
                     gp.introPuzzleOpen = true;
+                    gp.introPuzzlePage = 1;
                 }
             } else if(gp.currentMap == gp.MAP_GREENHOUSE){
                 for (int i = 0; i < gp.obj.length; i++){
