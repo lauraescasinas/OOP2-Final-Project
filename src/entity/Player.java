@@ -67,12 +67,15 @@ public class Player extends Entity{
                     gp.statue1State = 0; gp.statue2State = 3; gp.statue3State = 2;
                     gp.chronosWatchUnlocked = false; gp.locketUnlocked = false;
 
+                    // --- UPDATED: Reset Event States & Teleport to Room ---
+                    gp.houseEventState = 0;
+                    gp.demonVisible = false;
+                    gp.introDialogueTriggered = false; // Triggers room dialogue again
+
                     gp.setupGame(); // Respawns items
                     setDefaultValues(); // Teleport to start
-                    gp.currentMap = gp.MAP_HOUSE;
+                    gp.currentMap = gp.MAP_ROOM; // Back to the bedroom!
                 }
-
-
                 gp.mouseH.leftClicked = false;
             }
             return; // Freeze player
@@ -101,6 +104,7 @@ public class Player extends Entity{
                             // Advance State Machine
                             if (gp.houseEventState == 1) gp.houseEventState = 2;
                             else if (gp.houseEventState == 4) gp.houseEventState = 5;
+                            else if (gp.houseEventState == 7) gp.houseEventState = 8; // Move to 1s delay
                         }
                     }
                 }
@@ -249,10 +253,20 @@ public class Player extends Entity{
 
         Rectangle playerHitbox = new Rectangle(x, y, gp.tileSize, gp.tileSize);
 
-        if (gp.currentMap == gp.MAP_HOUSE && gp.houseEventState == 0) {
-            if (playerHitbox.intersects(gp.tempBtnHitbox)) {
-                gp.houseEventState = 1; // Start event
-                gp.startDialogue(gp.houseDialogue1);
+        if (gp.currentMap == gp.MAP_HOUSE) {
+            if (gp.currentQuest == 5 && gp.houseEventState < 7) {
+                // Ending Event Trigger
+                if (playerHitbox.intersects(gp.tempBtnHitbox)) {
+                    gp.houseEventState = 7;
+                    gp.demonVisible = true;
+                    gp.startDialogue(gp.houseDialogue3);
+                }
+            } else if (gp.houseEventState == 0) {
+                // Intro Event Trigger
+                if (playerHitbox.intersects(gp.tempBtnHitbox)) {
+                    gp.houseEventState = 1;
+                    gp.startDialogue(gp.houseDialogue1);
+                }
             }
         }
 
@@ -322,10 +336,10 @@ public class Player extends Entity{
                 y = gp.houseDoorHitbox.y + (gp.houseDoorHitbox.height / 2) - (gp.tileSize / 2);
                 direction = "up";
 
-                // TRIGGER ENDING IF ALL QUESTS ARE DONE!
-                if (gp.currentQuest == 5) {
-                    gp.currentQuest = 6;
-                }
+                // triggers the ending when you enter the house
+//                if (gp.currentQuest == 5) {
+//                    gp.currentQuest = 6;
+//                }
             }
             // enter museum
             else if (playerHitbox.intersects(gp.streetMuseumDoorHitbox)) {

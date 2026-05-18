@@ -28,7 +28,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int MAP_GREENHOUSE = 3;
     public final int MAP_MUSEUM = 4;
     public final int MAP_ROOM = 5; // <--- NEW: Room Map
-    public int currentMap = MAP_ROOM;// start in the house
+    public int currentMap = MAP_MUSEUM;// start in the house
 
     BufferedImage roomBg;
     BufferedImage houseBg;
@@ -69,6 +69,7 @@ public class GamePanel extends JPanel implements Runnable {
     public int demonFrameIndex = 0;
     public int demonCounter = 0;
     public int demonSpeed = 10; // Animation speed
+    public int demonVanishTimer = 0;
 
     // Event State: 0=Not Started, 1=Dialog1, 2=Wait 1s, 3=Wait 2s, 4=Dialog2, 5=Wait 2s, 6=Done
     public int houseEventState = 0;
@@ -89,11 +90,11 @@ public class GamePanel extends JPanel implements Runnable {
             "Demon: How sweet. A little prayer for the great Edmund Voss.", // 0
             "Elara: What— who are you?!", // 1
             "Demon: Someone who was looking forward to meeting your father\nfor a very long time. And look at this...", // 2
-            "White lilies. A normal casket. A cross on the wall.", // 3
-            "Did you even know him?", // 4
+            "Demon: White lilies. A normal casket. A cross on the wall.", // 3
+            "Demon: Did you even know him?", // 4
             "Elara: ...what are you trying to say—", // 5
             "Demon: A man who kept a jar of dead men's eyes on his desk. A man who\ntalked to taxidermied foxes. And you send him off like he was an accountant.", // 6
-            "Elara: Shut. Up.", // 7
+            "Elara: Shut up.", // 7
             "Demon: His soul is... restless, Elara. Unsettled. And if no one does\nanything about that—", // 8
             "Demon: I'll just take it with me.", // 9 (Will be styled RED and BOLD)
             "Demon: Unless...you do something for me.", // 10
@@ -102,6 +103,18 @@ public class GamePanel extends JPanel implements Runnable {
             "Elara: ...Some of these descriptions don't even make sense.", // 13
             "Demon: Your father made sense of stranger things. I'm sure you'll manage.", // 14
             "Demon: Clock's ticking, Elara. It always is." // 15
+    };
+
+    public String[] houseDialogue3 = {
+            "Elara lays the last item beside the casket. Her hands are shaking, but she's\ndone it. She steps back and faces the demon.", // 0
+            "That's everything. It's done.", // 1
+            "Demon: See? That's more like it. Not so hard to give your father a proper\nsend-off, was it?", // 2
+            "Demon: But don't go settling in. This was just the opening act.", // 3
+            "Demon: I'll be coming back for you.", // 4 (BOLD RED)
+            "Elara stands frozen—not from the words themselves, but from the ease\nwith which he said them. Like a promise. Like a threat baked into a joke.", // 5
+            "Still, after a moment, she lets her shoulders drop. Lets herself breathe.\nBecause whatever comes next, she won today.", // 6
+            "The demon isn't taking her father's soul.", // 7
+            "Not tonight." // 8 (BOLD RED)
     };
 
     public String[] roomDialogue = {
@@ -476,9 +489,16 @@ public class GamePanel extends JPanel implements Runnable {
             }
         } else if (houseEventState == 5) {
             eventTimer++;
-            if (eventTimer >= 120) { // 2 seconds
+            if (eventTimer >= 60) { // 1 second
                 introPuzzleOpen = true;
                 houseEventState = 6;
+                eventTimer = 0;
+            }
+        } else if (houseEventState == 8) {
+            eventTimer++;
+            if (eventTimer >= 60) { // 1 second
+                currentQuest = 6; // Trigger End Screen
+                houseEventState = 9; // Finish state machine
                 eventTimer = 0;
             }
         }
@@ -492,6 +512,24 @@ public class GamePanel extends JPanel implements Runnable {
             }
         }
 
+        // demon vanishes
+        if (isDialogueActive && currentDialogueArray == houseDialogue3) {
+            if (currentDialogueListIndex == 4 && demonVisible) {
+                // Start the timer ONLY after the dramatic text finishes typing out
+                if (dialogueCharIndex >= fullDialogue.length()) {
+                    demonVanishTimer++;
+                    if (demonVanishTimer >= 60) { // 1 second at 60 FPS
+                        demonVisible = false;
+                    }
+                }
+            } else if (currentDialogueListIndex >= 5) {
+                // Failsafe: if the player clicks 'Next' before the 1 second is up, force vanish!
+                demonVisible = false;
+            }
+        } else if (houseEventState == 0) {
+            // Reset the timer when the game restarts so it works on future playthroughs
+            demonVanishTimer = 0;
+        }
 
         player.update();
     }
@@ -676,9 +714,9 @@ public class GamePanel extends JPanel implements Runnable {
             int uiX = screenWidth / 2 - 250;
             int uiY = screenHeight / 2 - 200;
 
-            if (clue1_Open && openClue1 != null) g2.drawImage(openClue1, uiX, uiY, 500, 400, null);
-            if (clue2_Open && openClue2 != null) g2.drawImage(openClue2, uiX, uiY, 500, 400, null);
-            if (clue3_Open && openClue3 != null) g2.drawImage(openClue3, uiX, uiY, 500, 400, null);
+            if (clue1_Open && openClue1 != null) g2.drawImage(openClue1, uiX, uiY, 420, 200, null);
+            if (clue2_Open && openClue2 != null) g2.drawImage(openClue2, uiX, uiY, 260, 285, null);
+            if (clue3_Open && openClue3 != null) g2.drawImage(openClue3, uiX, uiY, 160, 290, null);
 
             if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
 
@@ -835,7 +873,8 @@ public class GamePanel extends JPanel implements Runnable {
             g2.setFont(new Font("Arial", Font.PLAIN, 22));
 
             // Special Styling for round 10 of Dialogue 2
-            if (currentDialogueArray == houseDialogue2 && currentDialogueListIndex == 9) {
+            if ((currentDialogueArray == houseDialogue2 && currentDialogueListIndex == 9) ||
+                    (currentDialogueArray == houseDialogue3 && (currentDialogueListIndex == 4 || currentDialogueListIndex == 8))) {
                 g2.setColor(new Color(220, 50, 50)); // Red
                 g2.setFont(new Font("Arial", Font.BOLD, 24));
             }
