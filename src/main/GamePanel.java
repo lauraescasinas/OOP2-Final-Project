@@ -27,19 +27,21 @@ public class GamePanel extends JPanel implements Runnable {
     public final int MAP_WORKSHOP = 2;
     public final int MAP_GREENHOUSE = 3;
     public final int MAP_MUSEUM = 4;
-    public final int MAP_ROOM = 5; // <--- NEW: Room Map
-    public int currentMap = MAP_MUSEUM;// start in the house
+    public final int MAP_ROOM = 5;
+    public final int MAP_MAIN_MENU = -1;// <--- NEW: Room Map
+    public int currentMap = MAP_MAIN_MENU;// start in the house
 
     BufferedImage roomBg;
     BufferedImage houseBg;
-    BufferedImage streetBg;
-    BufferedImage workshopBg, toolboxWorkshop, sofaWorkshop;
-    BufferedImage greenhouseBg;
+    BufferedImage streetBg1, streetBg2;
+    BufferedImage workshopBg1, workshopBg2, toolboxWorkshop, sofaWorkshop;
+    BufferedImage greenhouseBg1, greenhouseBg2;
     BufferedImage museumBg, tableMuseum, glasscaseMuseum;
     BufferedImage bouquetInv;
     BufferedImage jarInv;
-    BufferedImage lockedCase, clue1, clue2, clue3, passwordUI, backBtn, locketInv, unlockedCase, watchInv;
-    BufferedImage openClue1, openClue2, openClue3;
+    BufferedImage inventoryBox;
+    BufferedImage lockedCase, clue0, clue1, clue2, clue3, passwordUI, backBtn, locketInv, unlockedCase, watchInv;
+    BufferedImage openClue1, openClue2, openClue3, openClue0;
     BufferedImage statueRotateScreen, statueLeft, statueBackLeft, statueBackRight, statueRight;
     BufferedImage tempBtn, listScreen1, listScreen2, listScreen3, nextBtn, prevBtn;
     BufferedImage objTab1, objTab2, objTab3, objTab4, objTab5;
@@ -50,11 +52,16 @@ public class GamePanel extends JPanel implements Runnable {
     public boolean clue1_Open = false;
     public boolean clue2_Open = false;
     public boolean clue3_Open = false;
+    public boolean clue0_Open = false;
     public boolean statue_Open = false;
     public boolean introPuzzleOpen = false;
     public boolean chronosWatchUnlocked = false;
     public boolean introAns1 = false, introAns2 = false, introAns3 = false, introAns4 = false;
 
+    // map animation variables
+    public int mapFrameIndex = 0; // Toggles between 0 and 1
+    public int mapFrameCounter = 0;
+    public int mapAnimSpeed = 45;
 
     // --- Animated Gibberish Variables ---
     public BufferedImage[] gibberishFrames = new BufferedImage[10];
@@ -62,6 +69,13 @@ public class GamePanel extends JPanel implements Runnable {
     public int gibberishCounter = 0;    // Timer counter
     public int gibberishSpeed = 6;      // Speed of animation (lower = faster)
 
+    BufferedImage[] menuFrames = new BufferedImage[4];
+    public int menuFrameIndex = 0;
+    public int menuFrameCounter = 0;
+    public final int menuFrameSpeed = 36; // ~600ms at 60 FPS
+    public Rectangle playButtonHitbox = new Rectangle(600, 375, 100, 40); // ← adjust to match your button art
+    private javax.sound.sampled.Clip menuMusic;
+    private javax.sound.sampled.Clip clickSFX;
 
     // --- NEW: Demon Animation & Event Variables ---
     BufferedImage demon1, demon2;
@@ -151,6 +165,7 @@ public class GamePanel extends JPanel implements Runnable {
     public Rectangle clue1Hitbox = new Rectangle(290, 280, 48, 48);
     public Rectangle clue2Hitbox = new Rectangle(510, 430, 48, 48);
     public Rectangle clue3Hitbox = new Rectangle(695, 320, 48, 48);
+    public Rectangle clue0Hitbox = new Rectangle(230, 538, 48, 48);
     // statue in map hitboxes
     public Rectangle mapStatue1Hitbox = new Rectangle(560, 250, 70, 100);
     public Rectangle mapStatue2Hitbox = new Rectangle(630, 340, 70, 100);
@@ -353,12 +368,40 @@ public class GamePanel extends JPanel implements Runnable {
     // backgrounds
     public void loadBackgrounds() {
         try {
+            for (int i = 0; i < 4; i++) {
+                menuFrames[i] = ImageIO.read(getClass().getResourceAsStream("/Objects/MainMenu_" + (i + 1) + ".png"));
+            }
+
+            try {
+                java.net.URL musicURL = getClass().getResource("/Music/MainMenu.wav");
+                if (musicURL != null) {
+                    javax.sound.sampled.AudioInputStream ais =
+                            javax.sound.sampled.AudioSystem.getAudioInputStream(musicURL);
+                    menuMusic = javax.sound.sampled.AudioSystem.getClip();
+                    menuMusic.open(ais);
+                }
+
+                java.net.URL sfxURL = getClass().getResource("/Music/Button.wav");
+                if (sfxURL != null) {
+                    javax.sound.sampled.AudioInputStream ais2 =
+                            javax.sound.sampled.AudioSystem.getAudioInputStream(sfxURL);
+                    clickSFX = javax.sound.sampled.AudioSystem.getClip();
+                    clickSFX.open(ais2);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
             houseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/House_bg.png"));
-            streetBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Street_bg.png"));
-            workshopBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Workshop_bg.png"));
+            streetBg1 = ImageIO.read(getClass().getResourceAsStream("/Maps/Street_bg1.png"));
+            streetBg2 = ImageIO.read(getClass().getResourceAsStream("/Maps/Street_bg2.png"));
+
+            workshopBg1 = ImageIO.read(getClass().getResourceAsStream("/Maps/Workshop_bg1.png"));
+            workshopBg2 = ImageIO.read(getClass().getResourceAsStream("/Maps/Workshop_bg2.png"));
             toolboxWorkshop = ImageIO.read(getClass().getResourceAsStream("/Objects/toolbox_Workshop_bg.png"));
             sofaWorkshop = ImageIO.read(getClass().getResourceAsStream("/Objects/sofa_Workshop_bg.png"));
-            greenhouseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Greenhouse_bg.png"));
+            greenhouseBg1 = ImageIO.read(getClass().getResourceAsStream("/Maps/Greenhouse_bg1.png"));
+            greenhouseBg2 = ImageIO.read(getClass().getResourceAsStream("/Maps/Greenhouse_bg2.png"));
             roomBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Room_bg.png"));
             houseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/House_bg.png"));
             museumBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Museum_bg.png"));
@@ -378,7 +421,7 @@ public class GamePanel extends JPanel implements Runnable {
             jarInv = ImageIO.read(getClass().getResourceAsStream("/Objects/jar_eyes.png"));
             locketInv = ImageIO.read(getClass().getResourceAsStream("/Objects/memento_locket.png"));
             watchInv = ImageIO.read(getClass().getResourceAsStream("/Objects/chronos_watch.png"));
-
+            inventoryBox = ImageIO.read(getClass().getResourceAsStream("/Objects/inventory_box.png"));
 
             lockedCase = ImageIO.read(getClass().getResourceAsStream("/Objects/locked_GlassCase.png"));
             passwordUI = ImageIO.read(getClass().getResourceAsStream("/Objects/password_input.png"));
@@ -389,9 +432,11 @@ public class GamePanel extends JPanel implements Runnable {
             clue1 = ImageIO.read(getClass().getResourceAsStream("/Objects/clue1.png"));
             clue2 = ImageIO.read(getClass().getResourceAsStream("/Objects/clue2.png"));
             clue3 = ImageIO.read(getClass().getResourceAsStream("/Objects/clue3.png"));
+            clue0 = ImageIO.read(getClass().getResourceAsStream("/Objects/clue0.png"));
             openClue1 = ImageIO.read(getClass().getResourceAsStream("/Objects/open_clue1.png"));
             openClue2 = ImageIO.read(getClass().getResourceAsStream("/Objects/open_clue2.png"));
             openClue3 = ImageIO.read(getClass().getResourceAsStream("/Objects/open_clue3.png"));
+            openClue0 = ImageIO.read(getClass().getResourceAsStream("/Objects/open_clue0.png"));
 
             // statues
             statueRotateScreen = ImageIO.read(getClass().getResourceAsStream("/Objects/statuerotate_Screen.png"));
@@ -416,8 +461,14 @@ public class GamePanel extends JPanel implements Runnable {
             for (int i = 0; i < 10; i++) {
                 gibberishFrames[i] = ImageIO.read(getClass().getResourceAsStream("/Objects/Gibberish_" + (i + 1) + ".png"));
             }
+
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        if (menuMusic != null) {
+            menuMusic.loop(javax.sound.sampled.Clip.LOOP_CONTINUOUSLY);
+            menuMusic.start();
         }
     }
 
@@ -439,6 +490,39 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void update() {
+
+        if (currentMap == MAP_MAIN_MENU) {
+            menuFrameCounter++;
+            if (menuFrameCounter >= menuFrameSpeed) {
+                menuFrameIndex = (menuFrameIndex + 1) % 4;
+                menuFrameCounter = 0;
+            }
+            // Handle Play button click
+            if (mouseH.leftClicked) {
+                Rectangle mouseHitbox = new Rectangle(mouseH.mouseX, mouseH.mouseY, 1, 1);
+                if (mouseHitbox.intersects(playButtonHitbox)) {
+                    if (clickSFX != null) {
+                        clickSFX.setFramePosition(0); // rewind to start
+                        clickSFX.start();
+                    }
+                    if (menuMusic != null) {
+                        menuMusic.stop();
+                        menuMusic.close();
+                    }
+                    currentMap = MAP_ROOM; // ← your actual first game map
+                    mouseH.leftClicked = false;
+                }
+                mouseH.leftClicked = false;
+            }
+            return; // skip all other update logic while on menu
+        }
+
+        mapFrameCounter++;
+        if (mapFrameCounter >= mapAnimSpeed) {
+            mapFrameIndex = (mapFrameIndex == 0) ? 1 : 0; // Flip back and forth between 0 and 1
+            mapFrameCounter = 0;
+        }
+
         if (currentMap == MAP_ROOM && !introDialogueTriggered) {
             startTimer++;
             // 120 frames at 60 FPS = 2 seconds
@@ -538,6 +622,17 @@ public class GamePanel extends JPanel implements Runnable {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 
+        if (currentMap == MAP_MAIN_MENU) {
+            if (menuFrames[menuFrameIndex] != null) {
+                g2.drawImage(menuFrames[menuFrameIndex], 0, 0, screenWidth, screenHeight, null);
+            }
+            // Optional: debug hitbox for the Play button
+            // g2.setColor(new Color(255, 255, 0, 100));
+            // g2.fillRect(playButtonHitbox.x, playButtonHitbox.y, playButtonHitbox.width, playButtonHitbox.height);
+            g2.dispose();
+            return; // skip drawing everything else
+        }
+
         if (currentMap == MAP_ROOM && roomBg != null) {
             g2.drawImage(roomBg, 0, 0, screenWidth, screenHeight, null);
         } else if (currentMap == MAP_HOUSE && houseBg != null) {
@@ -562,10 +657,12 @@ public class GamePanel extends JPanel implements Runnable {
             // debug hitbox for temporary button
             g2.setColor(new Color(0, 0, 255, 100)); // Blue
             g2.fillRect(tempBtnHitbox.x, tempBtnHitbox.y, tempBtnHitbox.width, tempBtnHitbox.height);
-        } else if (currentMap == MAP_STREET && streetBg != null) {
-            g2.drawImage(streetBg, 0, 0, screenWidth, screenHeight, null);
-        } else if (currentMap == MAP_WORKSHOP && workshopBg != null) {
-            g2.drawImage(workshopBg, 0, 0, screenWidth, screenHeight, null);
+        } else if (currentMap == MAP_STREET) {
+            BufferedImage currentStreet = (mapFrameIndex == 0) ? streetBg1 : streetBg2;
+            if (currentStreet != null) g2.drawImage(currentStreet, 0, 0, screenWidth, screenHeight, null);
+        } else if (currentMap == MAP_WORKSHOP) {
+            BufferedImage currentWorkshop = (mapFrameIndex == 0) ? workshopBg1 : workshopBg2;
+            if (currentWorkshop != null) g2.drawImage(currentWorkshop, 0, 0, screenWidth, screenHeight, null);
             //scatter the glass eyes in workshop
             for (int i = 0; i < obj.length; i++) {
                 if (obj[i] != null && obj[i].name.equals("Glass Eye")) {
@@ -575,8 +672,9 @@ public class GamePanel extends JPanel implements Runnable {
                     g2.fillRect(obj[i].hitbox.x, obj[i].hitbox.y, obj[i].hitbox.width, obj[i].hitbox.height);
                 }
             }
-        } else if (currentMap == MAP_GREENHOUSE && greenhouseBg != null) {
-            g2.drawImage(greenhouseBg, 0, 0, screenWidth, screenHeight, null);
+        } else if (currentMap == MAP_GREENHOUSE) {
+            BufferedImage currentGreenhouse = (mapFrameIndex == 0) ? greenhouseBg1 : greenhouseBg2;
+            if (currentGreenhouse != null) g2.drawImage(currentGreenhouse, 0, 0, screenWidth, screenHeight, null);
             // scatter the roses in greenhoues
             for (int i = 0; i < obj.length; i++) {
                 if (obj[i] != null && obj[i].name.equals("Black Rose")) {
@@ -588,16 +686,18 @@ public class GamePanel extends JPanel implements Runnable {
             }
         } else if (currentMap == MAP_MUSEUM && museumBg != null) {
             g2.drawImage(museumBg, 0, 0, screenWidth, screenHeight, null);
-            if (clue1 != null) g2.drawImage(clue1, 290, 280, tileSize, tileSize, null);
-            if (clue2 != null) g2.drawImage(clue2, 510, 430, tileSize, tileSize, null);
-            if (clue3 != null) g2.drawImage(clue3, 695, 320, tileSize, tileSize, null);
+            if (clue1 != null) g2.drawImage(clue1, 290, 280, tileSize - 7, tileSize - 6, null);
+            if (clue2 != null) g2.drawImage(clue2, 510, 437, tileSize - 7, tileSize - 6, null);
+            if (clue3 != null) g2.drawImage(clue3, 705, 320, tileSize - 10, tileSize - 9, null);
+            if (clue0 != null) g2.drawImage(clue0, 230, 538, tileSize - 7 , tileSize - 6, null);
+
 
             // clue hitboxes
             g2.setColor(new Color(0, 0, 255, 100)); // Blue debug boxes
             g2.fillRect(clue1Hitbox.x, clue1Hitbox.y, clue1Hitbox.width, clue1Hitbox.height);
             g2.fillRect(clue2Hitbox.x, clue2Hitbox.y, clue2Hitbox.width, clue2Hitbox.height);
             g2.fillRect(clue3Hitbox.x, clue3Hitbox.y, clue3Hitbox.width, clue3Hitbox.height);
-
+            g2.fillRect(clue0Hitbox.x, clue0Hitbox.y, clue0Hitbox.width, clue0Hitbox.height);
             // statue hitboxes
             g2.setColor(new Color(255, 100, 0, 100)); // Orange
             g2.fillRect(mapStatue1Hitbox.x, mapStatue1Hitbox.y, mapStatue1Hitbox.width, mapStatue1Hitbox.height);
@@ -655,6 +755,11 @@ public class GamePanel extends JPanel implements Runnable {
             player.draw(g2);
         }
 
+        if (player.glassEyesCollected >= 5 && inventoryBox != null) {
+            // These coordinates create a bounding box perfectly sized behind all 4 item slots
+            g2.drawImage(inventoryBox, 10, 290, tileSize + 20, (tileSize * 4) + 50, null);
+        }
+
         // bouquet appears after all 5 roses are collected
         if (player.blackRosesCollected >= 5 && bouquetInv != null) {
             g2.drawImage(bouquetInv, 20, 300, tileSize, tileSize, null);
@@ -706,7 +811,7 @@ public class GamePanel extends JPanel implements Runnable {
             g2.fillRect(backButtonHitbox.x, backButtonHitbox.y, backButtonHitbox.width, backButtonHitbox.height);
         }
 
-        if (clue1_Open || clue2_Open || clue3_Open) {
+        if (clue1_Open || clue2_Open || clue3_Open || clue0_Open) {
             // low opacity bg
             g2.setColor(new Color(0, 0, 0, 150));
             g2.fillRect(0, 0, screenWidth, screenHeight);
@@ -714,9 +819,10 @@ public class GamePanel extends JPanel implements Runnable {
             int uiX = screenWidth / 2 - 250;
             int uiY = screenHeight / 2 - 200;
 
-            if (clue1_Open && openClue1 != null) g2.drawImage(openClue1, uiX, uiY, 420, 200, null);
-            if (clue2_Open && openClue2 != null) g2.drawImage(openClue2, uiX, uiY, 260, 285, null);
-            if (clue3_Open && openClue3 != null) g2.drawImage(openClue3, uiX, uiY, 160, 290, null);
+            if (clue1_Open && openClue1 != null) g2.drawImage(openClue1, uiX + 50, uiY + 70, 440, 220, null);
+            if (clue2_Open && openClue2 != null) g2.drawImage(openClue2, uiX + 110, uiY + 70, 270, 295, null);
+            if (clue3_Open && openClue3 != null) g2.drawImage(openClue3, uiX + 150, uiY + 70, 200, 330, null);
+            if (clue0_Open && openClue0 != null) g2.drawImage(openClue0, uiX + 50, uiY + 10, 420, 480, null);
 
             if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
 

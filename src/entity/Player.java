@@ -114,7 +114,7 @@ public class Player extends Entity{
         }
 
 
-        if (gp.passwordUIOpen || gp.clue1_Open || gp.clue2_Open || gp.clue3_Open || gp.statue_Open || gp.introPuzzleOpen) {
+        if (gp.passwordUIOpen || gp.clue1_Open || gp.clue2_Open || gp.clue3_Open || gp.clue0_Open || gp.statue_Open || gp.introPuzzleOpen) {
             if (gp.mouseH.leftClicked) {
                 Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
 
@@ -124,6 +124,7 @@ public class Player extends Entity{
                     gp.clue1_Open = false;
                     gp.clue2_Open = false;
                     gp.clue3_Open = false;
+                    gp.clue0_Open = false;
                     gp.statue_Open = false;
                     gp.introPuzzleOpen = false;
                     gp.introPuzzlePage = 1;
@@ -435,7 +436,10 @@ public class Player extends Entity{
                     gp.clue2_Open = true;
                 } else if (mouseHitbox.intersects(gp.clue3Hitbox)) {
                     gp.clue3_Open = true;
+                } else if (mouseHitbox.intersects(gp.clue0Hitbox)) {
+                    gp.clue0_Open = true;
                 }
+
                 if (gp.chronosWatchUnlocked == false) {
                     if (mouseHitbox.intersects(gp.mapStatue1Hitbox) ||
                             mouseHitbox.intersects(gp.mapStatue2Hitbox) ||
