@@ -22,13 +22,14 @@ public class GamePanel extends JPanel implements Runnable {
     public final int screenWidth = tileSize * maxScreenCol;  // 864 pixels
     public final int screenHeight = tileSize * maxScreenRow;  // 672 pixels
 
+    public final int MAP_MAIN_MENU = -1;
     public final int MAP_HOUSE = 0;
     public final int MAP_STREET = 1;
     public final int MAP_WORKSHOP = 2;
     public final int MAP_GREENHOUSE = 3;
     public final int MAP_MUSEUM = 4;
     public final int MAP_ROOM = 5; // <--- NEW: Room Map
-    public int currentMap = MAP_MUSEUM;// start in the house
+    public int currentMap = MAP_MAIN_MENU;// start in the house
 
     BufferedImage roomBg;
     BufferedImage houseBg;
@@ -64,6 +65,17 @@ public class GamePanel extends JPanel implements Runnable {
 
 
     // --- NEW: Demon Animation & Event Variables ---
+
+    // menu
+    BufferedImage[] menuFrames = new BufferedImage[4];
+    public int menuFrameIndex = 0;
+    public int menuFrameCounter = 0;
+    public final int menuFrameSpeed = 36; // ~600ms at 60 FPS
+    public Rectangle playButtonHitbox = new Rectangle(600, 375, 100, 40); // ← adjust to match your button art
+    private javax.sound.sampled.Clip menuMusic;
+    private javax.sound.sampled.Clip clickSFX;
+
+
     BufferedImage demon1, demon2;
     public boolean demonVisible = false;
     public int demonFrameIndex = 0;
@@ -353,6 +365,30 @@ public class GamePanel extends JPanel implements Runnable {
     // backgrounds
     public void loadBackgrounds() {
         try {
+            for (int i = 0; i < 4; i++) {
+                menuFrames[i] = ImageIO.read(getClass().getResourceAsStream("/Maps/MainMenu_" + (i + 1) + ".png"));
+            }
+
+            try {
+                java.net.URL musicURL = getClass().getResource("/Music/MainMenu.wav");
+                if (musicURL != null) {
+                    javax.sound.sampled.AudioInputStream ais =
+                            javax.sound.sampled.AudioSystem.getAudioInputStream(musicURL);
+                    menuMusic = javax.sound.sampled.AudioSystem.getClip();
+                    menuMusic.open(ais);
+                }
+
+                java.net.URL sfxURL = getClass().getResource("/Music/Button.wav");
+                if (sfxURL != null) {
+                    javax.sound.sampled.AudioInputStream ais2 =
+                            javax.sound.sampled.AudioSystem.getAudioInputStream(sfxURL);
+                    clickSFX = javax.sound.sampled.AudioSystem.getClip();
+                    clickSFX.open(ais2);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
             houseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/House_bg.png"));
             streetBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Street_bg.png"));
             workshopBg = ImageIO.read(getClass().getResourceAsStream("/Maps/Workshop_bg.png"));
@@ -419,6 +455,10 @@ public class GamePanel extends JPanel implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        if (menuMusic != null) {
+            menuMusic.loop(javax.sound.sampled.Clip.LOOP_CONTINUOUSLY);
+            menuMusic.start();
+        }
     }
 
     public void startDialogue(String[] dialogueList) {
@@ -439,6 +479,32 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void update() {
+        if (currentMap == MAP_MAIN_MENU) {
+            menuFrameCounter++;
+            if (menuFrameCounter >= menuFrameSpeed) {
+                menuFrameIndex = (menuFrameIndex + 1) % 4;
+                menuFrameCounter = 0;
+            }
+            // Handle Play button click
+            if (mouseH.leftClicked) {
+                Rectangle mouseHitbox = new Rectangle(mouseH.mouseX, mouseH.mouseY, 1, 1);
+                if (mouseHitbox.intersects(playButtonHitbox)) {
+                    if (clickSFX != null) {
+                        clickSFX.setFramePosition(0); // rewind to start
+                        clickSFX.start();
+                    }
+                    if (menuMusic != null) {
+                        menuMusic.stop();
+                        menuMusic.close();
+                    }
+                    currentMap = MAP_MUSEUM; // ← your actual first game map
+                    mouseH.leftClicked = false;
+                }
+                mouseH.leftClicked = false;
+            }
+            return; // skip all other update logic while on menu
+        }
+
         if (currentMap == MAP_ROOM && !introDialogueTriggered) {
             startTimer++;
             // 120 frames at 60 FPS = 2 seconds
@@ -537,6 +603,17 @@ public class GamePanel extends JPanel implements Runnable {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
+
+        if (currentMap == MAP_MAIN_MENU) {
+            if (menuFrames[menuFrameIndex] != null) {
+                g2.drawImage(menuFrames[menuFrameIndex], 0, 0, screenWidth, screenHeight, null);
+            }
+            // Optional: debug hitbox for the Play button
+            // g2.setColor(new Color(255, 255, 0, 100));
+            // g2.fillRect(playButtonHitbox.x, playButtonHitbox.y, playButtonHitbox.width, playButtonHitbox.height);
+            g2.dispose();
+            return; // skip drawing everything else
+        }
 
         if (currentMap == MAP_ROOM && roomBg != null) {
             g2.drawImage(roomBg, 0, 0, screenWidth, screenHeight, null);
