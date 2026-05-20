@@ -34,13 +34,13 @@ public class Player extends Entity{
 
     public void getPlayerImage(){
         try{
-            // Loading Profiles (Idle States)
+            // Idle states
             frontImage = ImageIO.read(getClass().getResourceAsStream("/Player/FrontProfile.png"));
             backImage = ImageIO.read(getClass().getResourceAsStream("/Player/BackProfile.png"));
             leftImage = ImageIO.read(getClass().getResourceAsStream("/Player/LeftSideProfile.png"));
             rightImage = ImageIO.read(getClass().getResourceAsStream("/Player/RightSideProfile.png"));
 
-            // Loading Walking Frames
+            // Walking frames
             frontWalk1 = ImageIO.read(getClass().getResourceAsStream("/Player/FrontWalk_1.png"));
             frontWalk2 = ImageIO.read(getClass().getResourceAsStream("/Player/FrontWalk_2.png"));
             backWalk1 = ImageIO.read(getClass().getResourceAsStream("/Player/BackWalk_1.png"));
@@ -59,7 +59,6 @@ public class Player extends Entity{
         if (gp.currentQuest == 6) {
             if (gp.mouseH.leftClicked) {
                 Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
-                // Restart the Game!
                 if (mouseHitbox.intersects(gp.againBtnHitbox)) {
                     gp.currentQuest = 0;
                     gp.introAns1 = false; gp.introAns2 = false; gp.introAns3 = false; gp.introAns4 = false;
@@ -67,18 +66,17 @@ public class Player extends Entity{
                     gp.statue1State = 0; gp.statue2State = 3; gp.statue3State = 2;
                     gp.chronosWatchUnlocked = false; gp.locketUnlocked = false;
 
-                    // --- UPDATED: Reset Event States & Teleport to Room ---
                     gp.houseEventState = 0;
                     gp.demonVisible = false;
-                    gp.introDialogueTriggered = false; // Triggers room dialogue again
+                    gp.introDialogueTriggered = false;
 
-                    gp.setupGame(); // Respawns items
-                    setDefaultValues(); // Teleport to start
-                    gp.currentMap = gp.MAP_ROOM; // Back to the bedroom!
+                    gp.setupGame();
+                    setDefaultValues();
+                    gp.currentMap = gp.MAP_ROOM;
                 }
                 gp.mouseH.leftClicked = false;
             }
-            return; // Freeze player
+            return; // freeze player on end screen
         }
 
         if (gp.isDialogueActive) {
@@ -91,26 +89,23 @@ public class Player extends Entity{
                         gp.currentDialogue = gp.fullDialogue;
                         gp.dialogueCharIndex = gp.fullDialogue.length();
                     } else {
-                        // Move to the next string in the array
                         gp.currentDialogueListIndex++;
                         if (gp.currentDialogueListIndex < gp.currentDialogueArray.length) {
                             gp.fullDialogue = gp.currentDialogueArray[gp.currentDialogueListIndex];
                             gp.currentDialogue = "";
                             gp.dialogueCharIndex = 0;
                         } else {
-                            // Array is empty, close dialogue box
                             gp.isDialogueActive = false;
 
-                            // Advance State Machine
                             if (gp.houseEventState == 1) gp.houseEventState = 2;
                             else if (gp.houseEventState == 4) gp.houseEventState = 5;
-                            else if (gp.houseEventState == 7) gp.houseEventState = 8; // Move to 1s delay
+                            else if (gp.houseEventState == 7) gp.houseEventState = 8;
                         }
                     }
                 }
                 gp.mouseH.leftClicked = false;
             }
-            return; // Freeze player
+            return; // freeze player during dialogue
         }
 
 
@@ -118,7 +113,7 @@ public class Player extends Entity{
             if (gp.mouseH.leftClicked) {
                 Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
 
-                // back button closes EVERYTHING
+                // back button closes all UIs
                 if (mouseHitbox.intersects(gp.backButtonHitbox)) {
                     gp.passwordUIOpen = false;
                     gp.clue1_Open = false;
@@ -130,27 +125,29 @@ public class Player extends Entity{
                     gp.introPuzzlePage = 1;
                 }
                 else if (gp.statue_Open && gp.chronosWatchUnlocked == false) {
-
-                    // Rotate Clockwise (Add 1, if it hits 4 it wraps back to 0)
+                    // Rotate clockwise on click (wraps 0-3)
                     if (mouseHitbox.intersects(gp.uiStatue1Hitbox)) {
                         gp.statue1State = (gp.statue1State + 1) % 4;
+                        gp.soundManager.playSFX("/Music/StatueMove.wav");
                     } else if (mouseHitbox.intersects(gp.uiStatue2Hitbox)) {
                         gp.statue2State = (gp.statue2State + 1) % 4;
+                        gp.soundManager.playSFX("/Music/StatueMove.wav");
                     } else if (mouseHitbox.intersects(gp.uiStatue3Hitbox)) {
                         gp.statue3State = (gp.statue3State + 1) % 4;
+                        gp.soundManager.playSFX("/Music/StatueMove.wav");
                     }
 
-                    // Check Winning Condition: 3 (Right), 1 (Back-Left), 0 (Left)
+                    // Winning condition: Right (3), Back-Left (1), Left (0)
                     if (gp.statue1State == 3 && gp.statue2State == 1 && gp.statue3State == 0) {
                         if (gp.chronosWatchUnlocked == false) {
                             gp.chronosWatchUnlocked = true;
                             gp.statue_Open = false;
-                            if (gp.currentQuest == 3) gp.currentQuest = 4; // Advance to Quest 4
+                            if (gp.currentQuest == 3) gp.currentQuest = 4;
                         }
                         System.out.println("Success! Chronos Watch Unlocked.");
                     }
                 }
-                // submit button (green circle) ONLY works if password UI is open
+                // submit button only works if password UI is open
                 else if (gp.passwordUIOpen && mouseHitbox.intersects(gp.submitButtonHitbox)) {
                     if (keyH.currentInput.equals("Password123")) {
                         gp.locketUnlocked = true;
@@ -165,7 +162,7 @@ public class Player extends Entity{
                 else if (gp.introPuzzleOpen) {
                     if (gp.introPuzzlePage == 1) {
                         if (mouseHitbox.intersects(gp.nextButtonHitbox)) {
-                            gp.introPuzzlePage = 2; // Go to Page 2
+                            gp.introPuzzlePage = 2;
                         }
                         else if (mouseHitbox.intersects(gp.r1c1Hitbox)) {
                             gp.introAns1 = true;
@@ -180,21 +177,18 @@ public class Player extends Entity{
                             System.out.println("Desc 2: Incorrect.");
                         }
                     }
-                    // PAGE 2 CLICKS
                     else if (gp.introPuzzlePage == 2) {
                         if (mouseHitbox.intersects(gp.nextButtonHitbox)) {
-                            gp.introPuzzlePage = 3; // Go to Page 3
+                            gp.introPuzzlePage = 3;
                         } else if (mouseHitbox.intersects(gp.prevButtonHitbox)) {
-                            gp.introPuzzlePage = 1; // Go back to Page 1
+                            gp.introPuzzlePage = 1;
                         }
-                        // Correct for Desc 3 is Watch (r1c1)
                         else if (mouseHitbox.intersects(gp.r1c1Hitbox)) {
                             gp.introAns3 = true;
                             System.out.println("Desc 3: Correct! (Chronos Watch)");
                         } else if (mouseHitbox.intersects(gp.r1c2Hitbox) || mouseHitbox.intersects(gp.r1c3Hitbox)) {
                             System.out.println("Desc 3: Incorrect.");
                         }
-                        // Correct for Desc 4 is Locket (r2c3)
                         else if (mouseHitbox.intersects(gp.r2c3Hitbox)) {
                             gp.introAns4 = true;
                             System.out.println("Desc 4: Correct! (Memento Locket)");
@@ -202,17 +196,15 @@ public class Player extends Entity{
                             System.out.println("Desc 4: Incorrect.");
                         }
                     }
-                    // PAGE 3 CLICKS
                     else if (gp.introPuzzlePage == 3) {
                         if (mouseHitbox.intersects(gp.prevButtonHitbox)) {
-                            gp.introPuzzlePage = 2; // Go back to Page 2
+                            gp.introPuzzlePage = 2;
                         }
-
                     }
 
                     if (gp.introAns1 && gp.introAns2 && gp.introAns3 && gp.introAns4 && gp.currentQuest == 0) {
-                        gp.currentQuest = 1; // Unlock Quest 1!
-                        gp.introPuzzleOpen = false; // Close UI automatically
+                        gp.currentQuest = 1;
+                        gp.introPuzzleOpen = false;
                         System.out.println("Intro Complete! You may now leave the house.");
                     }
                 }
@@ -225,19 +217,15 @@ public class Player extends Entity{
         if(keyH.upPressed == true || keyH.downPressed == true ||
                 keyH.leftPressed == true || keyH.rightPressed == true) {
             if (keyH.upPressed == true) {
-//                System.out.println("up pressed");
                 direction = "up";
                 y -= speed;
             } else if (keyH.downPressed == true) {
-//                System.out.println("down pressed");
                 direction = "down";
                 y += speed;
             } else if (keyH.leftPressed == true) {
-//                System.out.println("left pressed");
                 direction = "left";
                 x -= speed;
             } else if (keyH.rightPressed == true) {
-//                System.out.println("right pressed");
                 direction = "right";
                 x += speed;
             }
@@ -256,14 +244,16 @@ public class Player extends Entity{
 
         if (gp.currentMap == gp.MAP_HOUSE) {
             if (gp.currentQuest == 5 && gp.houseEventState < 7) {
-                // Ending Event Trigger
+                // Ending event trigger
                 if (playerHitbox.intersects(gp.tempBtnHitbox)) {
                     gp.houseEventState = 7;
                     gp.demonVisible = true;
+                    gp.soundManager.playBGM("/Music/FinalConfrontation.wav");
+                    gp.soundManager.playSFX("/Music/DemonAppears.wav");
                     gp.startDialogue(gp.houseDialogue3);
                 }
             } else if (gp.houseEventState == 0) {
-                // Intro Event Trigger
+                // Intro event trigger
                 if (playerHitbox.intersects(gp.tempBtnHitbox)) {
                     gp.houseEventState = 1;
                     gp.startDialogue(gp.houseDialogue1);
@@ -274,31 +264,26 @@ public class Player extends Entity{
         if (gp.currentMap == gp.MAP_ROOM) {
             if (playerHitbox.intersects(gp.bedroomDoorHitbox)) {
                 gp.currentMap = gp.MAP_HOUSE;
-
-                // Spawn in the House (left hallway), facing right into the living room
                 x = gp.outsideBedroomDoorHitbox.x + gp.outsideBedroomDoorHitbox.width + 10;
                 y = gp.outsideBedroomDoorHitbox.y + (gp.outsideBedroomDoorHitbox.height / 2) - (gp.tileSize / 2);
                 direction = "right";
             }
         }
 
-        //  exit house
+        // exit house
         else if (gp.currentMap == gp.MAP_HOUSE) {
-            // check if player hitbox touches the house door hitbox
             if (playerHitbox.intersects(gp.houseDoorHitbox)) {
-                if (gp.currentQuest >= 1) { // MUST COMPLETE INTRO TO LEAVE
+                if (gp.currentQuest >= 1) {
                     gp.currentMap = gp.MAP_STREET;
                     x = gp.streetHouseDoorHitbox.x + (gp.streetHouseDoorHitbox.width / 2) - (gp.tileSize / 2);
                     y = gp.streetHouseDoorHitbox.y + gp.streetHouseDoorHitbox.height + 10;
                     direction = "down";
                 } else {
                     System.out.println("The door is locked. I must finish the list first.");
-                    y -= speed * 2; // Bounce back
+                    y -= speed * 2;
                 }
             } else if (playerHitbox.intersects(gp.outsideBedroomDoorHitbox)) {
                     gp.currentMap = gp.MAP_ROOM;
-
-                    // Spawn in the Room (right edge), facing left into the bedroom
                     x = gp.bedroomDoorHitbox.x - gp.tileSize - 10;
                     y = gp.bedroomDoorHitbox.y + (gp.bedroomDoorHitbox.height / 2) - (gp.tileSize / 2);
                     direction = "left";
@@ -336,26 +321,21 @@ public class Player extends Entity{
                 x = gp.houseDoorHitbox.x - gp.tileSize - 10;
                 y = gp.houseDoorHitbox.y + (gp.houseDoorHitbox.height / 2) - (gp.tileSize / 2);
                 direction = "up";
-
-                // triggers the ending when you enter the house
-//                if (gp.currentQuest == 5) {
-//                    gp.currentQuest = 6;
-//                }
             }
             // enter museum
             else if (playerHitbox.intersects(gp.streetMuseumDoorHitbox)) {
-                if (gp.currentQuest >= 3) { // MUST COMPLETE ROSES TO ENTER
+                if (gp.currentQuest >= 3) {
                     gp.currentMap = gp.MAP_MUSEUM;
                     x = gp.museumDoorHitbox.x + (gp.museumDoorHitbox.width / 2) - (gp.tileSize / 2);
                     y = gp.museumDoorHitbox.y - gp.tileSize - 5;
                     direction = "up";
                 } else {
-                    y += speed * 2; // Bounce back
+                    y += speed * 2;
                 }
             }
             // enter workshop
             else if (playerHitbox.intersects(gp.streetWorkshopDoorHitbox)) {
-                if (gp.currentQuest >= 1) { // MUST COMPLETE INTRO TO ENTER
+                if (gp.currentQuest >= 1) {
                     gp.currentMap = gp.MAP_WORKSHOP;
                     x = gp.workshopDoorHitbox.x + (gp.workshopDoorHitbox.width / 2) - (gp.tileSize / 2);
                     y = gp.workshopDoorHitbox.y - gp.tileSize - 10;
@@ -364,24 +344,23 @@ public class Player extends Entity{
             }
             // enter greenhouse
             else if (playerHitbox.intersects(gp.streetGreenhouseDoorHitbox)) {
-                if (gp.currentQuest >= 2) { // MUST COMPLETE GLASS EYES TO ENTER
+                if (gp.currentQuest >= 2) {
                     gp.currentMap = gp.MAP_GREENHOUSE;
                     x = gp.greenhouseDoorHitbox.x + (gp.greenhouseDoorHitbox.width / 2) - (gp.tileSize / 2);
                     y = gp.greenhouseDoorHitbox.y - gp.tileSize - 10;
                     direction = "up";
                 } else {
-                    y -= speed * 2; // Bounce back
+                    y -= speed * 2;
                 }
             }
         }
 
-        // boundaries to prevvent walking off screen
+        // screen boundary clamps
         if (x < 0) x = 0;
         if (y < 0) y = 0;
         if (x > gp.screenWidth - gp.tileSize){
             x = gp.screenWidth - gp.tileSize;
         }
-        // for interior maps - allow player to walk to the bottom of the screen
         if (y > gp.screenHeight - gp.tileSize && gp.currentMap == gp.MAP_STREET){
             y = gp.screenHeight - gp.tileSize;
         }
@@ -389,11 +368,7 @@ public class Player extends Entity{
         if (gp.mouseH.leftClicked){
             Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
 
-
             if (gp.currentMap == gp.MAP_HOUSE) {
-//                if (mouseHitbox.intersects(gp.tempBtnHitbox)) {
-//                    gp.introPuzzleOpen = true;
-//                }
                 if (mouseHitbox.intersects(gp.debugIntroHitbox)) {
                     gp.introPuzzleOpen = true;
                     gp.introPuzzlePage = 1;
@@ -404,8 +379,9 @@ public class Player extends Entity{
                         if (mouseHitbox.intersects(gp.obj[i].hitbox)){
                             gp.obj[i] = null;
                             blackRosesCollected++;
+                            gp.soundManager.playSFX("/Music/Rose.wav");
                             if (blackRosesCollected >= 5 && gp.currentQuest == 2) {
-                                gp.currentQuest = 3; // Advance to Quest 3!
+                                gp.currentQuest = 3;
                             }
                         }
                     }
@@ -417,14 +393,13 @@ public class Player extends Entity{
                             gp.obj[i] = null;
                             glassEyesCollected++;
                             if (glassEyesCollected >= 5 && gp.currentQuest == 1) {
-                                gp.currentQuest = 2; // Advance to Quest 2!
+                                gp.currentQuest = 2;
                             }
                         }
                     }
                 }
             } else if (gp.currentMap == gp.MAP_MUSEUM){
                 if (gp.locketUnlocked == false) {
-                    // If we click the glass case, open the UI and clear the text
                     if (mouseHitbox.intersects(gp.glassCaseHitbox)){
                         gp.passwordUIOpen = true;
                         keyH.currentInput = "";
@@ -444,43 +419,36 @@ public class Player extends Entity{
                     if (mouseHitbox.intersects(gp.mapStatue1Hitbox) ||
                             mouseHitbox.intersects(gp.mapStatue2Hitbox) ||
                             mouseHitbox.intersects(gp.mapStatue3Hitbox)) {
-
                         gp.statue_Open = true;
                     }
                 }
-
-
             }
-            // reset click every collect
             gp.mouseH.leftClicked = false;
         }
     }
 
     public void draw(Graphics2D g2){
-//        g2.setColor(Color.white);
-//        g2.fillRect(x, y, gp.tileSize, gp.tileSize);
-
         BufferedImage image = null;
         boolean isMoving = keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed;
 
         switch(direction){
             case "up":
-                if (!isMoving) image = backImage; // Standing still
+                if (!isMoving) image = backImage;
                 else if (spriteNum == 1) image = backWalk1;
                 else image = backWalk2;
                 break;
             case "down":
-                if (!isMoving) image = frontImage; // Standing still
+                if (!isMoving) image = frontImage;
                 else if (spriteNum == 1) image = frontWalk1;
                 else image = frontWalk2;
                 break;
             case "left":
-                if (!isMoving) image = leftImage; // Standing still
+                if (!isMoving) image = leftImage;
                 else if (spriteNum == 1) image = leftWalk1;
                 else image = leftWalk2;
                 break;
             case "right":
-                if (!isMoving) image = rightImage; // Standing still
+                if (!isMoving) image = rightImage;
                 else if (spriteNum == 1) image = rightWalk1;
                 else image = rightWalk2;
                 break;
