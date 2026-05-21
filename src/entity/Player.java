@@ -18,6 +18,7 @@ public class Player extends Entity{
     public BufferedImage frontWalk1, frontWalk2, backWalk1, backWalk2;
     public BufferedImage leftWalk1, leftWalk2, rightWalk1, rightWalk2;
 
+
     public Player(GamePanel gp, KeyHandler keyH){
         this.gp = gp;
         this.keyH = keyH;
@@ -54,7 +55,7 @@ public class Player extends Entity{
         }
     }
 
-    public void update(){
+    public void update() {
 
         if (gp.currentQuest == 6) {
             if (gp.mouseH.leftClicked) {
@@ -62,10 +63,17 @@ public class Player extends Entity{
                 // Restart the Game!
                 if (mouseHitbox.intersects(gp.againBtnHitbox)) {
                     gp.currentQuest = 0;
-                    gp.introAns1 = false; gp.introAns2 = false; gp.introAns3 = false; gp.introAns4 = false;
-                    blackRosesCollected = 0; glassEyesCollected = 0;
-                    gp.statue1State = 0; gp.statue2State = 3; gp.statue3State = 2;
-                    gp.chronosWatchUnlocked = false; gp.locketUnlocked = false;
+                    gp.introAns1 = false;
+                    gp.introAns2 = false;
+                    gp.introAns3 = false;
+                    gp.introAns4 = false;
+                    blackRosesCollected = 0;
+                    glassEyesCollected = 0;
+                    gp.statue1State = 0;
+                    gp.statue2State = 3;
+                    gp.statue3State = 2;
+                    gp.chronosWatchUnlocked = false;
+                    gp.locketUnlocked = false;
 
                     // --- UPDATED: Reset Event States & Teleport to Room ---
                     gp.houseEventState = 0;
@@ -128,8 +136,7 @@ public class Player extends Entity{
                     gp.statue_Open = false;
                     gp.introPuzzleOpen = false;
                     gp.introPuzzlePage = 1;
-                }
-                else if (gp.statue_Open && gp.chronosWatchUnlocked == false) {
+                } else if (gp.statue_Open && gp.chronosWatchUnlocked == false) {
 
                     // Rotate Clockwise (Add 1, if it hits 4 it wraps back to 0)
                     if (mouseHitbox.intersects(gp.uiStatue1Hitbox)) {
@@ -161,19 +168,16 @@ public class Player extends Entity{
                         System.out.println("Access Denied. Wrong Password.");
                         keyH.currentInput = "";
                     }
-                }
-                else if (gp.introPuzzleOpen) {
+                } else if (gp.introPuzzleOpen) {
                     if (gp.introPuzzlePage == 1) {
                         if (mouseHitbox.intersects(gp.nextButtonHitbox)) {
                             gp.introPuzzlePage = 2; // Go to Page 2
-                        }
-                        else if (mouseHitbox.intersects(gp.r1c1Hitbox)) {
+                        } else if (mouseHitbox.intersects(gp.r1c1Hitbox)) {
                             gp.introAns1 = true;
                             System.out.println("Desc 1: Correct! (Jar of Eyes)");
                         } else if (mouseHitbox.intersects(gp.r1c2Hitbox) || mouseHitbox.intersects(gp.r1c3Hitbox)) {
                             System.out.println("Desc 1: Incorrect.");
-                        }
-                        else if (mouseHitbox.intersects(gp.r2c3Hitbox)) {
+                        } else if (mouseHitbox.intersects(gp.r2c3Hitbox)) {
                             gp.introAns2 = true;
                             System.out.println("Desc 2: Correct! (Black Baccara Roses)");
                         } else if (mouseHitbox.intersects(gp.r2c1Hitbox) || mouseHitbox.intersects(gp.r2c2Hitbox)) {
@@ -222,25 +226,73 @@ public class Player extends Entity{
         }
 
 
-        if(keyH.upPressed == true || keyH.downPressed == true ||
+        if (keyH.upPressed == true || keyH.downPressed == true ||
                 keyH.leftPressed == true || keyH.rightPressed == true) {
+
+            int nextX = x;
+            int nextY = y;
+
             if (keyH.upPressed == true) {
-//                System.out.println("up pressed");
                 direction = "up";
-                y -= speed;
+                nextY -= speed;
             } else if (keyH.downPressed == true) {
-//                System.out.println("down pressed");
                 direction = "down";
-                y += speed;
+                nextY += speed;
             } else if (keyH.leftPressed == true) {
-//                System.out.println("left pressed");
                 direction = "left";
-                x -= speed;
+                nextX -= speed;
             } else if (keyH.rightPressed == true) {
-//                System.out.println("right pressed");
                 direction = "right";
-                x += speed;
+                nextX += speed;
             }
+
+            Rectangle nextHitbox = new Rectangle(nextX, nextY, gp.tileSize, gp.tileSize);
+            boolean collisionOn = false;
+
+            // 3. Check if the future hitbox hits any solid barriers
+            if (gp.currentMap == gp.MAP_ROOM) {
+                for (Rectangle wall : gp.roomWalls) {
+                    if (nextHitbox.intersects(wall)) {
+                        collisionOn = true;
+                        break; // Stop checking! We hit something, no need to check the rest.
+                    }
+                }
+            }
+
+            if (gp.currentMap == gp.MAP_HOUSE) {
+                for (Rectangle wall : gp.houseWalls) {
+                    if (nextHitbox.intersects(wall)) {
+                        collisionOn = true;
+                        break; // Stop checking! We hit something, no need to check the rest.
+                    }
+                }
+
+                if (gp.currentQuest < 1 && nextHitbox.intersects(gp.houseDoorHitbox)) {
+                    collisionOn = true;
+                    System.out.println("The door is locked. I must finish the list first.");
+                }
+            }
+
+            if (gp.currentMap == gp.MAP_STREET) {
+                // Museum door locked until quest 3
+                if (gp.currentQuest < 3 && nextHitbox.intersects(gp.streetMuseumDoorHitbox)) {
+                    collisionOn = true;
+                }
+                // Greenhouse door locked until quest 2
+                if (gp.currentQuest < 2 && nextHitbox.intersects(gp.streetGreenhouseDoorHitbox)) {
+                    collisionOn = true;
+                }
+                // Workshop door locked until quest 1
+                if (gp.currentQuest < 1 && nextHitbox.intersects(gp.streetWorkshopDoorHitbox)) {
+                    collisionOn = true;
+                }
+            }
+
+            if (collisionOn == false) {
+                x = nextX;
+                y = nextY;
+            }
+
             spriteCounter++;
             if (spriteCounter > 25) {
                 if (spriteNum == 1) {
@@ -271,189 +323,172 @@ public class Player extends Entity{
             }
         }
 
+        // ----------------------------------------------------
+        // --- MAP DOOR TRANSITIONS ---
+        // ----------------------------------------------------
+
         if (gp.currentMap == gp.MAP_ROOM) {
             if (playerHitbox.intersects(gp.bedroomDoorHitbox)) {
                 gp.currentMap = gp.MAP_HOUSE;
-
-                // Spawn in the House (left hallway), facing right into the living room
                 x = gp.outsideBedroomDoorHitbox.x + gp.outsideBedroomDoorHitbox.width + 10;
                 y = gp.outsideBedroomDoorHitbox.y + (gp.outsideBedroomDoorHitbox.height / 2) - (gp.tileSize / 2);
                 direction = "right";
             }
         }
-
-        //  exit house
         else if (gp.currentMap == gp.MAP_HOUSE) {
-            // check if player hitbox touches the house door hitbox
             if (playerHitbox.intersects(gp.houseDoorHitbox)) {
-                if (gp.currentQuest >= 1) { // MUST COMPLETE INTRO TO LEAVE
+                if (gp.currentQuest >= 1) {
                     gp.currentMap = gp.MAP_STREET;
                     x = gp.streetHouseDoorHitbox.x + (gp.streetHouseDoorHitbox.width / 2) - (gp.tileSize / 2);
                     y = gp.streetHouseDoorHitbox.y + gp.streetHouseDoorHitbox.height + 10;
                     direction = "down";
-                } else {
-                    System.out.println("The door is locked. I must finish the list first.");
-                    y -= speed * 2; // Bounce back
                 }
-            } else if (playerHitbox.intersects(gp.outsideBedroomDoorHitbox)) {
-                    gp.currentMap = gp.MAP_ROOM;
-
-                    // Spawn in the Room (right edge), facing left into the bedroom
-                    x = gp.bedroomDoorHitbox.x - gp.tileSize - 10;
-                    y = gp.bedroomDoorHitbox.y + (gp.bedroomDoorHitbox.height / 2) - (gp.tileSize / 2);
-                    direction = "left";
-                }
-
-        // exit workshop
-        } else if (gp.currentMap == gp.MAP_WORKSHOP){
-            if (playerHitbox.intersects(gp.workshopDoorHitbox)){
+            }
+            else if (playerHitbox.intersects(gp.outsideBedroomDoorHitbox)) {
+                gp.currentMap = gp.MAP_ROOM;
+                x = gp.bedroomDoorHitbox.x - gp.tileSize - 10;
+                y = gp.bedroomDoorHitbox.y + (gp.bedroomDoorHitbox.height / 2) - (gp.tileSize / 2);
+                direction = "left";
+            }
+        }
+        else if (gp.currentMap == gp.MAP_WORKSHOP) {
+            if (playerHitbox.intersects(gp.workshopDoorHitbox)) {
                 gp.currentMap = gp.MAP_STREET;
                 x = gp.streetWorkshopDoorHitbox.x + gp.streetWorkshopDoorHitbox.width + 10;
                 y = gp.streetWorkshopDoorHitbox.y + (gp.streetWorkshopDoorHitbox.height / 2) - (gp.tileSize / 2);
                 direction = "left";
             }
-        // exit greenhouse
-        } else if (gp.currentMap == gp.MAP_GREENHOUSE){
+        }
+        else if (gp.currentMap == gp.MAP_GREENHOUSE) {
             if (playerHitbox.intersects(gp.greenhouseDoorHitbox)) {
                 gp.currentMap = gp.MAP_STREET;
                 x = gp.streetGreenhouseDoorHitbox.x - gp.tileSize - 10;
                 y = gp.streetGreenhouseDoorHitbox.y + (gp.streetGreenhouseDoorHitbox.height / 2) - (gp.tileSize / 2);
                 direction = "right";
             }
-        // exit museum
-        } else if (gp.currentMap == gp.MAP_MUSEUM){
-            if (playerHitbox.intersects(gp.museumDoorHitbox)){
+        }
+        else if (gp.currentMap == gp.MAP_MUSEUM) {
+            if (playerHitbox.intersects(gp.museumDoorHitbox)) {
                 gp.currentMap = gp.MAP_STREET;
                 x = gp.streetMuseumDoorHitbox.x + (gp.streetMuseumDoorHitbox.width / 2) - (gp.tileSize / 2);
                 y = gp.streetMuseumDoorHitbox.y + gp.streetMuseumDoorHitbox.height + 10;
                 direction = "down";
             }
-        } else if (gp.currentMap == gp.MAP_STREET) {
-
-            // enter house
+        }
+        else if (gp.currentMap == gp.MAP_STREET) {
             if (playerHitbox.intersects(gp.streetHouseDoorHitbox)) {
                 gp.currentMap = gp.MAP_HOUSE;
                 x = gp.houseDoorHitbox.x - gp.tileSize - 10;
                 y = gp.houseDoorHitbox.y + (gp.houseDoorHitbox.height / 2) - (gp.tileSize / 2);
                 direction = "up";
-
-                // triggers the ending when you enter the house
-//                if (gp.currentQuest == 5) {
-//                    gp.currentQuest = 6;
-//                }
             }
-            // enter museum
             else if (playerHitbox.intersects(gp.streetMuseumDoorHitbox)) {
-                if (gp.currentQuest >= 3) { // MUST COMPLETE ROSES TO ENTER
+                if (gp.currentQuest >= 3) {
                     gp.currentMap = gp.MAP_MUSEUM;
                     x = gp.museumDoorHitbox.x + (gp.museumDoorHitbox.width / 2) - (gp.tileSize / 2);
                     y = gp.museumDoorHitbox.y - gp.tileSize - 5;
                     direction = "up";
-                } else {
-                    y += speed * 2; // Bounce back
                 }
             }
-            // enter workshop
             else if (playerHitbox.intersects(gp.streetWorkshopDoorHitbox)) {
-                if (gp.currentQuest >= 1) { // MUST COMPLETE INTRO TO ENTER
+                if (gp.currentQuest >= 1) {
                     gp.currentMap = gp.MAP_WORKSHOP;
                     x = gp.workshopDoorHitbox.x + (gp.workshopDoorHitbox.width / 2) - (gp.tileSize / 2);
                     y = gp.workshopDoorHitbox.y - gp.tileSize - 10;
                     direction = "up";
                 }
             }
-            // enter greenhouse
             else if (playerHitbox.intersects(gp.streetGreenhouseDoorHitbox)) {
-                if (gp.currentQuest >= 2) { // MUST COMPLETE GLASS EYES TO ENTER
+                if (gp.currentQuest >= 2) {
                     gp.currentMap = gp.MAP_GREENHOUSE;
                     x = gp.greenhouseDoorHitbox.x + (gp.greenhouseDoorHitbox.width / 2) - (gp.tileSize / 2);
                     y = gp.greenhouseDoorHitbox.y - gp.tileSize - 10;
                     direction = "up";
-                } else {
-                    y -= speed * 2; // Bounce back
                 }
             }
         }
 
-        // boundaries to prevvent walking off screen
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (x > gp.screenWidth - gp.tileSize){
-            x = gp.screenWidth - gp.tileSize;
-        }
-        // for interior maps - allow player to walk to the bottom of the screen
-        if (y > gp.screenHeight - gp.tileSize && gp.currentMap == gp.MAP_STREET){
-            y = gp.screenHeight - gp.tileSize;
-        }
+            // boundaries to prevvent walking off screen
+            if (x < 0) x = 0;
+            if (y < 0) y = 0;
+            if (x > gp.screenWidth - gp.tileSize) {
+                x = gp.screenWidth - gp.tileSize;
+            }
+            // for interior maps - allow player to walk to the bottom of the screen
+            if (y > gp.screenHeight - gp.tileSize && gp.currentMap == gp.MAP_STREET) {
+                y = gp.screenHeight - gp.tileSize;
+            }
 
-        if (gp.mouseH.leftClicked){
-            Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
+            if (gp.mouseH.leftClicked) {
+                Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
 
 
-            if (gp.currentMap == gp.MAP_HOUSE) {
+                if (gp.currentMap == gp.MAP_HOUSE) {
 //                if (mouseHitbox.intersects(gp.tempBtnHitbox)) {
 //                    gp.introPuzzleOpen = true;
 //                }
-                if (mouseHitbox.intersects(gp.debugIntroHitbox)) {
-                    gp.introPuzzleOpen = true;
-                    gp.introPuzzlePage = 1;
-                }
-            } else if(gp.currentMap == gp.MAP_GREENHOUSE){
-                for (int i = 0; i < gp.obj.length; i++){
-                    if (gp.obj[i] != null){
-                        if (mouseHitbox.intersects(gp.obj[i].hitbox)){
-                            gp.obj[i] = null;
-                            blackRosesCollected++;
-                            if (blackRosesCollected >= 5 && gp.currentQuest == 2) {
-                                gp.currentQuest = 3; // Advance to Quest 3!
+                    if (mouseHitbox.intersects(gp.debugIntroHitbox)) {
+                        gp.introPuzzleOpen = true;
+                        gp.introPuzzlePage = 1;
+                    }
+                } else if (gp.currentMap == gp.MAP_GREENHOUSE) {
+                    for (int i = 0; i < gp.obj.length; i++) {
+                        if (gp.obj[i] != null) {
+                            if (mouseHitbox.intersects(gp.obj[i].hitbox)) {
+                                gp.obj[i] = null;
+                                blackRosesCollected++;
+                                if (blackRosesCollected >= 5 && gp.currentQuest == 2) {
+                                    gp.currentQuest = 3; // Advance to Quest 3!
+                                }
                             }
                         }
                     }
-                }
-            } else if (gp.currentMap == gp.MAP_WORKSHOP){
-                for (int i = 0; i < gp.obj.length; i++){
-                    if (gp.obj[i] != null && gp.obj[i].name.equals("Glass Eye")){
-                        if (mouseHitbox.intersects(gp.obj[i].hitbox)){
-                            gp.obj[i] = null;
-                            glassEyesCollected++;
-                            if (glassEyesCollected >= 5 && gp.currentQuest == 1) {
-                                gp.currentQuest = 2; // Advance to Quest 2!
+                } else if (gp.currentMap == gp.MAP_WORKSHOP) {
+                    for (int i = 0; i < gp.obj.length; i++) {
+                        if (gp.obj[i] != null && gp.obj[i].name.equals("Glass Eye")) {
+                            if (mouseHitbox.intersects(gp.obj[i].hitbox)) {
+                                gp.obj[i] = null;
+                                glassEyesCollected++;
+                                if (glassEyesCollected >= 5 && gp.currentQuest == 1) {
+                                    gp.currentQuest = 2; // Advance to Quest 2!
+                                }
                             }
                         }
                     }
-                }
-            } else if (gp.currentMap == gp.MAP_MUSEUM){
-                if (gp.locketUnlocked == false) {
-                    // If we click the glass case, open the UI and clear the text
-                    if (mouseHitbox.intersects(gp.glassCaseHitbox)){
-                        gp.passwordUIOpen = true;
-                        keyH.currentInput = "";
+                } else if (gp.currentMap == gp.MAP_MUSEUM) {
+                    if (gp.locketUnlocked == false) {
+
+                        if (gp.chronosWatchUnlocked == true) {
+                            gp.passwordUIOpen = true;
+                            keyH.currentInput = "";
+                        } else {
+                            System.out.println("investigate statues first.");
+                        }
                     }
-                }
-                if (mouseHitbox.intersects(gp.clue1Hitbox)) {
-                    gp.clue1_Open = true;
-                } else if (mouseHitbox.intersects(gp.clue2Hitbox)) {
-                    gp.clue2_Open = true;
-                } else if (mouseHitbox.intersects(gp.clue3Hitbox)) {
-                    gp.clue3_Open = true;
-                } else if (mouseHitbox.intersects(gp.clue0Hitbox)) {
-                    gp.clue0_Open = true;
-                }
-
-                if (gp.chronosWatchUnlocked == false) {
-                    if (mouseHitbox.intersects(gp.mapStatue1Hitbox) ||
-                            mouseHitbox.intersects(gp.mapStatue2Hitbox) ||
-                            mouseHitbox.intersects(gp.mapStatue3Hitbox)) {
-
-                        gp.statue_Open = true;
+                    if (mouseHitbox.intersects(gp.clue1Hitbox)) {
+                        gp.clue1_Open = true;
+                    } else if (mouseHitbox.intersects(gp.clue2Hitbox)) {
+                        gp.clue2_Open = true;
+                    } else if (mouseHitbox.intersects(gp.clue3Hitbox)) {
+                        gp.clue3_Open = true;
+                    } else if (mouseHitbox.intersects(gp.clue0Hitbox)) {
+                        gp.clue0_Open = true;
                     }
+
+                    if (gp.chronosWatchUnlocked == false) {
+                        if (mouseHitbox.intersects(gp.mapStatue1Hitbox) ||
+                                mouseHitbox.intersects(gp.mapStatue2Hitbox) ||
+                                mouseHitbox.intersects(gp.mapStatue3Hitbox)) {
+
+                            gp.statue_Open = true;
+                        }
+                    }
+
+
                 }
-
-
+                // reset click every collect
+                gp.mouseH.leftClicked = false;
             }
-            // reset click every collect
-            gp.mouseH.leftClicked = false;
-        }
     }
 
     public void draw(Graphics2D g2){

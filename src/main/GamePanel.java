@@ -29,7 +29,24 @@ public class GamePanel extends JPanel implements Runnable {
     public final int MAP_MUSEUM = 4;
     public final int MAP_ROOM = 5;
     public final int MAP_MAIN_MENU = -1;// <--- NEW: Room Map
-    public int currentMap = MAP_MAIN_MENU;// start in the house
+    public int currentMap = MAP_ROOM;// start in the house
+
+    // BARRIERS
+    public Rectangle[] roomWalls = {
+            new Rectangle(250, 100, 360, 180), // Top vanity area
+            new Rectangle(250, 470, 360, 150), // Bottom void
+            new Rectangle(130, 100, 150, 500),// Left void
+            new Rectangle(580, 100, 150, 280),
+            new Rectangle(290, 320, 120, 40)// Right void (leaves door gap)
+    };
+
+    public Rectangle[] houseWalls = {
+            new Rectangle(370, 170, 170, 80), // Top vanity area
+            new Rectangle(580, 60, 100, 400), // Bottom void
+            new Rectangle(250, 70, 100, 400),
+            new Rectangle(100, 120, 150, 250),
+            new Rectangle(110, 530, 600, 100)
+    };
 
     BufferedImage roomBg;
     BufferedImage houseBg;
@@ -97,7 +114,7 @@ public class GamePanel extends JPanel implements Runnable {
     // Dialogue Arrays (with manual \n for text wrapping)
     public String[] houseDialogue1 = {
             "Before leaving for the day, Elara kneels once more to offer a prayer\nfor her father—who died just two nights ago.",
-            "Please... just let him get there safely. That's all I'm asking."
+            "Elara: Please... just let him get there safely. That's all I'm asking."
     };
 
     public String[] houseDialogue2 = {
@@ -635,13 +652,19 @@ public class GamePanel extends JPanel implements Runnable {
 
         if (currentMap == MAP_ROOM && roomBg != null) {
             g2.drawImage(roomBg, 0, 0, screenWidth, screenHeight, null);
+
+            // draw room barriers
+            g2.setColor(new Color(0, 0, 255, 100)); // Blue
+            for (Rectangle wall : roomWalls) {
+                g2.fillRect(wall.x, wall.y, wall.width, wall.height);
+            }
+
         } else if (currentMap == MAP_HOUSE && houseBg != null) {
             g2.drawImage(houseBg, 0, 0, screenWidth, screenHeight, null);
 
             if (demonVisible) {
                 BufferedImage currentDemon = (demonFrameIndex == 0) ? demon1 : demon2;
                 if (currentDemon != null) {
-                    // Adjust X and Y as needed to fit perfectly next to the casket
                     g2.drawImage(currentDemon, 330, 230, tileSize * 2, tileSize * 2, null);
                 }
             }
@@ -650,9 +673,11 @@ public class GamePanel extends JPanel implements Runnable {
             g2.setColor(new Color(255, 0, 0, 100)); // Red
             g2.fillRect(debugIntroHitbox.x, debugIntroHitbox.y, debugIntroHitbox.width, debugIntroHitbox.height);
 
-            // temporary button
-//            if (tempBtn != null)
-//                g2.drawImage(tempBtn, tempBtnHitbox.x, tempBtnHitbox.y, tempBtnHitbox.width, tempBtnHitbox.height, null);
+            // draw living room barriers
+            g2.setColor(new Color(0, 0, 255, 100)); // Blue
+            for (Rectangle wall : houseWalls) {
+                g2.fillRect(wall.x, wall.y, wall.width, wall.height);
+            }
 
             // debug hitbox for temporary button
             g2.setColor(new Color(0, 0, 255, 100)); // Blue
