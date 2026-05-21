@@ -29,6 +29,8 @@ public class Player extends Entity{
     public void setDefaultValues(){
         x = 280;
         y = 380;
+//        x = 500;
+//        y = 500;
         speed = 4;
         direction = "down";
     }
@@ -56,6 +58,51 @@ public class Player extends Entity{
     }
 
     public void update() {
+
+        if (gp.currentMap != gp.MAP_MAIN_MENU && !gp.playingAcceptCutscene && !gp.playingRejectCutscene && !gp.showTheEndText) {
+            if (gp.mouseH.leftClicked) {
+                Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
+
+                if (gp.isSettingsOpen) {
+                    // Inside the Settings Menu
+                    if (mouseHitbox.intersects(gp.resumeHitbox)) {
+                        gp.isSettingsOpen = false; // Close settings
+                    } else if (mouseHitbox.intersects(gp.exitMenuHitbox)) {
+                        // --- TOTAL RESET TO MAIN MENU ---
+                        gp.isSettingsOpen = false;
+                        gp.currentQuest = 0;
+                        gp.introAns1 = false; gp.introAns2 = false; gp.introAns3 = false; gp.introAns4 = false;
+                        blackRosesCollected = 0; glassEyesCollected = 0;
+                        gp.statue1State = 0; gp.statue2State = 3; gp.statue3State = 2;
+                        gp.chronosWatchUnlocked = false; gp.locketUnlocked = false;
+                        gp.houseEventState = 0;
+                        gp.demonVisible = false;
+                        gp.introDialogueTriggered = false;
+                        gp.isDialogueActive = false;
+                        gp.introPuzzleOpen = false;
+                        gp.passwordUIOpen = false;
+                        gp.statue_Open = false;
+                        gp.showEndingGibberish = false;
+                        gp.showChoiceScreen = false;
+
+                        gp.setupGame(); // Respawn items
+                        setDefaultValues(); // Teleport back to room defaults
+                        gp.currentMap = gp.MAP_MAIN_MENU; // Go to title screen
+                    }
+                    gp.mouseH.leftClicked = false;
+                    return; // Freeze the game while settings is open!
+
+                } else if (mouseHitbox.intersects(gp.settingsBtnHitbox)) {
+                    // Open Settings Menu
+                    gp.isSettingsOpen = true;
+                    gp.mouseH.leftClicked = false;
+                    return;
+                }
+            }
+
+            // If settings is open, stop the rest of the update method from running!
+            if (gp.isSettingsOpen) return;
+        }
 
         if (gp.currentQuest == 6) {
             if (gp.mouseH.leftClicked) {
@@ -99,20 +146,25 @@ public class Player extends Entity{
                         gp.currentDialogue = gp.fullDialogue;
                         gp.dialogueCharIndex = gp.fullDialogue.length();
                     } else {
-                        // Move to the next string in the array
-                        gp.currentDialogueListIndex++;
-                        if (gp.currentDialogueListIndex < gp.currentDialogueArray.length) {
-                            gp.fullDialogue = gp.currentDialogueArray[gp.currentDialogueListIndex];
-                            gp.currentDialogue = "";
-                            gp.dialogueCharIndex = 0;
-                        } else {
-                            // Array is empty, close dialogue box
+                        // --- NEW: Intercept specific lines in the Final Dialogue ---
+                        if (gp.currentDialogueArray == gp.houseDialogue3 && gp.currentDialogueListIndex == 6) {
                             gp.isDialogueActive = false;
-
-                            // Advance State Machine
-                            if (gp.houseEventState == 1) gp.houseEventState = 2;
-                            else if (gp.houseEventState == 4) gp.houseEventState = 5;
-                            else if (gp.houseEventState == 7) gp.houseEventState = 8; // Move to 1s delay
+                            gp.houseEventState = 10; // Trigger 1s delay before Gibberish
+                        } else if (gp.currentDialogueArray == gp.houseDialogue3 && gp.currentDialogueListIndex == 9) {
+                            gp.isDialogueActive = false;
+                            gp.houseEventState = 13; // Trigger 1s delay before Choice Screen
+                        } else {
+                            // Normal progression
+                            gp.currentDialogueListIndex++;
+                            if (gp.currentDialogueListIndex < gp.currentDialogueArray.length) {
+                                gp.fullDialogue = gp.currentDialogueArray[gp.currentDialogueListIndex];
+                                gp.currentDialogue = "";
+                                gp.dialogueCharIndex = 0;
+                            } else {
+                                gp.isDialogueActive = false;
+                                if (gp.houseEventState == 1) gp.houseEventState = 2;
+                                else if (gp.houseEventState == 4) gp.houseEventState = 5;
+                            }
                         }
                     }
                 }
@@ -121,6 +173,88 @@ public class Player extends Entity{
             return; // Freeze player
         }
 
+        if (gp.showEndingGibberish) {
+            if (gp.mouseH.leftClicked) {
+                Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
+                // When Back is clicked, close screen and resume dialogue at line 7
+                if (mouseHitbox.intersects(gp.backButtonHitbox)) {
+                    gp.showEndingGibberish = false;
+                    gp.houseEventState = 12;
+                    gp.isDialogueActive = true;
+                    gp.currentDialogueListIndex = 7;
+                    gp.fullDialogue = gp.houseDialogue3[7];
+                    gp.currentDialogue = "";
+                    gp.dialogueCharIndex = 0;
+                }
+                gp.mouseH.leftClicked = false;
+            }
+            return;
+        }
+
+        // --- NEW: Choice Screen Click Logic ---
+        if (gp.showChoiceScreen) {
+            if (gp.mouseH.leftClicked) {
+                Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
+
+                if (mouseHitbox.intersects(gp.acceptHitbox)) {
+                    gp.showChoiceScreen = false;
+                    gp.playingAcceptCutscene = true;
+                    gp.cutsceneFrameIndex = 0;
+                    gp.cutsceneTimer = 0;
+                } else if (mouseHitbox.intersects(gp.rejectHitbox) && gp.rejectHoverCount >= 5) {
+                    // Only allows click if it has jumped 3 times!
+                    gp.showChoiceScreen = false;
+                    gp.playingRejectCutscene = true;
+                    gp.cutsceneFrameIndex = 0;
+                    gp.cutsceneTimer = 0;
+                }
+                gp.mouseH.leftClicked = false;
+            }
+            return; // Freeze player
+        }
+
+        // --- NEW: Final Menu Button Reset Logic ---
+        if (gp.playingAcceptCutscene || gp.playingRejectCutscene) {
+            if (gp.showMenuButton && gp.mouseH.leftClicked) {
+                Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
+                if (mouseHitbox.intersects(gp.menuBtnHitbox)) {
+                    // Turn off cutscene variables
+                    gp.playingAcceptCutscene = false;
+                    gp.playingRejectCutscene = false;
+                    gp.showTheEndText = false;
+                    gp.showMenuButton = false;
+                    gp.currentTheEndText = "";
+                    gp.theEndCharIndex = 0;
+
+                    // Reset the jumping button
+                    gp.rejectHoverCount = 0;
+                    gp.rejectHitbox.x = 450;
+                    gp.rejectHitbox.y = 300;
+
+                    // Reset core gameplay variables
+                    gp.currentQuest = 0;
+                    gp.introAns1 = false; gp.introAns2 = false; gp.introAns3 = false; gp.introAns4 = false;
+                    blackRosesCollected = 0; glassEyesCollected = 0;
+                    gp.statue1State = 0; gp.statue2State = 3; gp.statue3State = 2;
+                    gp.chronosWatchUnlocked = false; gp.locketUnlocked = false;
+                    gp.houseEventState = 0;
+                    gp.demonVisible = false;
+                    gp.introDialogueTriggered = false;
+
+                    gp.setupGame();
+                    setDefaultValues();
+                    gp.currentMap = gp.MAP_MAIN_MENU; // Teleport to the Main Menu!
+                }
+                gp.mouseH.leftClicked = false;
+            }
+            return; // Freeze player
+        }
+
+
+        if (gp.showChoiceScreen) {
+            // Prepared to intercept Accept/Reject clicks later!
+            return; // Freeze player
+        }
 
         if (gp.passwordUIOpen || gp.clue1_Open || gp.clue2_Open || gp.clue3_Open || gp.clue0_Open || gp.statue_Open || gp.introPuzzleOpen) {
             if (gp.mouseH.leftClicked) {
@@ -159,7 +293,7 @@ public class Player extends Entity{
                 }
                 // submit button (green circle) ONLY works if password UI is open
                 else if (gp.passwordUIOpen && mouseHitbox.intersects(gp.submitButtonHitbox)) {
-                    if (keyH.currentInput.equals("Password123")) {
+                    if (keyH.currentInput.equals("1984")) {
                         gp.locketUnlocked = true;
                         gp.passwordUIOpen = false;
                         if (gp.currentQuest == 4) gp.currentQuest = 5;
@@ -285,6 +419,41 @@ public class Player extends Entity{
                 // Workshop door locked until quest 1
                 if (gp.currentQuest < 1 && nextHitbox.intersects(gp.streetWorkshopDoorHitbox)) {
                     collisionOn = true;
+                }
+
+                for (Rectangle wall : gp.streetWalls) {
+                    if (nextHitbox.intersects(wall)) {
+                        collisionOn = true;
+                        break; // Stop checking! We hit something, no need to check the rest.
+                    }
+                }
+
+            }
+
+            if (gp.currentMap == gp.MAP_WORKSHOP) {
+                for (Rectangle wall : gp.workshopWalls) {
+                    if (nextHitbox.intersects(wall)) {
+                        collisionOn = true;
+                        break; // Stop checking! We hit something, no need to check the rest.
+                    }
+                }
+            }
+
+            if (gp.currentMap == gp.MAP_GREENHOUSE) {
+                for (Rectangle wall : gp.greenhouseWalls) {
+                    if (nextHitbox.intersects(wall)) {
+                        collisionOn = true;
+                        break; // Stop checking! We hit something, no need to check the rest.
+                    }
+                }
+            }
+
+            if (gp.currentMap == gp.MAP_MUSEUM) {
+                for (Rectangle wall : gp.museumWalls) {
+                    if (nextHitbox.intersects(wall)) {
+                        collisionOn = true;
+                        break; // Stop checking! We hit something, no need to check the rest.
+                    }
                 }
             }
 

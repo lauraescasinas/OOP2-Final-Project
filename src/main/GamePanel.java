@@ -28,24 +28,64 @@ public class GamePanel extends JPanel implements Runnable {
     public final int MAP_GREENHOUSE = 3;
     public final int MAP_MUSEUM = 4;
     public final int MAP_ROOM = 5;
-    public final int MAP_MAIN_MENU = -1;// <--- NEW: Room Map
-    public int currentMap = MAP_ROOM;// start in the house
+    public final int MAP_MAIN_MENU = -1;
+    public int currentMap = MAP_MAIN_MENU;// start in the house
 
     // BARRIERS
     public Rectangle[] roomWalls = {
-            new Rectangle(250, 100, 360, 180), // Top vanity area
-            new Rectangle(250, 470, 360, 150), // Bottom void
-            new Rectangle(130, 100, 150, 500),// Left void
+            new Rectangle(250, 100, 360, 180),
+            new Rectangle(250, 470, 360, 150),
+            new Rectangle(130, 100, 150, 500),
             new Rectangle(580, 100, 150, 280),
-            new Rectangle(290, 320, 120, 40)// Right void (leaves door gap)
+            new Rectangle(290, 320, 120, 40)
     };
 
     public Rectangle[] houseWalls = {
-            new Rectangle(370, 170, 170, 80), // Top vanity area
-            new Rectangle(580, 60, 100, 400), // Bottom void
+            new Rectangle(370, 170, 170, 80),
+            new Rectangle(580, 60, 100, 400),
             new Rectangle(250, 70, 100, 400),
             new Rectangle(100, 120, 150, 250),
             new Rectangle(110, 530, 600, 100)
+    };
+
+    public Rectangle[] streetWalls = {
+            new Rectangle(200, 210, 420, 80),
+            new Rectangle(840, 30, 90, 600),
+            new Rectangle(750, 0, 100, 280),
+            new Rectangle(5, 668, 1000, 90),
+            new Rectangle(30, 470, 300, 50),
+            new Rectangle(290, 480, 40, 120),
+            new Rectangle(-20, 250, 50, 300),
+            new Rectangle(530, 500, 200, 300),
+            //tree
+            new Rectangle(270, 240, 100, 100)
+    };
+
+    public Rectangle[] workshopWalls = {
+            new Rectangle(390, 190, 420, 50),
+            new Rectangle(250, 600, 700, 50),
+            new Rectangle(150, 400, 270, 80),
+            new Rectangle(100, 210, 270, 60),
+
+            new Rectangle(12, 130, 60, 430),
+            new Rectangle(380, 180, 60, 250),
+            new Rectangle(800, 100, 60, 550)
+    };
+
+    public Rectangle[] greenhouseWalls = {
+            new Rectangle(90, 30, 60, 800),
+            new Rectangle(720, 20, 60, 800),
+            new Rectangle(100, 90, 600, 60),
+            new Rectangle(10, 600, 320, 60),
+            new Rectangle(520, 580, 320, 60)
+    };
+
+    public Rectangle[] museumWalls = {
+            new Rectangle(90, 30, 60, 800),
+            new Rectangle(720, 20, 60, 800),
+            new Rectangle(120, 210, 600, 60),
+            new Rectangle(20, 580, 320, 60),
+            new Rectangle(520, 580, 320, 60)
     };
 
     BufferedImage roomBg;
@@ -63,6 +103,32 @@ public class GamePanel extends JPanel implements Runnable {
     BufferedImage tempBtn, listScreen1, listScreen2, listScreen3, nextBtn, prevBtn;
     BufferedImage objTab1, objTab2, objTab3, objTab4, objTab5;
     BufferedImage endScreen, againBtn;
+
+    public int rejectHoverCount = 0;
+
+    public BufferedImage settingsBtn, settingsWindow;
+    public boolean isSettingsOpen = false;
+
+    // Hitboxes (Coordinates estimated based on a centered 400x300 window)
+    public Rectangle settingsBtnHitbox = new Rectangle(20, 20, 48, 48); // Top left
+    public Rectangle resumeHitbox = new Rectangle(332, 300, 200, 50);   // Adjust these later!
+    public Rectangle exitMenuHitbox = new Rectangle(332, 390, 200, 50); // Adjust these later!
+
+    public boolean playingAcceptCutscene = false;
+    public boolean playingRejectCutscene = false;
+    public BufferedImage[] acceptCutscene = new BufferedImage[8];
+    public BufferedImage[] rejectCutscene = new BufferedImage[8];
+    public int cutsceneFrameIndex = 0;
+    public int cutsceneTimer = 0;
+
+    public BufferedImage menuBtn;
+    public Rectangle menuBtnHitbox = new Rectangle(50, 550, 235, 56); // Bottom left
+    public boolean showTheEndText = false;
+    public boolean showMenuButton = false;
+    public String targetTheEndText = "the end.";
+    public String currentTheEndText = "";
+    public int theEndCharIndex = 0;
+    public int theEndTimer = 0;
 
     public boolean passwordUIOpen = false;
     public boolean locketUnlocked = false;
@@ -90,7 +156,8 @@ public class GamePanel extends JPanel implements Runnable {
     public int menuFrameIndex = 0;
     public int menuFrameCounter = 0;
     public final int menuFrameSpeed = 36; // ~600ms at 60 FPS
-    public Rectangle playButtonHitbox = new Rectangle(600, 375, 100, 40); // ← adjust to match your button art
+    public Rectangle playButtonHitbox = new Rectangle(600, 375, 100, 40);
+    public Rectangle exitButtonHitbox = new Rectangle(600, 425, 100, 40);
     private javax.sound.sampled.Clip menuMusic;
     private javax.sound.sampled.Clip clickSFX;
 
@@ -138,14 +205,15 @@ public class GamePanel extends JPanel implements Runnable {
 
     public String[] houseDialogue3 = {
             "Elara lays the last item beside the casket. Her hands are shaking, but she's\ndone it. She steps back and faces the demon.", // 0
-            "That's everything. It's done.", // 1
-            "Demon: See? That's more like it. Not so hard to give your father a proper\nsend-off, was it?", // 2
-            "Demon: But don't go settling in. This was just the opening act.", // 3
-            "Demon: I'll be coming back for you.", // 4 (BOLD RED)
-            "Elara stands frozen—not from the words themselves, but from the ease\nwith which he said them. Like a promise. Like a threat baked into a joke.", // 5
-            "Still, after a moment, she lets her shoulders drop. Lets herself breathe.\nBecause whatever comes next, she won today.", // 6
-            "The demon isn't taking her father's soul.", // 7
-            "Not tonight." // 8 (BOLD RED)
+            "Elara: That's everything. It's done.", // 1
+            "The demon doesn't budge.", // 2
+            "Elara: Hello?  I said I'm done. I collected all of them.", // 3
+            "Demon: Didn't you see the last page of the list I gave you?", // 4 (BOLD RED)
+            "Elara stands frozen—it's not that she didn't see it.", // 5
+            "She wanted to ignore it.", // 6
+            "You can't do this to me. I already did what you told me to do-", // 7
+            "Demon: Don't you want your father's soul to be at peace?", // 8 (BOLD RED)
+            "..." // 9
     };
 
     public String[] roomDialogue = {
@@ -153,6 +221,16 @@ public class GamePanel extends JPanel implements Runnable {
                     "Fifteen-year-old Elara stands at the side of her bed, still in yesterday’s\n" +
                     "clothes, trying to piece together the last seventy-two hours."
     };
+
+    public BufferedImage[] endingGibberishFrames = new BufferedImage[11];
+    public boolean showEndingGibberish = false;
+    public int endingGibberishIndex = 0;
+    public int endingGibberishTimer = 0;
+
+    public boolean showChoiceScreen = false;
+    public BufferedImage acceptBtn, rejectBtn;
+    public Rectangle acceptHitbox = new Rectangle(200, 300, 235, 56); // Adjust later
+    public Rectangle rejectHitbox = new Rectangle(480, 300, 235, 65); // Adjust later
 
     public String[] currentDialogueArray = null;
     public int currentDialogueListIndex = 0;
@@ -238,6 +316,7 @@ public class GamePanel extends JPanel implements Runnable {
 
         this.addKeyListener(keyH);
         this.addMouseListener(mouseH);
+        this.addMouseMotionListener(mouseH);
         this.setFocusable(true);
         loadBackgrounds();
     }
@@ -479,6 +558,24 @@ public class GamePanel extends JPanel implements Runnable {
                 gibberishFrames[i] = ImageIO.read(getClass().getResourceAsStream("/Objects/Gibberish_" + (i + 1) + ".png"));
             }
 
+            for (int i = 0; i < 11; i++) {
+                endingGibberishFrames[i] = ImageIO.read(getClass().getResourceAsStream("/Objects/gibberish_Ending/Gibberish_" + (i + 1) + ".png"));
+            }
+
+            acceptBtn = ImageIO.read(getClass().getResourceAsStream("/Objects/accept_button.png"));
+            rejectBtn = ImageIO.read(getClass().getResourceAsStream("/Objects/reject_button.png"));
+            menuBtn = ImageIO.read(getClass().getResourceAsStream("/Objects/MenuButton.png"));
+
+            settingsBtn = ImageIO.read(getClass().getResourceAsStream("/Objects/Settings.png"));
+            settingsWindow = ImageIO.read(getClass().getResourceAsStream("/Objects/SettingsWindow.png"));
+
+            for (int i = 0; i < 8; i++) {
+                    acceptCutscene[i] = ImageIO.read(getClass().getResourceAsStream("/Objects/bad_Ending/BadEnding_" + (i + 1) + ".png"));
+                    rejectCutscene[i] = ImageIO.read(getClass().getResourceAsStream("/Objects/good_Ending/GoodEnding_" + (i + 1) + ".png"));
+            }
+
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -528,6 +625,9 @@ public class GamePanel extends JPanel implements Runnable {
                     }
                     currentMap = MAP_ROOM; // ← your actual first game map
                     mouseH.leftClicked = false;
+                } else if (mouseHitbox.intersects(exitButtonHitbox)) {
+                    if (clickSFX != null) clickSFX.start();
+                    System.exit(0); // This command closes the application!
                 }
                 mouseH.leftClicked = false;
             }
@@ -615,21 +715,99 @@ public class GamePanel extends JPanel implements Runnable {
 
         // demon vanishes
         if (isDialogueActive && currentDialogueArray == houseDialogue3) {
-            if (currentDialogueListIndex == 4 && demonVisible) {
-                // Start the timer ONLY after the dramatic text finishes typing out
-                if (dialogueCharIndex >= fullDialogue.length()) {
-                    demonVanishTimer++;
-                    if (demonVanishTimer >= 60) { // 1 second at 60 FPS
-                        demonVisible = false;
-                    }
-                }
-            } else if (currentDialogueListIndex >= 5) {
-                // Failsafe: if the player clicks 'Next' before the 1 second is up, force vanish!
-                demonVisible = false;
-            }
+//            if (currentDialogueListIndex == 4 && demonVisible) {
+//                // Start the timer ONLY after the dramatic text finishes typing out
+//                if (dialogueCharIndex >= fullDialogue.length()) {
+//                    demonVanishTimer++;
+//                    if (demonVanishTimer >= 60) { // 1 second at 60 FPS
+//                        demonVisible = false;
+//                    }
+//                }
+//            } else if (currentDialogueListIndex >= 5) {
+//                // Failsafe: if the player clicks 'Next' before the 1 second is up, force vanish!
+//                demonVisible = false;
+//            }
         } else if (houseEventState == 0) {
             // Reset the timer when the game restarts so it works on future playthroughs
             demonVanishTimer = 0;
+        }
+
+        if (houseEventState == 10) {
+            eventTimer++;
+            if (eventTimer >= 60) { // 1 second after line 6
+                showEndingGibberish = true;
+                endingGibberishIndex = 0;
+                endingGibberishTimer = 0;
+                houseEventState = 11; // Waiting for player to close gibberish
+                eventTimer = 0;
+            }
+        } else if (houseEventState == 13) {
+            eventTimer++;
+            if (eventTimer >= 60) { // 1 second after line 9
+                showChoiceScreen = true;
+                houseEventState = 14; // Waiting for choice
+                eventTimer = 0;
+            }
+        }
+
+        // --- NEW: Ending Gibberish Animation (0.5s per frame, stops at 11) ---
+        if (showEndingGibberish) {
+            endingGibberishTimer++;
+            if (endingGibberishTimer >= 30) { // 0.5s at 60 FPS
+                if (endingGibberishIndex < 10) { // Max index is 10 (Gibberish_11)
+                    endingGibberishIndex++;
+                }
+                endingGibberishTimer = 0;
+            }
+        }
+
+        // --- NEW: Reject Button Hover Logic ---
+        if (showChoiceScreen) {
+            Rectangle mouseHitbox = new Rectangle(mouseH.mouseX, mouseH.mouseY, 1, 1);
+            if (rejectHoverCount < 5 && mouseHitbox.intersects(rejectHitbox)) { // <-- Increased limit to 5
+                rejectHoverCount++;
+                // Move the button to predefined random locations
+                if (rejectHoverCount == 1) {
+                    rejectHitbox.x = 100; rejectHitbox.y = 150;
+                } else if (rejectHoverCount == 2) {
+                    rejectHitbox.x = 600; rejectHitbox.y = 450;
+                } else if (rejectHoverCount == 3) {
+                    rejectHitbox.x = 200; rejectHitbox.y = 500; // New jump spot
+                } else if (rejectHoverCount == 4) {
+                    rejectHitbox.x = 650; rejectHitbox.y = 100; // Another jump spot
+                } else if (rejectHoverCount == 5) {
+                    rejectHitbox.x = 480; rejectHitbox.y = 300; // Returns to a clickable spot
+                }
+            }
+        }
+
+
+
+        // --- NEW: Cutscene & Ending Typewriter Logic ---
+        if (playingAcceptCutscene || playingRejectCutscene) {
+            // Cutscene Frame Timer (1 second per frame = 60 frames)
+            if (cutsceneFrameIndex < 7) {
+                cutsceneTimer++;
+                if (cutsceneTimer >= 60) {
+                    cutsceneFrameIndex++;
+                    cutsceneTimer = 0;
+                }
+            } else {
+                // On the 8th frame (index 7), freeze and show text
+                showTheEndText = true;
+            }
+
+            // "the end." Typewriter (0.5s per letter = 30 frames)
+            if (showTheEndText && theEndCharIndex < targetTheEndText.length()) {
+                theEndTimer++;
+                if (theEndTimer >= 30) {
+                    currentTheEndText += targetTheEndText.charAt(theEndCharIndex);
+                    theEndCharIndex++;
+                    theEndTimer = 0;
+                }
+            } else if (showTheEndText && theEndCharIndex >= targetTheEndText.length()) {
+                showMenuButton = true;
+            }
         }
 
         player.update();
@@ -685,6 +863,11 @@ public class GamePanel extends JPanel implements Runnable {
         } else if (currentMap == MAP_STREET) {
             BufferedImage currentStreet = (mapFrameIndex == 0) ? streetBg1 : streetBg2;
             if (currentStreet != null) g2.drawImage(currentStreet, 0, 0, screenWidth, screenHeight, null);
+
+            g2.setColor(new Color(0, 0, 255, 100)); // Blue
+            for (Rectangle wall : streetWalls) {
+                g2.fillRect(wall.x, wall.y, wall.width, wall.height);
+            }
         } else if (currentMap == MAP_WORKSHOP) {
             BufferedImage currentWorkshop = (mapFrameIndex == 0) ? workshopBg1 : workshopBg2;
             if (currentWorkshop != null) g2.drawImage(currentWorkshop, 0, 0, screenWidth, screenHeight, null);
@@ -697,6 +880,11 @@ public class GamePanel extends JPanel implements Runnable {
                     g2.fillRect(obj[i].hitbox.x, obj[i].hitbox.y, obj[i].hitbox.width, obj[i].hitbox.height);
                 }
             }
+
+            g2.setColor(new Color(0, 0, 255, 100));
+            for (Rectangle wall : workshopWalls) {
+                g2.fillRect(wall.x, wall.y, wall.width, wall.height);
+            }
         } else if (currentMap == MAP_GREENHOUSE) {
             BufferedImage currentGreenhouse = (mapFrameIndex == 0) ? greenhouseBg1 : greenhouseBg2;
             if (currentGreenhouse != null) g2.drawImage(currentGreenhouse, 0, 0, screenWidth, screenHeight, null);
@@ -708,6 +896,11 @@ public class GamePanel extends JPanel implements Runnable {
                     g2.setColor(new Color(255, 255, 0, 150));
                     g2.fillRect(obj[i].hitbox.x, obj[i].hitbox.y, obj[i].hitbox.width, obj[i].hitbox.height);
                 }
+            }
+
+            g2.setColor(new Color(0, 0, 255, 100));
+            for (Rectangle wall : greenhouseWalls) {
+                g2.fillRect(wall.x, wall.y, wall.width, wall.height);
             }
         } else if (currentMap == MAP_MUSEUM && museumBg != null) {
             g2.drawImage(museumBg, 0, 0, screenWidth, screenHeight, null);
@@ -747,6 +940,11 @@ public class GamePanel extends JPanel implements Runnable {
             } else {
                 // replace locked glass case with unlocked glass case* 2,
                 if (unlockedCase != null) g2.drawImage(unlockedCase, 150, 280, tileSize + 2, tileSize + 2, null);
+            }
+
+            g2.setColor(new Color(0, 0, 255, 100));
+            for (Rectangle wall : museumWalls) {
+                g2.fillRect(wall.x, wall.y, wall.width, wall.height);
             }
         }
 
@@ -1020,6 +1218,79 @@ public class GamePanel extends JPanel implements Runnable {
 
             if (nextBtn != null) {
                 g2.drawImage(nextBtn, dialogueNextHitbox.x, dialogueNextHitbox.y, dialogueNextHitbox.width, dialogueNextHitbox.height, null);
+            }
+        }
+
+        if (showEndingGibberish) {
+            g2.setColor(new Color(0, 0, 0, 200));
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+
+            if (endingGibberishFrames[endingGibberishIndex] != null) {
+                g2.drawImage(endingGibberishFrames[endingGibberishIndex], 230, 100, 420, 480, null);
+            }
+            if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
+        }
+
+        // --- NEW: Draw Choice Screen (Prepared) ---
+        if (showChoiceScreen) {
+            g2.setColor(new Color(0, 0, 0, 200));
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+
+            if (acceptBtn != null) g2.drawImage(acceptBtn, acceptHitbox.x, acceptHitbox.y, acceptHitbox.width, acceptHitbox.height, null);
+            if (rejectBtn != null) g2.drawImage(rejectBtn, rejectHitbox.x, rejectHitbox.y, rejectHitbox.width, rejectHitbox.height, null);
+        }
+
+        if (currentMap != MAP_MAIN_MENU && !playingAcceptCutscene && !playingRejectCutscene && !showTheEndText) {
+
+            // Draw the eye icon in the top left
+            if (settingsBtn != null) {
+                g2.drawImage(settingsBtn, settingsBtnHitbox.x, settingsBtnHitbox.y, settingsBtnHitbox.width, settingsBtnHitbox.height, null);
+            }
+
+            // Draw the pop-up window if opened
+            if (isSettingsOpen) {
+                // Dim the background
+                g2.setColor(new Color(0, 0, 0, 150));
+                g2.fillRect(0, 0, screenWidth, screenHeight);
+
+                // Draw the window (Centered 400x300)
+                if (settingsWindow != null) {
+                    g2.drawImage(settingsWindow, 232, 186, 400, 300, null);
+                }
+
+                // Debug hitboxes (Uncomment these to see where the buttons actually are so you can adjust the coordinates!)
+                 g2.setColor(new Color(255, 255, 0, 100));
+                 g2.fillRect(resumeHitbox.x, resumeHitbox.y, resumeHitbox.width, resumeHitbox.height);
+                 g2.fillRect(exitMenuHitbox.x, exitMenuHitbox.y, exitMenuHitbox.width, exitMenuHitbox.height);
+            }
+        }
+
+        if (playingAcceptCutscene || playingRejectCutscene) {
+            g2.setColor(Color.BLACK);
+            g2.fillRect(0, 0, screenWidth, screenHeight); // Black background
+
+            BufferedImage currentFrame = null;
+            if (playingAcceptCutscene && acceptCutscene[cutsceneFrameIndex] != null) {
+                currentFrame = acceptCutscene[cutsceneFrameIndex];
+            } else if (playingRejectCutscene && rejectCutscene[cutsceneFrameIndex] != null) {
+                currentFrame = rejectCutscene[cutsceneFrameIndex];
+            }
+
+            if (currentFrame != null) {
+                g2.drawImage(currentFrame, 0, 0, screenWidth, screenHeight, null);
+            }
+
+            if (showTheEndText) {
+                g2.setColor(Color.BLACK);
+                g2.setFont(new Font("Arial", Font.BOLD, 48));
+                // Center the text
+                int textX = screenWidth / 2 + 100;
+                int textY = screenHeight / 2;
+                g2.drawString(currentTheEndText, textX, textY);
+            }
+
+            if (showMenuButton && menuBtn != null) {
+                g2.drawImage(menuBtn, menuBtnHitbox.x, menuBtnHitbox.y, menuBtnHitbox.width, menuBtnHitbox.height, null);
             }
         }
 
