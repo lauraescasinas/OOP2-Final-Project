@@ -448,13 +448,42 @@ public class GamePanel extends JPanel implements Runnable {
         if (currentMap != lastMap) {
             lastMap = currentMap;
             switch (currentMap) {
-                case MAP_ROOM       -> soundManager.playBGMOnce("/Music/LivingRoom.wav");
-                case MAP_HOUSE      -> soundManager.playBGMOnce("/Music/LivingRoom.wav");
-                case MAP_STREET     -> soundManager.playBGM("/Music/IntroQuest.wav");
-                case MAP_WORKSHOP   -> soundManager.playBGM("/Music/Workshop.wav");
+                case MAP_ROOM, MAP_HOUSE -> soundManager.playBGMOnce("/Music/LivingRoom.wav");
+                case MAP_STREET -> {
+                    soundManager.playBGM("/Music/IntroQuest.wav");
+                    soundManager.playSFX("/Music/StreetWind.wav");
+                }
+                case MAP_WORKSHOP -> soundManager.playBGM("/Music/Workshop.wav");
                 case MAP_GREENHOUSE -> soundManager.playBGM("/Music/Greenhouse.wav");
-                case MAP_MUSEUM     -> soundManager.playBGM("/Music/Museum.wav");
+                case MAP_MUSEUM -> soundManager.playBGM("/Music/Museum.wav");
             }
+        }
+
+        // Voice line triggers
+        if (isDialogueActive) {
+            if (currentDialogueArray == houseDialogue2 && currentDialogueListIndex == 9 && dialogueCharIndex == 1) {
+                soundManager.playSFX("/Music/DemonLine1.wav");
+            }
+            if (currentDialogueArray == houseDialogue3 && currentDialogueListIndex == 4 && dialogueCharIndex == 1) {
+                soundManager.playSFX("/Music/DemonLine2.wav");
+            }
+        }
+
+        // Handle object interaction SFX
+        if (mouseH.leftClicked) {
+            Rectangle mouseHitbox = new Rectangle(mouseH.mouseX, mouseH.mouseY, 1, 1);
+            if (mouseHitbox.intersects(glassCaseHitbox)) {
+                soundManager.playSFX("/Music/GlassCase.wav");
+            }
+        }
+
+        // Reset logic for Again button
+        if (currentQuest == 6 && mouseH.leftClicked && new Rectangle(mouseH.mouseX, mouseH.mouseY, 1, 1).intersects(againBtnHitbox)) {
+            currentQuest = 0;
+            soundManager.resetAllAudio();
+            soundManager.playBGM("/Music/MainMenu.wav");
+            currentMap = MAP_MAIN_MENU;
+            mouseH.leftClicked = false;
         }
         mapFrameCounter++;
         if (mapFrameCounter >= mapAnimSpeed) {
