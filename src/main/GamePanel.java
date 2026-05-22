@@ -423,6 +423,49 @@ public class GamePanel extends JPanel implements Runnable {
         return null;
     }
 
+    // ── Centralised full reset — called by Again button ───────────────────────
+    public void fullReset() {
+        // game-state flags
+        currentQuest       = 0;
+        houseEventState    = 0;
+        eventTimer         = 0;
+        demonVisible       = false;
+        demonVanishTimer   = 0;
+        demonFrameIndex    = 0;
+        demonCounter       = 0;
+        introDialogueTriggered = false;
+        startTimer         = 0;
+        isDialogueActive   = false;
+        currentDialogueArray = null;
+        currentDialogueListIndex = 0;
+        fullDialogue       = "";
+        currentDialogue    = "";
+        dialogueCharIndex  = 0;
+        typewriterCounter  = 0;
+        // inventory / puzzle
+        locketUnlocked     = false;
+        chronosWatchUnlocked = false;
+        passwordUIOpen     = false;
+        introPuzzleOpen    = false;
+        introPuzzlePage    = 1;
+        statue1State       = 0;
+        statue2State       = 3;
+        statue3State       = 2;
+        introAns1 = false; introAns2 = false; introAns3 = false; introAns4 = false;
+        clue1_Open = false; clue2_Open = false; clue3_Open = false; clue0_Open = false;
+        statue_Open        = false;
+        // map / player
+        lastMap            = -999;
+        player.blackRosesCollected = 0;
+        player.glassEyesCollected  = 0;
+        player.setDefaultValues();
+        setupGame();
+        // audio — stop everything then restart main-menu track
+        soundManager.resetAllAudio();
+        soundManager.playBGM("/Music/MainMenu.wav");
+        currentMap = MAP_MAIN_MENU;
+    }
+
     public void update() {
 
         if (currentMap == MAP_MAIN_MENU) {
@@ -444,23 +487,42 @@ public class GamePanel extends JPanel implements Runnable {
             return;
         }
 
-        // BGM: switch tracks when player enters a new map
+        // ── BGM: switch tracks when player enters a new map ───────────────────
         if (currentMap != lastMap) {
             lastMap = currentMap;
             switch (currentMap) {
-                case MAP_ROOM, MAP_HOUSE -> soundManager.playBGMOnce("/Music/LivingRoom.wav");
+                // MAP_ROOM (starting bedroom) keeps the soft piano intro
+                case MAP_ROOM -> {
+                    soundManager.stopAmbient();
+                    soundManager.playBGMOnce("/Music/LivingRoom.wav");
+                }
+                // MAP_HOUSE (living room / demon area) — no piano music here
+                case MAP_HOUSE -> {
+                    soundManager.stopAmbient();
+                    soundManager.stopBGM();
+                }
+                // MAP_STREET — background music + looping street ambient
                 case MAP_STREET -> {
                     soundManager.playBGM("/Music/IntroQuest.wav");
-                    soundManager.playSFX("/Music/StreetWind.wav");
+                    soundManager.playAmbient("/Music/StreetAmbient.wav");
                 }
-                case MAP_WORKSHOP -> soundManager.playBGM("/Music/Workshop.wav");
-                case MAP_GREENHOUSE -> soundManager.playBGM("/Music/Greenhouse.wav");
-                case MAP_MUSEUM -> soundManager.playBGM("/Music/Museum.wav");
+                case MAP_WORKSHOP -> {
+                    soundManager.stopAmbient();
+                    soundManager.playBGM("/Music/Workshop.wav");
+                }
+                case MAP_GREENHOUSE -> {
+                    soundManager.stopAmbient();
+                    soundManager.playBGM("/Music/Greenhouse.wav");
+                }
+                case MAP_MUSEUM -> {
+                    soundManager.stopAmbient();
+                    soundManager.playBGM("/Music/Museum.wav");
+                }
             }
         }
 
-        // Voice line triggers
-        if (isDialogueActive) {
+        // ── Demon voice-line triggers (only fire while inside the house) ──────
+        if (isDialogueActive && currentMap == MAP_HOUSE) {
             if (currentDialogueArray == houseDialogue2 && currentDialogueListIndex == 9 && dialogueCharIndex == 1) {
                 soundManager.playSFX("/Music/DemonLine1.wav");
             }
@@ -469,22 +531,22 @@ public class GamePanel extends JPanel implements Runnable {
             }
         }
 
-        // Handle object interaction SFX
-        if (mouseH.leftClicked) {
+        // ── Glass-case interaction SFX (museum only, only when still locked) ─
+        if (mouseH.leftClicked && currentMap == MAP_MUSEUM && !locketUnlocked) {
             Rectangle mouseHitbox = new Rectangle(mouseH.mouseX, mouseH.mouseY, 1, 1);
             if (mouseHitbox.intersects(glassCaseHitbox)) {
                 soundManager.playSFX("/Music/GlassCase.wav");
             }
         }
 
-        // Reset logic for Again button
-        if (currentQuest == 6 && mouseH.leftClicked && new Rectangle(mouseH.mouseX, mouseH.mouseY, 1, 1).intersects(againBtnHitbox)) {
-            currentQuest = 0;
-            soundManager.resetAllAudio();
-            soundManager.playBGM("/Music/MainMenu.wav");
-            currentMap = MAP_MAIN_MENU;
+        // ── Again button — full centralised reset ─────────────────────────────
+        if (currentQuest == 6 && mouseH.leftClicked &&
+                new Rectangle(mouseH.mouseX, mouseH.mouseY, 1, 1).intersects(againBtnHitbox)) {
+            fullReset();
             mouseH.leftClicked = false;
+            return;
         }
+
         mapFrameCounter++;
         if (mapFrameCounter >= mapAnimSpeed) {
             mapFrameIndex = (mapFrameIndex == 0) ? 1 : 0;
@@ -520,43 +582,46 @@ public class GamePanel extends JPanel implements Runnable {
             }
         }
 
-        // event state machine
-        if (houseEventState == 2) {
-            eventTimer++;
-            if (eventTimer >= 60) { // 1 second
-                demonVisible = true;
-                soundManager.playSFX("/Music/DemonAppears.wav");
-                houseEventState = 3;
-                eventTimer = 0;
-            }
-        } else if (houseEventState == 3) {
-            eventTimer++; 
-            if (eventTimer >= 120) { // 2 seconds
-                houseEventState = 4;
-                startDialogue(houseDialogue2);
-                soundManager.playBGM("/Music/IntroQuest.wav");
-                lastMap = currentMap;
-                eventTimer = 0;
-            }
-        } else if (houseEventState == 5) {
-            eventTimer++;
-            if (eventTimer >= 60) { // 1 second
-                introPuzzleOpen = true;
-                houseEventState = 6;
-                eventTimer = 0;
-            }
-        } else if (houseEventState == 8) {
-            eventTimer++;
-            if (eventTimer >= 60) { // 1 second
-                currentQuest = 6;
-                soundManager.playBGM("/Music/GoodEnding.wav");
-                lastMap = currentMap;
-                houseEventState = 9;
-                eventTimer = 0;
+        // ── Demon event state machine (guarded to MAP_HOUSE only) ─────────────
+        if (currentMap == MAP_HOUSE) {
+            if (houseEventState == 2) {
+                eventTimer++;
+                if (eventTimer >= 60) { // 1 second — demon appears with sound
+                    demonVisible = true;
+                    soundManager.playSFX("/Music/DemonAppears.wav");
+                    houseEventState = 3;
+                    eventTimer = 0;
+                }
+            } else if (houseEventState == 3) {
+                eventTimer++;
+                if (eventTimer >= 120) { // 2 seconds — start first demon dialogue
+                    houseEventState = 4;
+                    startDialogue(houseDialogue2);
+                    // Demon1 music: plays during the first demon encounter
+                    soundManager.playBGM("/Music/Demon1.wav");
+                    lastMap = currentMap;
+                    eventTimer = 0;
+                }
+            } else if (houseEventState == 5) {
+                eventTimer++;
+                if (eventTimer >= 60) { // 1 second — open quest list
+                    introPuzzleOpen = true;
+                    houseEventState = 6;
+                    eventTimer = 0;
+                }
+            } else if (houseEventState == 8) {
+                eventTimer++;
+                if (eventTimer >= 60) { // 1 second — trigger good ending
+                    currentQuest = 6;
+                    soundManager.playBGM("/Music/GoodEnding.wav");
+                    lastMap = currentMap;
+                    houseEventState = 9;
+                    eventTimer = 0;
+                }
             }
         }
 
-        // demon animation
+        // demon sprite animation
         if (demonVisible) {
             demonCounter++;
             if (demonCounter >= demonSpeed) {
@@ -800,54 +865,14 @@ public class GamePanel extends JPanel implements Runnable {
             g2.setColor(new Color(0, 0, 0, 150));
             g2.fillRect(0, 0, screenWidth, screenHeight);
 
-//            int uiX = screenWidth/2 - 250;
-//            int uiY = screenHeight/2 - 300;
-//            if (listScreen1 != null) g2.drawImage(listScreen1, uiX, uiY, 500, 600, null);
-
             if (introPuzzlePage == 1 && listScreen1 != null) {
                 g2.drawImage(listScreen1, 230, 100, 420, 480, null);
-
-                // Row 1 (Desc 1): Jar, Bouquet, Watch
-//                    if (jarInv != null)
-//                        g2.drawImage(jarInv, r1c1Hitbox.x, r1c1Hitbox.y, r1c1Hitbox.width, r1c1Hitbox.height, null);
-//                    if (bouquetInv != null)
-//                        g2.drawImage(bouquetInv, r1c2Hitbox.x, r1c2Hitbox.y, r1c2Hitbox.width, r1c2Hitbox.height, null);
-//                    if (watchInv != null)
-//                        g2.drawImage(watchInv, r1c3Hitbox.x, r1c3Hitbox.y, r1c3Hitbox.width, r1c3Hitbox.height, null);
-
-                // Row 2 (Desc 2): Locket, Watch, Bouquet
-//                    if (locketInv != null)
-//                        g2.drawImage(locketInv, r2c1Hitbox.x, r2c1Hitbox.y, r2c1Hitbox.width, r2c1Hitbox.height, null);
-//                    if (watchInv != null)
-//                        g2.drawImage(watchInv, r2c2Hitbox.x, r2c2Hitbox.y, r2c2Hitbox.width, r2c2Hitbox.height, null);
-//                    if (bouquetInv != null)
-//                        g2.drawImage(bouquetInv, r2c3Hitbox.x, r2c3Hitbox.y, r2c3Hitbox.width, r2c3Hitbox.height, null);
-
-                // Navigation (Only Next on Page 1)
                 if (nextBtn != null)
                     g2.drawImage(nextBtn, nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height, null);
             }
             // PAGE 2
             else if (introPuzzlePage == 2 && listScreen2 != null) {
                 g2.drawImage(listScreen2, 230, 100, 420, 480, null);
-
-                // Row 1 (Desc 3): Watch, Locket, Bouquet
-//                    if (watchInv != null)
-//                        g2.drawImage(watchInv, r1c1Hitbox.x, r1c1Hitbox.y, r1c1Hitbox.width, r1c1Hitbox.height, null);
-//                    if (locketInv != null)
-//                        g2.drawImage(locketInv, r1c2Hitbox.x, r1c2Hitbox.y, r1c2Hitbox.width, r1c2Hitbox.height, null);
-//                    if (bouquetInv != null)
-//                        g2.drawImage(bouquetInv, r1c3Hitbox.x, r1c3Hitbox.y, r1c3Hitbox.width, r1c3Hitbox.height, null);
-
-                // Row 2 (Desc 4): Jar, Bouquet, Locket
-//                    if (jarInv != null)
-//                        g2.drawImage(jarInv, r2c1Hitbox.x, r2c1Hitbox.y, r2c1Hitbox.width, r2c1Hitbox.height, null);
-//                    if (bouquetInv != null)
-//                        g2.drawImage(bouquetInv, r2c2Hitbox.x, r2c2Hitbox.y, r2c2Hitbox.width, r2c2Hitbox.height, null);
-//                    if (locketInv != null)
-//                        g2.drawImage(locketInv, r2c3Hitbox.x, r2c3Hitbox.y, r2c3Hitbox.width, r2c3Hitbox.height, null);
-
-                // Navigation (Both on Page 2)
                 if (prevBtn != null)
                     g2.drawImage(prevBtn, prevButtonHitbox.x, prevButtonHitbox.y, prevButtonHitbox.width, prevButtonHitbox.height, null);
                 if (nextBtn != null)
@@ -856,15 +881,11 @@ public class GamePanel extends JPanel implements Runnable {
             // PAGE 3
             else if (introPuzzlePage == 3 && gibberishFrames[gibberishFrameIndex] != null) {
                 g2.drawImage(gibberishFrames[gibberishFrameIndex], 230, 100, 420, 480, null);
-
-                // Navigation (Both on Page 3)
                 if (prevBtn != null)
                     g2.drawImage(prevBtn, prevButtonHitbox.x, prevButtonHitbox.y, prevButtonHitbox.width, prevButtonHitbox.height, null);
                 if (nextBtn != null)
                     g2.drawImage(nextBtn, nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height, null);
             }
-
-//            if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
 
             // debug hitboxes
             g2.setColor(new Color(255, 255, 0, 150));

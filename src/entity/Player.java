@@ -36,17 +36,17 @@ public class Player extends Entity{
         try{
             // Idle states
             frontImage = ImageIO.read(getClass().getResourceAsStream("/Player/FrontProfile.png"));
-            backImage = ImageIO.read(getClass().getResourceAsStream("/Player/BackProfile.png"));
-            leftImage = ImageIO.read(getClass().getResourceAsStream("/Player/LeftSideProfile.png"));
+            backImage  = ImageIO.read(getClass().getResourceAsStream("/Player/BackProfile.png"));
+            leftImage  = ImageIO.read(getClass().getResourceAsStream("/Player/LeftSideProfile.png"));
             rightImage = ImageIO.read(getClass().getResourceAsStream("/Player/RightSideProfile.png"));
 
             // Walking frames
             frontWalk1 = ImageIO.read(getClass().getResourceAsStream("/Player/FrontWalk_1.png"));
             frontWalk2 = ImageIO.read(getClass().getResourceAsStream("/Player/FrontWalk_2.png"));
-            backWalk1 = ImageIO.read(getClass().getResourceAsStream("/Player/BackWalk_1.png"));
-            backWalk2 = ImageIO.read(getClass().getResourceAsStream("/Player/BackProfile_2.png"));
-            leftWalk1 = ImageIO.read(getClass().getResourceAsStream("/Player/LeftWalk_1.png"));
-            leftWalk2 = ImageIO.read(getClass().getResourceAsStream("/Player/LeftWalk_2.png"));
+            backWalk1  = ImageIO.read(getClass().getResourceAsStream("/Player/BackWalk_1.png"));
+            backWalk2  = ImageIO.read(getClass().getResourceAsStream("/Player/BackProfile_2.png"));
+            leftWalk1  = ImageIO.read(getClass().getResourceAsStream("/Player/LeftWalk_1.png"));
+            leftWalk2  = ImageIO.read(getClass().getResourceAsStream("/Player/LeftWalk_2.png"));
             rightWalk1 = ImageIO.read(getClass().getResourceAsStream("/Player/RightWalk_1.png"));
             rightWalk2 = ImageIO.read(getClass().getResourceAsStream("/Player/RightWalk_2.png"));
         }catch (IOException e){
@@ -56,29 +56,14 @@ public class Player extends Entity{
 
     public void update(){
 
+        // ── End screen: Again button is now handled entirely by GamePanel.fullReset()
+        //    Player just freezes here while currentQuest == 6 ─────────────────────
         if (gp.currentQuest == 6) {
-            if (gp.mouseH.leftClicked) {
-                Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
-                if (mouseHitbox.intersects(gp.againBtnHitbox)) {
-                    gp.currentQuest = 0;
-                    gp.introAns1 = false; gp.introAns2 = false; gp.introAns3 = false; gp.introAns4 = false;
-                    blackRosesCollected = 0; glassEyesCollected = 0;
-                    gp.statue1State = 0; gp.statue2State = 3; gp.statue3State = 2;
-                    gp.chronosWatchUnlocked = false; gp.locketUnlocked = false;
-
-                    gp.houseEventState = 0;
-                    gp.demonVisible = false;
-                    gp.introDialogueTriggered = false;
-
-                    gp.setupGame();
-                    setDefaultValues();
-                    gp.currentMap = gp.MAP_ROOM;
-                }
-                gp.mouseH.leftClicked = false;
-            }
-            return; // freeze player on end screen
+            gp.mouseH.leftClicked = false;
+            return;
         }
 
+        // ── Dialogue: advance / skip typewriter ───────────────────────────────
         if (gp.isDialogueActive) {
             if (gp.mouseH.leftClicked) {
                 Rectangle mouseHitbox = new Rectangle(gp.mouseH.mouseX, gp.mouseH.mouseY, 1, 1);
@@ -97,9 +82,14 @@ public class Player extends Entity{
                         } else {
                             gp.isDialogueActive = false;
 
-                            if (gp.houseEventState == 1) gp.houseEventState = 2;
-                            else if (gp.houseEventState == 4) gp.houseEventState = 5;
-                            else if (gp.houseEventState == 7) gp.houseEventState = 8;
+                            // Only advance house-event states while actually inside the house.
+                            // This prevents DemonAppears.wav (and related SFX) from firing if
+                            // a dialogue somehow ends while the player is on any other map.
+                            if (gp.currentMap == gp.MAP_HOUSE) {
+                                if      (gp.houseEventState == 1) gp.houseEventState = 2;
+                                else if (gp.houseEventState == 4) gp.houseEventState = 5;
+                                else if (gp.houseEventState == 7) gp.houseEventState = 8;
+                            }
                         }
                     }
                 }
@@ -244,16 +234,17 @@ public class Player extends Entity{
 
         if (gp.currentMap == gp.MAP_HOUSE) {
             if (gp.currentQuest == 5 && gp.houseEventState < 7) {
-                // Ending event trigger
+                // ── Ending event trigger ──────────────────────────────────────
                 if (playerHitbox.intersects(gp.tempBtnHitbox)) {
                     gp.houseEventState = 7;
                     gp.demonVisible = true;
-                    gp.soundManager.playBGM("/Music/FinalConfrontation.wav");
+                    // Demon2 music: plays during the final confrontation
+                    gp.soundManager.playBGM("/Music/Demon2.wav");
                     gp.soundManager.playSFX("/Music/DemonAppears.wav");
                     gp.startDialogue(gp.houseDialogue3);
                 }
             } else if (gp.houseEventState == 0) {
-                // Intro event trigger
+                // ── Intro event trigger ───────────────────────────────────────
                 if (playerHitbox.intersects(gp.tempBtnHitbox)) {
                     gp.houseEventState = 1;
                     gp.startDialogue(gp.houseDialogue1);
@@ -392,6 +383,8 @@ public class Player extends Entity{
                         if (mouseHitbox.intersects(gp.obj[i].hitbox)){
                             gp.obj[i] = null;
                             glassEyesCollected++;
+                            // Glass eye pickup SFX
+                            gp.soundManager.playSFX("/Music/GlassEye.wav");
                             if (glassEyesCollected >= 5 && gp.currentQuest == 1) {
                                 gp.currentQuest = 2;
                             }
@@ -399,22 +392,29 @@ public class Player extends Entity{
                     }
                 }
             } else if (gp.currentMap == gp.MAP_MUSEUM){
+                // ── Glass case: open password UI (SFX handled by GamePanel) ─
                 if (gp.locketUnlocked == false) {
                     if (mouseHitbox.intersects(gp.glassCaseHitbox)){
                         gp.passwordUIOpen = true;
                         keyH.currentInput = "";
                     }
                 }
+                // ── Clue papers: open with paper-rustle SFX ──────────────────
                 if (mouseHitbox.intersects(gp.clue1Hitbox)) {
                     gp.clue1_Open = true;
+                    gp.soundManager.playSFX("/Music/CluePaper.wav");
                 } else if (mouseHitbox.intersects(gp.clue2Hitbox)) {
                     gp.clue2_Open = true;
+                    gp.soundManager.playSFX("/Music/CluePaper.wav");
                 } else if (mouseHitbox.intersects(gp.clue3Hitbox)) {
                     gp.clue3_Open = true;
+                    gp.soundManager.playSFX("/Music/CluePaper.wav");
                 } else if (mouseHitbox.intersects(gp.clue0Hitbox)) {
                     gp.clue0_Open = true;
+                    gp.soundManager.playSFX("/Music/CluePaper.wav");
                 }
 
+                // ── Statues ───────────────────────────────────────────────────
                 if (gp.chronosWatchUnlocked == false) {
                     if (mouseHitbox.intersects(gp.mapStatue1Hitbox) ||
                             mouseHitbox.intersects(gp.mapStatue2Hitbox) ||
