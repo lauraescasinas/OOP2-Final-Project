@@ -61,7 +61,6 @@ public class SoundManager {
         }
     }
 
-    // ── Street ambient channel (loops independently of BGM) ──────────────────
     public void playAmbient(String resourcePath) {
         stopAmbient();
         try {
@@ -84,7 +83,6 @@ public class SoundManager {
         }
     }
 
-    // ── One-shot SFX with tracking so resetAllAudio() can stop them ──────────
     public void playSFX(String resourcePath) {
         try {
             InputStream raw = getClass().getResourceAsStream(resourcePath);
@@ -108,7 +106,7 @@ public class SoundManager {
         } catch (Exception e) { e.printStackTrace(); }
     }
 
-    // ── Stops BGM, ambient, and every in-flight SFX clip ─────────────────────
+    // Stops BGM, Ambient, & SFX
     public void resetAllAudio() {
         stopBGM();
         stopAmbient();

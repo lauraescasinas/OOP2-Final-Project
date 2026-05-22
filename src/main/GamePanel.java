@@ -133,8 +133,8 @@ public class GamePanel extends JPanel implements Runnable {
 
     public String[] roomDialogue = {
             "October, 1998. The whole house smells like candle wax and old paper.\n" +
-                    "Fifteen-year-old Elara stands at the side of her bed, still in yesterday's\n" +
-                    "clothes, trying to piece together the last seventy-two hours."
+            "Fifteen-year-old Elara stands at the side of her bed, still in yesterday's\n" +
+            "clothes, trying to piece together the last seventy-two hours."
     };
 
     public String[] currentDialogueArray = null;
@@ -156,19 +156,21 @@ public class GamePanel extends JPanel implements Runnable {
 
     // hitboxes
     public Rectangle dialogueNextHitbox = new Rectangle(760, 580, 60, 60);
-
     public Rectangle glassCaseHitbox = new Rectangle(170, 280, tileSize + 2, tileSize + 2);
     public Rectangle backButtonHitbox = new Rectangle(50, 50, 60, 60);
     public Rectangle submitButtonHitbox = new Rectangle(560, 360, 60, 60);
+
     // clue hitboxes
     public Rectangle clue1Hitbox = new Rectangle(290, 280, 48, 48);
     public Rectangle clue2Hitbox = new Rectangle(510, 430, 48, 48);
     public Rectangle clue3Hitbox = new Rectangle(695, 320, 48, 48);
     public Rectangle clue0Hitbox = new Rectangle(230, 538, 48, 48);
+
     // statue in map hitboxes
     public Rectangle mapStatue1Hitbox = new Rectangle(560, 250, 70, 100);
     public Rectangle mapStatue2Hitbox = new Rectangle(630, 340, 70, 100);
     public Rectangle mapStatue3Hitbox = new Rectangle(670, 220, 70, 100);
+
     // statue in screen hitboxes
     public Rectangle uiStatue1Hitbox = new Rectangle(120, 250, 150, 200);
     public Rectangle uiStatue2Hitbox = new Rectangle(350, 250, 150, 200);
@@ -176,13 +178,16 @@ public class GamePanel extends JPanel implements Runnable {
 
     // temporary button hitbox
     public Rectangle tempBtnHitbox = new Rectangle(416, 300, 48, 48);
+
     // button hitboxes
     public Rectangle nextButtonHitbox = new Rectangle(680, 350, 60, 80);
     public Rectangle prevButtonHitbox = new Rectangle(140, 350, 60, 80);
+
     // list screen row 1
     public Rectangle r1c1Hitbox = new Rectangle(293, 280, 60, 60); // Jar
     public Rectangle r1c2Hitbox = new Rectangle(413, 280, 60, 60); // Bouquet
     public Rectangle r1c3Hitbox = new Rectangle(533, 280, 60, 60); // Watch
+
     // list screen row 2
     public Rectangle r2c1Hitbox = new Rectangle(293, 435, 60, 60); // Locket
     public Rectangle r2c2Hitbox = new Rectangle(413, 435, 60, 60); // Watch
@@ -225,6 +230,7 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void setupGame() {
         lastMap = -999;
+
         // blackroses in greenhouse
         obj[0] = new BlackroseObject();
         obj[0].x = 245; obj[0].y = 240;
@@ -425,6 +431,7 @@ public class GamePanel extends JPanel implements Runnable {
 
     // ── Centralised full reset — called by Again button ───────────────────────
     public void fullReset() {
+
         // game-state flags
         currentQuest       = 0;
         houseEventState    = 0;
@@ -442,6 +449,7 @@ public class GamePanel extends JPanel implements Runnable {
         currentDialogue    = "";
         dialogueCharIndex  = 0;
         typewriterCounter  = 0;
+
         // inventory / puzzle
         locketUnlocked     = false;
         chronosWatchUnlocked = false;
@@ -454,12 +462,14 @@ public class GamePanel extends JPanel implements Runnable {
         introAns1 = false; introAns2 = false; introAns3 = false; introAns4 = false;
         clue1_Open = false; clue2_Open = false; clue3_Open = false; clue0_Open = false;
         statue_Open        = false;
+
         // map / player
         lastMap            = -999;
         player.blackRosesCollected = 0;
         player.glassEyesCollected  = 0;
         player.setDefaultValues();
         setupGame();
+
         // audio — stop everything then restart main-menu track
         soundManager.resetAllAudio();
         soundManager.playBGM("/Music/MainMenu.wav");
@@ -597,6 +607,7 @@ public class GamePanel extends JPanel implements Runnable {
                 if (eventTimer >= 120) { // 2 seconds — start first demon dialogue
                     houseEventState = 4;
                     startDialogue(houseDialogue2);
+
                     // Demon1 music: plays during the first demon encounter
                     soundManager.playBGM("/Music/Demon1.wav");
                     lastMap = currentMap;
@@ -657,8 +668,8 @@ public class GamePanel extends JPanel implements Runnable {
             if (menuFrames[menuFrameIndex] != null) {
                 g2.drawImage(menuFrames[menuFrameIndex], 0, 0, screenWidth, screenHeight, null);
             }
-//            g2.setColor(new Color(255, 255, 0, 100));
-//            g2.fillRect(playButtonHitbox.x, playButtonHitbox.y, playButtonHitbox.width, playButtonHitbox.height);
+//          g2.setColor(new Color(255, 255, 0, 100));
+//          g2.fillRect(playButtonHitbox.x, playButtonHitbox.y, playButtonHitbox.width, playButtonHitbox.height);
             g2.dispose();
             return;
         }
@@ -679,8 +690,8 @@ public class GamePanel extends JPanel implements Runnable {
             g2.setColor(new Color(255, 0, 0, 100));
             g2.fillRect(debugIntroHitbox.x, debugIntroHitbox.y, debugIntroHitbox.width, debugIntroHitbox.height);
 
-//            if (tempBtn != null)
-//                g2.drawImage(tempBtn, tempBtnHitbox.x, tempBtnHitbox.y, tempBtnHitbox.width, tempBtnHitbox.height, null);
+//          if (tempBtn != null)
+//          g2.drawImage(tempBtn, tempBtnHitbox.x, tempBtnHitbox.y, tempBtnHitbox.width, tempBtnHitbox.height, null);
 
             g2.setColor(new Color(0, 0, 255, 100));
             g2.fillRect(tempBtnHitbox.x, tempBtnHitbox.y, tempBtnHitbox.width, tempBtnHitbox.height);
@@ -690,6 +701,7 @@ public class GamePanel extends JPanel implements Runnable {
         } else if (currentMap == MAP_WORKSHOP) {
             BufferedImage currentWorkshop = (mapFrameIndex == 0) ? workshopBg1 : workshopBg2;
             if (currentWorkshop != null) g2.drawImage(currentWorkshop, 0, 0, screenWidth, screenHeight, null);
+
             // scatter glass eyes in workshop
             for (int i = 0; i < obj.length; i++) {
                 if (obj[i] != null && obj[i].name.equals("Glass Eye")) {
@@ -701,6 +713,7 @@ public class GamePanel extends JPanel implements Runnable {
         } else if (currentMap == MAP_GREENHOUSE) {
             BufferedImage currentGreenhouse = (mapFrameIndex == 0) ? greenhouseBg1 : greenhouseBg2;
             if (currentGreenhouse != null) g2.drawImage(currentGreenhouse, 0, 0, screenWidth, screenHeight, null);
+
             // scatter black roses in greenhouse
             for (int i = 0; i < obj.length; i++) {
                 if (obj[i] != null && obj[i].name.equals("Black Rose")) {
@@ -722,6 +735,7 @@ public class GamePanel extends JPanel implements Runnable {
             g2.fillRect(clue2Hitbox.x, clue2Hitbox.y, clue2Hitbox.width, clue2Hitbox.height);
             g2.fillRect(clue3Hitbox.x, clue3Hitbox.y, clue3Hitbox.width, clue3Hitbox.height);
             g2.fillRect(clue0Hitbox.x, clue0Hitbox.y, clue0Hitbox.width, clue0Hitbox.height);
+
             // statue hitboxes
             g2.setColor(new Color(255, 100, 0, 100));
             g2.fillRect(mapStatue1Hitbox.x, mapStatue1Hitbox.y, mapStatue1Hitbox.width, mapStatue1Hitbox.height);
@@ -730,7 +744,7 @@ public class GamePanel extends JPanel implements Runnable {
 
             g2.drawImage(getStatueImage(statue1State), 560, 250, 70, 100, null);
             g2.drawImage(getStatueImage(statue2State), 630, 340, 70, 100, null);
-//            g2.drawImage(glasscaseMuseum, 647, 385, tileSize * 2, tileSize * 4, null);
+//          g2.drawImage(glasscaseMuseum, 647, 385, tileSize * 2, tileSize * 4, null);
             g2.drawImage(getStatueImage(statue3State), 670, 228, 70, 100, null);
 
             if (locketUnlocked == false) {
@@ -766,6 +780,7 @@ public class GamePanel extends JPanel implements Runnable {
         } else if (currentMap == MAP_ROOM) {
             g2.fillRect(bedroomDoorHitbox.x, bedroomDoorHitbox.y, bedroomDoorHitbox.width, bedroomDoorHitbox.height);
         }
+
         // draw player on top (except in museum where they're layered behind the case)
         if (currentMap != MAP_MUSEUM) {
             player.draw(g2);
@@ -779,6 +794,7 @@ public class GamePanel extends JPanel implements Runnable {
         if (player.blackRosesCollected >= 5 && bouquetInv != null) {
             g2.drawImage(bouquetInv, 20, 300, tileSize, tileSize, null);
         }
+
         // jar appears after all 5 glass eyes are collected
         if (player.glassEyesCollected >= 5 && jarInv != null) {
             g2.drawImage(jarInv, 20, 300 + tileSize + 10, tileSize, tileSize, null);
@@ -791,7 +807,6 @@ public class GamePanel extends JPanel implements Runnable {
         if (chronosWatchUnlocked == true && watchInv != null) {
             g2.drawImage(watchInv, 20, 300 + (tileSize * 3) + 30, tileSize, tileSize, null);
         }
-
 
         if (passwordUIOpen == true) {
             g2.setColor(new Color(0, 0, 0, 150));
@@ -870,6 +885,7 @@ public class GamePanel extends JPanel implements Runnable {
                 if (nextBtn != null)
                     g2.drawImage(nextBtn, nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height, null);
             }
+
             // PAGE 2
             else if (introPuzzlePage == 2 && listScreen2 != null) {
                 g2.drawImage(listScreen2, 230, 100, 420, 480, null);
@@ -878,6 +894,7 @@ public class GamePanel extends JPanel implements Runnable {
                 if (nextBtn != null)
                     g2.drawImage(nextBtn, nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height, null);
             }
+
             // PAGE 3
             else if (introPuzzlePage == 3 && gibberishFrames[gibberishFrameIndex] != null) {
                 g2.drawImage(gibberishFrames[gibberishFrameIndex], 230, 100, 420, 480, null);

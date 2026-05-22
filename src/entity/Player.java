@@ -34,6 +34,7 @@ public class Player extends Entity{
 
     public void getPlayerImage(){
         try{
+
             // Idle states
             frontImage = ImageIO.read(getClass().getResourceAsStream("/Player/FrontProfile.png"));
             backImage  = ImageIO.read(getClass().getResourceAsStream("/Player/BackProfile.png"));
@@ -49,7 +50,7 @@ public class Player extends Entity{
             leftWalk2  = ImageIO.read(getClass().getResourceAsStream("/Player/LeftWalk_2.png"));
             rightWalk1 = ImageIO.read(getClass().getResourceAsStream("/Player/RightWalk_1.png"));
             rightWalk2 = ImageIO.read(getClass().getResourceAsStream("/Player/RightWalk_2.png"));
-        }catch (IOException e){
+        } catch (IOException e){
             e.printStackTrace();
         }
     }
@@ -203,7 +204,6 @@ public class Player extends Entity{
             return;
         }
 
-
         if(keyH.upPressed == true || keyH.downPressed == true ||
                 keyH.leftPressed == true || keyH.rightPressed == true) {
             if (keyH.upPressed == true) {
@@ -288,6 +288,7 @@ public class Player extends Entity{
                 y = gp.streetWorkshopDoorHitbox.y + (gp.streetWorkshopDoorHitbox.height / 2) - (gp.tileSize / 2);
                 direction = "left";
             }
+
         // exit greenhouse
         } else if (gp.currentMap == gp.MAP_GREENHOUSE){
             if (playerHitbox.intersects(gp.greenhouseDoorHitbox)) {
@@ -296,6 +297,7 @@ public class Player extends Entity{
                 y = gp.streetGreenhouseDoorHitbox.y + (gp.streetGreenhouseDoorHitbox.height / 2) - (gp.tileSize / 2);
                 direction = "right";
             }
+
         // exit museum
         } else if (gp.currentMap == gp.MAP_MUSEUM){
             if (playerHitbox.intersects(gp.museumDoorHitbox)){
@@ -305,7 +307,6 @@ public class Player extends Entity{
                 direction = "down";
             }
         } else if (gp.currentMap == gp.MAP_STREET) {
-
             // enter house
             if (playerHitbox.intersects(gp.streetHouseDoorHitbox)) {
                 gp.currentMap = gp.MAP_HOUSE;
@@ -313,6 +314,7 @@ public class Player extends Entity{
                 y = gp.houseDoorHitbox.y + (gp.houseDoorHitbox.height / 2) - (gp.tileSize / 2);
                 direction = "up";
             }
+
             // enter museum
             else if (playerHitbox.intersects(gp.streetMuseumDoorHitbox)) {
                 if (gp.currentQuest >= 3) {
@@ -324,6 +326,7 @@ public class Player extends Entity{
                     y += speed * 2;
                 }
             }
+
             // enter workshop
             else if (playerHitbox.intersects(gp.streetWorkshopDoorHitbox)) {
                 if (gp.currentQuest >= 1) {
@@ -333,6 +336,7 @@ public class Player extends Entity{
                     direction = "up";
                 }
             }
+
             // enter greenhouse
             else if (playerHitbox.intersects(gp.streetGreenhouseDoorHitbox)) {
                 if (gp.currentQuest >= 2) {
@@ -349,9 +353,11 @@ public class Player extends Entity{
         // screen boundary clamps
         if (x < 0) x = 0;
         if (y < 0) y = 0;
+
         if (x > gp.screenWidth - gp.tileSize){
             x = gp.screenWidth - gp.tileSize;
         }
+
         if (y > gp.screenHeight - gp.tileSize && gp.currentMap == gp.MAP_STREET){
             y = gp.screenHeight - gp.tileSize;
         }
@@ -413,7 +419,6 @@ public class Player extends Entity{
                     gp.clue0_Open = true;
                     gp.soundManager.playSFX("/Music/CluePaper.wav");
                 }
-
                 // ── Statues ───────────────────────────────────────────────────
                 if (gp.chronosWatchUnlocked == false) {
                     if (mouseHitbox.intersects(gp.mapStatue1Hitbox) ||
@@ -453,7 +458,6 @@ public class Player extends Entity{
                 else image = rightWalk2;
                 break;
         }
-
         g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null);
     }
 }
