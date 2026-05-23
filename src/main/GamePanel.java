@@ -30,63 +30,66 @@ public class GamePanel extends JPanel implements Runnable {
     public final int MAP_ROOM = 5;
     public final int MAP_MAIN_MENU = -1;
     public int currentMap = MAP_MAIN_MENU;// start in the house
+    public CollisionManager cManager = new CollisionManager(this);
 
-    // BARRIERS
-    public Rectangle[] roomWalls = {
-            new Rectangle(250, 100, 360, 180),
-            new Rectangle(250, 470, 360, 150),
-            new Rectangle(130, 100, 150, 500),
-            new Rectangle(580, 100, 150, 280),
-            new Rectangle(290, 320, 120, 40)
-    };
 
-    public Rectangle[] houseWalls = {
-            new Rectangle(370, 170, 170, 80),
-            new Rectangle(580, 60, 100, 400),
-            new Rectangle(250, 70, 100, 400),
-            new Rectangle(100, 120, 150, 250),
-            new Rectangle(110, 530, 600, 100)
-    };
-
-    public Rectangle[] streetWalls = {
-            new Rectangle(200, 210, 420, 80),
-            new Rectangle(840, 30, 90, 600),
-            new Rectangle(750, 0, 100, 280),
-            new Rectangle(5, 668, 1000, 90),
-            new Rectangle(30, 470, 300, 50),
-            new Rectangle(290, 480, 40, 120),
-            new Rectangle(-20, 250, 50, 300),
-            new Rectangle(530, 500, 200, 300),
-            //tree
-            new Rectangle(270, 240, 100, 100)
-    };
-
-    public Rectangle[] workshopWalls = {
-            new Rectangle(390, 190, 420, 50),
-            new Rectangle(250, 600, 700, 50),
-            new Rectangle(150, 400, 270, 80),
-            new Rectangle(100, 210, 270, 60),
-
-            new Rectangle(12, 130, 60, 430),
-            new Rectangle(380, 180, 60, 250),
-            new Rectangle(800, 100, 60, 550)
-    };
-
-    public Rectangle[] greenhouseWalls = {
-            new Rectangle(90, 30, 60, 800),
-            new Rectangle(720, 20, 60, 800),
-            new Rectangle(100, 90, 600, 60),
-            new Rectangle(10, 600, 320, 60),
-            new Rectangle(520, 580, 320, 60)
-    };
-
-    public Rectangle[] museumWalls = {
-            new Rectangle(90, 30, 60, 800),
-            new Rectangle(720, 20, 60, 800),
-            new Rectangle(120, 210, 600, 60),
-            new Rectangle(20, 580, 320, 60),
-            new Rectangle(520, 580, 320, 60)
-    };
+    // TO DELETE AFTER TEST
+//    // BARRIERS
+//    public Rectangle[] roomWalls = {
+//            new Rectangle(250, 100, 360, 180),
+//            new Rectangle(250, 470, 360, 150),
+//            new Rectangle(130, 100, 150, 500),
+//            new Rectangle(580, 100, 150, 280),
+//            new Rectangle(290, 320, 120, 40)
+//    };
+//
+//    public Rectangle[] houseWalls = {
+//            new Rectangle(370, 170, 170, 80),
+//            new Rectangle(580, 60, 100, 400),
+//            new Rectangle(250, 70, 100, 400),
+//            new Rectangle(100, 120, 150, 250),
+//            new Rectangle(110, 530, 600, 100)
+//    };
+//
+//    public Rectangle[] streetWalls = {
+//            new Rectangle(200, 210, 420, 80),
+//            new Rectangle(840, 30, 90, 600),
+//            new Rectangle(750, 0, 100, 280),
+//            new Rectangle(5, 668, 1000, 90),
+//            new Rectangle(30, 470, 300, 50),
+//            new Rectangle(290, 480, 40, 120),
+//            new Rectangle(-20, 250, 50, 300),
+//            new Rectangle(530, 500, 200, 300),
+//            //tree
+//            new Rectangle(270, 240, 100, 100)
+//    };
+//
+//    public Rectangle[] workshopWalls = {
+//            new Rectangle(390, 190, 420, 50),
+//            new Rectangle(250, 600, 700, 50),
+//            new Rectangle(150, 400, 270, 80),
+//            new Rectangle(100, 210, 270, 60),
+//
+//            new Rectangle(12, 130, 60, 430),
+//            new Rectangle(380, 180, 60, 250),
+//            new Rectangle(800, 100, 60, 550)
+//    };
+//
+//    public Rectangle[] greenhouseWalls = {
+//            new Rectangle(90, 30, 60, 800),
+//            new Rectangle(720, 20, 60, 800),
+//            new Rectangle(100, 90, 600, 60),
+//            new Rectangle(10, 600, 320, 60),
+//            new Rectangle(520, 580, 320, 60)
+//    };
+//
+//    public Rectangle[] museumWalls = {
+//            new Rectangle(90, 30, 60, 800),
+//            new Rectangle(720, 20, 60, 800),
+//            new Rectangle(120, 210, 600, 60),
+//            new Rectangle(20, 580, 320, 60),
+//            new Rectangle(520, 580, 320, 60)
+//    };
 
     BufferedImage roomBg;
     BufferedImage houseBg;
@@ -570,10 +573,9 @@ public class GamePanel extends JPanel implements Runnable {
             settingsWindow = ImageIO.read(getClass().getResourceAsStream("/Objects/SettingsWindow.png"));
 
             for (int i = 0; i < 8; i++) {
-                    acceptCutscene[i] = ImageIO.read(getClass().getResourceAsStream("/Objects/bad_Ending/BadEnding_" + (i + 1) + ".png"));
-                    rejectCutscene[i] = ImageIO.read(getClass().getResourceAsStream("/Objects/good_Ending/GoodEnding_" + (i + 1) + ".png"));
+                acceptCutscene[i] = ImageIO.read(getClass().getResourceAsStream("/Objects/bad_Ending/BadEnding_" + (i + 1) + ".png"));
+                rejectCutscene[i] = ImageIO.read(getClass().getResourceAsStream("/Objects/good_Ending/GoodEnding_" + (i + 1) + ".png"));
             }
-
 
 
         } catch (IOException e) {
@@ -768,19 +770,23 @@ public class GamePanel extends JPanel implements Runnable {
                 rejectHoverCount++;
                 // Move the button to predefined random locations
                 if (rejectHoverCount == 1) {
-                    rejectHitbox.x = 100; rejectHitbox.y = 150;
+                    rejectHitbox.x = 100;
+                    rejectHitbox.y = 150;
                 } else if (rejectHoverCount == 2) {
-                    rejectHitbox.x = 600; rejectHitbox.y = 450;
+                    rejectHitbox.x = 600;
+                    rejectHitbox.y = 450;
                 } else if (rejectHoverCount == 3) {
-                    rejectHitbox.x = 200; rejectHitbox.y = 500; // New jump spot
+                    rejectHitbox.x = 200;
+                    rejectHitbox.y = 500; // New jump spot
                 } else if (rejectHoverCount == 4) {
-                    rejectHitbox.x = 650; rejectHitbox.y = 100; // Another jump spot
+                    rejectHitbox.x = 650;
+                    rejectHitbox.y = 100; // Another jump spot
                 } else if (rejectHoverCount == 5) {
-                    rejectHitbox.x = 480; rejectHitbox.y = 300; // Returns to a clickable spot
+                    rejectHitbox.x = 480;
+                    rejectHitbox.y = 300; // Returns to a clickable spot
                 }
             }
         }
-
 
 
         // --- NEW: Cutscene & Ending Typewriter Logic ---
@@ -814,486 +820,331 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g;
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
 
-        if (currentMap == MAP_MAIN_MENU) {
-            if (menuFrames[menuFrameIndex] != null) {
-                g2.drawImage(menuFrames[menuFrameIndex], 0, 0, screenWidth, screenHeight, null);
-            }
-            // Optional: debug hitbox for the Play button
-            // g2.setColor(new Color(255, 255, 0, 100));
-            // g2.fillRect(playButtonHitbox.x, playButtonHitbox.y, playButtonHitbox.width, playButtonHitbox.height);
-            g2.dispose();
-            return; // skip drawing everything else
-        }
-
-        if (currentMap == MAP_ROOM && roomBg != null) {
-            g2.drawImage(roomBg, 0, 0, screenWidth, screenHeight, null);
-
-            // draw room barriers
-            g2.setColor(new Color(0, 0, 255, 100)); // Blue
-            for (Rectangle wall : roomWalls) {
-                g2.fillRect(wall.x, wall.y, wall.width, wall.height);
+            if (currentMap == MAP_MAIN_MENU) {
+                if (menuFrames[menuFrameIndex] != null)
+                    g2.drawImage(menuFrames[menuFrameIndex], 0, 0, screenWidth, screenHeight, null);
+                if (keyH.showDebug) {
+                    g2.setColor(new Color(255, 255, 0, 100));
+                    g2.fillRect(playButtonHitbox.x, playButtonHitbox.y, playButtonHitbox.width, playButtonHitbox.height);
+                    g2.fillRect(exitButtonHitbox.x, exitButtonHitbox.y, exitButtonHitbox.width, exitButtonHitbox.height);
+                }
+                g2.dispose();
+                return;
             }
 
-        } else if (currentMap == MAP_HOUSE && houseBg != null) {
-            g2.drawImage(houseBg, 0, 0, screenWidth, screenHeight, null);
+            if (currentMap == MAP_ROOM && roomBg != null) {
+                g2.drawImage(roomBg, 0, 0, screenWidth, screenHeight, null);
+                if (keyH.showDebug) {
+                    g2.setColor(new Color(0, 0, 255, 100));
+                    for (Rectangle wall : cManager.roomWalls) g2.fillRect(wall.x, wall.y, wall.width, wall.height);
+                }
+            } else if (currentMap == MAP_HOUSE && houseBg != null) {
+                g2.drawImage(houseBg, 0, 0, screenWidth, screenHeight, null);
+                if (demonVisible) {
+                    BufferedImage currentDemon = (demonFrameIndex == 0) ? demon1 : demon2;
+                    if (currentDemon != null) g2.drawImage(currentDemon, 330, 230, tileSize * 2, tileSize * 2, null);
+                }
+                if (keyH.showDebug) {
+                    g2.setColor(new Color(255, 0, 0, 100));
+                    g2.fillRect(debugIntroHitbox.x, debugIntroHitbox.y, debugIntroHitbox.width, debugIntroHitbox.height);
+                    g2.setColor(new Color(0, 0, 255, 100));
+                    for (Rectangle wall : cManager.houseWalls) g2.fillRect(wall.x, wall.y, wall.width, wall.height);
+                    g2.fillRect(tempBtnHitbox.x, tempBtnHitbox.y, tempBtnHitbox.width, tempBtnHitbox.height);
+                }
+            } else if (currentMap == MAP_STREET) {
+                BufferedImage currentStreet = (mapFrameIndex == 0) ? streetBg1 : streetBg2;
+                if (currentStreet != null) g2.drawImage(currentStreet, 0, 0, screenWidth, screenHeight, null);
+                if (keyH.showDebug) {
+                    g2.setColor(new Color(0, 0, 255, 100));
+                    for (Rectangle wall : cManager.streetWalls) g2.fillRect(wall.x, wall.y, wall.width, wall.height);
+                }
+            } else if (currentMap == MAP_WORKSHOP) {
+                BufferedImage currentWorkshop = (mapFrameIndex == 0) ? workshopBg1 : workshopBg2;
+                if (currentWorkshop != null) g2.drawImage(currentWorkshop, 0, 0, screenWidth, screenHeight, null);
+                for (int i = 0; i < obj.length; i++) {
+                    if (obj[i] != null && obj[i].name.equals("Glass Eye")) {
+                        obj[i].draw(g2, this);
+                        if (keyH.showDebug) {
+                            g2.setColor(new Color(255, 255, 0, 150));
+                            g2.fillRect(obj[i].hitbox.x, obj[i].hitbox.y, obj[i].hitbox.width, obj[i].hitbox.height);
+                        }
+                    }
+                }
+                if (keyH.showDebug) {
+                    g2.setColor(new Color(0, 0, 255, 100));
+                    for (Rectangle wall : cManager.workshopWalls) g2.fillRect(wall.x, wall.y, wall.width, wall.height);
+                }
+            } else if (currentMap == MAP_GREENHOUSE) {
+                BufferedImage currentGreenhouse = (mapFrameIndex == 0) ? greenhouseBg1 : greenhouseBg2;
+                if (currentGreenhouse != null) g2.drawImage(currentGreenhouse, 0, 0, screenWidth, screenHeight, null);
+                for (int i = 0; i < obj.length; i++) {
+                    if (obj[i] != null && obj[i].name.equals("Black Rose")) {
+                        obj[i].draw(g2, this);
+                        if (keyH.showDebug) {
+                            g2.setColor(new Color(255, 255, 0, 150));
+                            g2.fillRect(obj[i].hitbox.x, obj[i].hitbox.y, obj[i].hitbox.width, obj[i].hitbox.height);
+                        }
+                    }
+                }
+                if (keyH.showDebug) {
+                    g2.setColor(new Color(0, 0, 255, 100));
+                    for (Rectangle wall : cManager.greenhouseWalls)
+                        g2.fillRect(wall.x, wall.y, wall.width, wall.height);
+                }
+            } else if (currentMap == MAP_MUSEUM && museumBg != null) {
+                g2.drawImage(museumBg, 0, 0, screenWidth, screenHeight, null);
+                if (clue1 != null) g2.drawImage(clue1, 290, 280, tileSize - 7, tileSize - 6, null);
+                if (clue2 != null) g2.drawImage(clue2, 510, 437, tileSize - 7, tileSize - 6, null);
+                if (clue3 != null) g2.drawImage(clue3, 705, 320, tileSize - 10, tileSize - 9, null);
+                if (clue0 != null) g2.drawImage(clue0, 230, 538, tileSize - 7, tileSize - 6, null);
 
-            if (demonVisible) {
-                BufferedImage currentDemon = (demonFrameIndex == 0) ? demon1 : demon2;
-                if (currentDemon != null) {
-                    g2.drawImage(currentDemon, 330, 230, tileSize * 2, tileSize * 2, null);
+                g2.drawImage(getStatueImage(statue1State), 560, 250, 70, 100, null);
+                g2.drawImage(getStatueImage(statue2State), 630, 340, 70, 100, null);
+                g2.drawImage(getStatueImage(statue3State), 670, 228, 70, 100, null);
+
+                player.draw(g2);
+                g2.drawImage(glasscaseMuseum, 647, 385, tileSize * 2, tileSize * 4, null);
+
+                if (!locketUnlocked) {
+                    if (lockedCase != null) g2.drawImage(lockedCase, 170, 280, tileSize + 2, tileSize + 2, null);
+                } else {
+                    if (unlockedCase != null) g2.drawImage(unlockedCase, 150, 280, tileSize + 2, tileSize + 2, null);
+                }
+
+                if (keyH.showDebug) {
+                    g2.setColor(new Color(0, 0, 255, 100));
+                    g2.fillRect(clue1Hitbox.x, clue1Hitbox.y, clue1Hitbox.width, clue1Hitbox.height);
+                    g2.fillRect(clue2Hitbox.x, clue2Hitbox.y, clue2Hitbox.width, clue2Hitbox.height);
+                    g2.fillRect(clue3Hitbox.x, clue3Hitbox.y, clue3Hitbox.width, clue3Hitbox.height);
+                    g2.fillRect(clue0Hitbox.x, clue0Hitbox.y, clue0Hitbox.width, clue0Hitbox.height);
+                    for (Rectangle wall : cManager.museumWalls) g2.fillRect(wall.x, wall.y, wall.width, wall.height);
+                    g2.setColor(new Color(255, 100, 0, 100));
+                    g2.fillRect(mapStatue1Hitbox.x, mapStatue1Hitbox.y, mapStatue1Hitbox.width, mapStatue1Hitbox.height);
+                    g2.fillRect(mapStatue2Hitbox.x, mapStatue2Hitbox.y, mapStatue2Hitbox.width, mapStatue2Hitbox.height);
+                    g2.fillRect(mapStatue3Hitbox.x, mapStatue3Hitbox.y, mapStatue3Hitbox.width, mapStatue3Hitbox.height);
+                    if (!locketUnlocked) {
+                        g2.setColor(new Color(255, 0, 0, 100));
+                        g2.fillRect(glassCaseHitbox.x, glassCaseHitbox.y, glassCaseHitbox.width, glassCaseHitbox.height);
+                    }
                 }
             }
 
-            // Draw Debug Hitbox (Top Right)
-            g2.setColor(new Color(255, 0, 0, 100)); // Red
-            g2.fillRect(debugIntroHitbox.x, debugIntroHitbox.y, debugIntroHitbox.width, debugIntroHitbox.height);
-
-            // draw living room barriers
-            g2.setColor(new Color(0, 0, 255, 100)); // Blue
-            for (Rectangle wall : houseWalls) {
-                g2.fillRect(wall.x, wall.y, wall.width, wall.height);
-            }
-
-            // debug hitbox for temporary button
-            g2.setColor(new Color(0, 0, 255, 100)); // Blue
-            g2.fillRect(tempBtnHitbox.x, tempBtnHitbox.y, tempBtnHitbox.width, tempBtnHitbox.height);
-        } else if (currentMap == MAP_STREET) {
-            BufferedImage currentStreet = (mapFrameIndex == 0) ? streetBg1 : streetBg2;
-            if (currentStreet != null) g2.drawImage(currentStreet, 0, 0, screenWidth, screenHeight, null);
-
-            g2.setColor(new Color(0, 0, 255, 100)); // Blue
-            for (Rectangle wall : streetWalls) {
-                g2.fillRect(wall.x, wall.y, wall.width, wall.height);
-            }
-        } else if (currentMap == MAP_WORKSHOP) {
-            BufferedImage currentWorkshop = (mapFrameIndex == 0) ? workshopBg1 : workshopBg2;
-            if (currentWorkshop != null) g2.drawImage(currentWorkshop, 0, 0, screenWidth, screenHeight, null);
-            //scatter the glass eyes in workshop
-            for (int i = 0; i < obj.length; i++) {
-                if (obj[i] != null && obj[i].name.equals("Glass Eye")) {
-                    obj[i].draw(g2, this);
-                    //visible hitboxes for debugging
-                    g2.setColor(new Color(255, 255, 0, 150));
-                    g2.fillRect(obj[i].hitbox.x, obj[i].hitbox.y, obj[i].hitbox.width, obj[i].hitbox.height);
-                }
-            }
-
-            g2.setColor(new Color(0, 0, 255, 100));
-            for (Rectangle wall : workshopWalls) {
-                g2.fillRect(wall.x, wall.y, wall.width, wall.height);
-            }
-        } else if (currentMap == MAP_GREENHOUSE) {
-            BufferedImage currentGreenhouse = (mapFrameIndex == 0) ? greenhouseBg1 : greenhouseBg2;
-            if (currentGreenhouse != null) g2.drawImage(currentGreenhouse, 0, 0, screenWidth, screenHeight, null);
-            // scatter the roses in greenhoues
-            for (int i = 0; i < obj.length; i++) {
-                if (obj[i] != null && obj[i].name.equals("Black Rose")) {
-                    obj[i].draw(g2, this);
-                    //visible hitboxes for debugging
-                    g2.setColor(new Color(255, 255, 0, 150));
-                    g2.fillRect(obj[i].hitbox.x, obj[i].hitbox.y, obj[i].hitbox.width, obj[i].hitbox.height);
-                }
-            }
-
-            g2.setColor(new Color(0, 0, 255, 100));
-            for (Rectangle wall : greenhouseWalls) {
-                g2.fillRect(wall.x, wall.y, wall.width, wall.height);
-            }
-        } else if (currentMap == MAP_MUSEUM && museumBg != null) {
-            g2.drawImage(museumBg, 0, 0, screenWidth, screenHeight, null);
-            if (clue1 != null) g2.drawImage(clue1, 290, 280, tileSize - 7, tileSize - 6, null);
-            if (clue2 != null) g2.drawImage(clue2, 510, 437, tileSize - 7, tileSize - 6, null);
-            if (clue3 != null) g2.drawImage(clue3, 705, 320, tileSize - 10, tileSize - 9, null);
-            if (clue0 != null) g2.drawImage(clue0, 230, 538, tileSize - 7 , tileSize - 6, null);
-
-
-            // clue hitboxes
-            g2.setColor(new Color(0, 0, 255, 100)); // Blue debug boxes
-            g2.fillRect(clue1Hitbox.x, clue1Hitbox.y, clue1Hitbox.width, clue1Hitbox.height);
-            g2.fillRect(clue2Hitbox.x, clue2Hitbox.y, clue2Hitbox.width, clue2Hitbox.height);
-            g2.fillRect(clue3Hitbox.x, clue3Hitbox.y, clue3Hitbox.width, clue3Hitbox.height);
-            g2.fillRect(clue0Hitbox.x, clue0Hitbox.y, clue0Hitbox.width, clue0Hitbox.height);
-            // statue hitboxes
-            g2.setColor(new Color(255, 100, 0, 100)); // Orange
-            g2.fillRect(mapStatue1Hitbox.x, mapStatue1Hitbox.y, mapStatue1Hitbox.width, mapStatue1Hitbox.height);
-            g2.fillRect(mapStatue2Hitbox.x, mapStatue2Hitbox.y, mapStatue2Hitbox.width, mapStatue2Hitbox.height);
-            g2.fillRect(mapStatue3Hitbox.x, mapStatue3Hitbox.y, mapStatue3Hitbox.width, mapStatue3Hitbox.height);
-
-
-            g2.drawImage(getStatueImage(statue1State), 560, 250, 70, 100, null);
-
-            g2.drawImage(getStatueImage(statue2State), 630, 340, 70, 100, null);
-
-//            g2.drawImage(glasscaseMuseum, 647, 385, tileSize * 2, tileSize * 4, null);
-
-            g2.drawImage(getStatueImage(statue3State), 670, 228, 70, 100, null);
-
-            if (locketUnlocked == false) {
-                if (lockedCase != null) g2.drawImage(lockedCase, 170, 280, tileSize + 2, tileSize + 2, null);
-
-                // for debug locked glass case
+            if (keyH.showDebug) {
                 g2.setColor(new Color(255, 0, 0, 100));
-                g2.fillRect(glassCaseHitbox.x, glassCaseHitbox.y, glassCaseHitbox.width, glassCaseHitbox.height);
-            } else {
-                // replace locked glass case with unlocked glass case* 2,
-                if (unlockedCase != null) g2.drawImage(unlockedCase, 150, 280, tileSize + 2, tileSize + 2, null);
+                if (currentMap == MAP_HOUSE) {
+                    g2.fillRect(cManager.houseDoorHitbox.x, cManager.houseDoorHitbox.y, cManager.houseDoorHitbox.width, cManager.houseDoorHitbox.height);
+                    g2.fillRect(cManager.outsideBedroomDoorHitbox.x, cManager.outsideBedroomDoorHitbox.y, cManager.outsideBedroomDoorHitbox.width, cManager.outsideBedroomDoorHitbox.height);
+                } else if (currentMap == MAP_STREET) {
+                    g2.fillRect(cManager.streetHouseDoorHitbox.x, cManager.streetHouseDoorHitbox.y, cManager.streetHouseDoorHitbox.width, cManager.streetHouseDoorHitbox.height);
+                    g2.fillRect(cManager.streetMuseumDoorHitbox.x, cManager.streetMuseumDoorHitbox.y, cManager.streetMuseumDoorHitbox.width, cManager.streetMuseumDoorHitbox.height);
+                    g2.fillRect(cManager.streetWorkshopDoorHitbox.x, cManager.streetWorkshopDoorHitbox.y, cManager.streetWorkshopDoorHitbox.width, cManager.streetWorkshopDoorHitbox.height);
+                    g2.fillRect(cManager.streetGreenhouseDoorHitbox.x, cManager.streetGreenhouseDoorHitbox.y, cManager.streetGreenhouseDoorHitbox.width, cManager.streetGreenhouseDoorHitbox.height);
+                } else if (currentMap == MAP_WORKSHOP) {
+                    g2.fillRect(cManager.workshopDoorHitbox.x, cManager.workshopDoorHitbox.y, cManager.workshopDoorHitbox.width, cManager.workshopDoorHitbox.height);
+                    g2.drawImage(toolboxWorkshop, 113, 263, 37, 23, null);
+                    g2.drawImage(sofaWorkshop, 509, 369, 88, 190, null);
+                } else if (currentMap == MAP_GREENHOUSE) {
+                    g2.fillRect(cManager.greenhouseDoorHitbox.x, cManager.greenhouseDoorHitbox.y, cManager.greenhouseDoorHitbox.width, cManager.greenhouseDoorHitbox.height);
+                } else if (currentMap == MAP_MUSEUM) {
+                    g2.fillRect(cManager.museumDoorHitbox.x, cManager.museumDoorHitbox.y, cManager.museumDoorHitbox.width, cManager.museumDoorHitbox.height);
+                } else if (currentMap == MAP_ROOM) {
+                    g2.fillRect(cManager.bedroomDoorHitbox.x, cManager.bedroomDoorHitbox.y, cManager.bedroomDoorHitbox.width, cManager.bedroomDoorHitbox.height);
+                }
             }
 
-            g2.setColor(new Color(0, 0, 255, 100));
-            for (Rectangle wall : museumWalls) {
-                g2.fillRect(wall.x, wall.y, wall.width, wall.height);
-            }
-        }
+            if (currentMap != MAP_MUSEUM) player.draw(g2);
 
+            // --- UI DRAWING ---
+            if (player.glassEyesCollected >= 5 && inventoryBox != null)
+                g2.drawImage(inventoryBox, 10, 290, tileSize + 20, (tileSize * 4) + 50, null);
+            if (player.blackRosesCollected >= 5 && bouquetInv != null)
+                g2.drawImage(bouquetInv, 20, 300, tileSize, tileSize, null);
+            if (player.glassEyesCollected >= 5 && jarInv != null)
+                g2.drawImage(jarInv, 20, 300 + tileSize + 10, tileSize, tileSize, null);
+            if (locketUnlocked && locketInv != null)
+                g2.drawImage(locketInv, 20, 300 + (tileSize * 2) + 20, tileSize, tileSize, null);
+            if (chronosWatchUnlocked && watchInv != null)
+                g2.drawImage(watchInv, 20, 300 + (tileSize * 3) + 30, tileSize, tileSize, null);
 
-        // temporary: visible door hitboxes for debugging nyahahhaa
-        g2.setColor(new Color(255, 0, 0, 100));
-        if (currentMap == MAP_HOUSE) {
-            g2.fillRect(houseDoorHitbox.x, houseDoorHitbox.y, houseDoorHitbox.width, houseDoorHitbox.height);
-            g2.fillRect(outsideBedroomDoorHitbox.x, outsideBedroomDoorHitbox.y, outsideBedroomDoorHitbox.width, outsideBedroomDoorHitbox.height);
-        } else if (currentMap == MAP_STREET) {
-            g2.fillRect(streetHouseDoorHitbox.x, streetHouseDoorHitbox.y, streetHouseDoorHitbox.width, streetHouseDoorHitbox.height);
-            g2.fillRect(streetMuseumDoorHitbox.x, streetMuseumDoorHitbox.y, streetMuseumDoorHitbox.width, streetMuseumDoorHitbox.height);
-            g2.fillRect(streetWorkshopDoorHitbox.x, streetWorkshopDoorHitbox.y, streetWorkshopDoorHitbox.width, streetWorkshopDoorHitbox.height);
-            g2.fillRect(streetGreenhouseDoorHitbox.x, streetGreenhouseDoorHitbox.y, streetGreenhouseDoorHitbox.width, streetGreenhouseDoorHitbox.height);
-        } else if (currentMap == MAP_WORKSHOP) {
-            g2.fillRect(workshopDoorHitbox.x, workshopDoorHitbox.y, workshopDoorHitbox.width, workshopDoorHitbox.height);
-            g2.drawImage(toolboxWorkshop, 113, 263, 37, 23, null);
-            g2.drawImage(sofaWorkshop, 509, 369, 88, 190, null);
-        } else if (currentMap == MAP_GREENHOUSE) {
-            g2.fillRect(greenhouseDoorHitbox.x, greenhouseDoorHitbox.y, greenhouseDoorHitbox.width, greenhouseDoorHitbox.height);
-        } else if (currentMap == MAP_MUSEUM) {
-            // player position behind glass case in museum
-            player.draw(g2);
-            g2.drawImage(glasscaseMuseum, 647, 385, tileSize * 2, tileSize * 4, null);
-            g2.fillRect(museumDoorHitbox.x, museumDoorHitbox.y, museumDoorHitbox.width, museumDoorHitbox.height);
-        } else if (currentMap == MAP_ROOM) {
-            g2.fillRect(bedroomDoorHitbox.x, bedroomDoorHitbox.y, bedroomDoorHitbox.width, bedroomDoorHitbox.height);
-        }
-        // set player layer position back to normal after leaving the museum
-        if (currentMap != MAP_MUSEUM) {
-            player.draw(g2);
-        }
-
-        if (player.glassEyesCollected >= 5 && inventoryBox != null) {
-            // These coordinates create a bounding box perfectly sized behind all 4 item slots
-            g2.drawImage(inventoryBox, 10, 290, tileSize + 20, (tileSize * 4) + 50, null);
-        }
-
-        // bouquet appears after all 5 roses are collected
-        if (player.blackRosesCollected >= 5 && bouquetInv != null) {
-            g2.drawImage(bouquetInv, 20, 300, tileSize, tileSize, null);
-        }
-        // jar appears after all 5 glass eyes are collected
-        if (player.glassEyesCollected >= 5 && jarInv != null) {
-            g2.drawImage(jarInv, 20, 300 + tileSize + 10, tileSize, tileSize, null);
-        }
-
-        if (locketUnlocked == true && locketInv != null) {
-            // Drawn below the jar of eyes
-            g2.drawImage(locketInv, 20, 300 + (tileSize * 2) + 20, tileSize, tileSize, null);
-        }
-
-        if (chronosWatchUnlocked == true && watchInv != null) {
-            // Drawn below the locket (Notice it's tileSize*3 and +30 to keep the exact same spacing!)
-            g2.drawImage(watchInv, 20, 300 + (tileSize * 3) + 30, tileSize, tileSize, null);
-        }
-
-
-        if (passwordUIOpen == true) {
-            // low opacity black bg to dim background
-            g2.setColor(new Color(0, 0, 0, 150));
-            g2.fillRect(0, 0, screenWidth, screenHeight);
-
-            // Draw the UI centered (adjust coordinates if needed)
-            int uiX = screenWidth / 2 - 250;
-            int uiY = screenHeight / 2 - 200;
-            if (passwordUI != null) g2.drawImage(passwordUI, uiX, uiY, 500, 400, null);
-            if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
-
-            //  typed text inside the white box
-            g2.setFont(new Font("Arial", Font.BOLD, 36));
-            g2.setColor(Color.WHITE);
-
-            // adjust text input box
-            int textX = uiX + 100;
-            int textY = uiY + 260;
-            g2.drawString(keyH.currentInput, textX, textY);
-
-            g2.setColor(Color.MAGENTA);
-            int[] xPoints = {textX, textX - 15, textX + 15}; // The 3 X coordinates of the triangle
-            int[] yPoints = {textY, textY + 20, textY + 20}; // The 3 Y coordinates of the triangle
-            g2.fillPolygon(xPoints, yPoints, 3);
-
-            // debug hitboxes
-            g2.setColor(new Color(255, 255, 0, 150));
-            g2.fillRect(submitButtonHitbox.x, submitButtonHitbox.y, submitButtonHitbox.width, submitButtonHitbox.height);
-            g2.fillRect(backButtonHitbox.x, backButtonHitbox.y, backButtonHitbox.width, backButtonHitbox.height);
-        }
-
-        if (clue1_Open || clue2_Open || clue3_Open || clue0_Open) {
-            // low opacity bg
-            g2.setColor(new Color(0, 0, 0, 150));
-            g2.fillRect(0, 0, screenWidth, screenHeight);
-
-            int uiX = screenWidth / 2 - 250;
-            int uiY = screenHeight / 2 - 200;
-
-            if (clue1_Open && openClue1 != null) g2.drawImage(openClue1, uiX + 50, uiY + 70, 440, 220, null);
-            if (clue2_Open && openClue2 != null) g2.drawImage(openClue2, uiX + 110, uiY + 70, 270, 295, null);
-            if (clue3_Open && openClue3 != null) g2.drawImage(openClue3, uiX + 150, uiY + 70, 200, 330, null);
-            if (clue0_Open && openClue0 != null) g2.drawImage(openClue0, uiX + 50, uiY + 10, 420, 480, null);
-
-            if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
-
-            // back button hitbox
-            g2.setColor(new Color(255, 255, 0, 150));
-            g2.fillRect(backButtonHitbox.x, backButtonHitbox.y, backButtonHitbox.width, backButtonHitbox.height);
-        }
-
-        if (statue_Open == true) {
-
-            g2.setColor(new Color(0, 0, 0, 150));
-            g2.fillRect(0, 0, screenWidth, screenHeight);
-
-            // bg screen
-//                if (statueRotateScreen != null) {
-//                    g2.drawImage(statueRotateScreen, screenWidth / 2 - 350, screenHeight / 2 - 250, 700, 500, null);
-//                }
-
-            // draw 3 statues
-            g2.drawImage(getStatueImage(statue1State), uiStatue1Hitbox.x, uiStatue1Hitbox.y, uiStatue1Hitbox.width, uiStatue1Hitbox.height, null);
-            g2.drawImage(getStatueImage(statue2State), uiStatue2Hitbox.x, uiStatue2Hitbox.y, uiStatue2Hitbox.width, uiStatue2Hitbox.height, null);
-            g2.drawImage(getStatueImage(statue3State), uiStatue3Hitbox.x, uiStatue3Hitbox.y, uiStatue3Hitbox.width, uiStatue3Hitbox.height, null);
-
-            if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
-
-            // statue hitboxes
-            g2.setColor(new Color(0, 255, 0, 100)); // Green
-            g2.fillRect(uiStatue1Hitbox.x, uiStatue1Hitbox.y, uiStatue1Hitbox.width, uiStatue1Hitbox.height);
-            g2.fillRect(uiStatue2Hitbox.x, uiStatue2Hitbox.y, uiStatue2Hitbox.width, uiStatue2Hitbox.height);
-            g2.fillRect(uiStatue3Hitbox.x, uiStatue3Hitbox.y, uiStatue3Hitbox.width, uiStatue3Hitbox.height);
-        }
-
-        if (introPuzzleOpen == true) {
-            // dim bg
-            g2.setColor(new Color(0, 0, 0, 150));
-            g2.fillRect(0, 0, screenWidth, screenHeight);
-
-            // bg screen
-//            int uiX = screenWidth/2 - 250;
-//            int uiY = screenHeight/2 - 300;
-//            if (listScreen1 != null) g2.drawImage(listScreen1, uiX, uiY, 500, 600, null);
-            if (introPuzzlePage == 1 && listScreen1 != null) {
-                g2.drawImage(listScreen1, 230, 100, 420, 480, null);
-
-                // Row 1 (Desc 1): Jar, Bouquet, Watch
-//                    if (jarInv != null)
-//                        g2.drawImage(jarInv, r1c1Hitbox.x, r1c1Hitbox.y, r1c1Hitbox.width, r1c1Hitbox.height, null);
-//                    if (bouquetInv != null)
-//                        g2.drawImage(bouquetInv, r1c2Hitbox.x, r1c2Hitbox.y, r1c2Hitbox.width, r1c2Hitbox.height, null);
-//                    if (watchInv != null)
-//                        g2.drawImage(watchInv, r1c3Hitbox.x, r1c3Hitbox.y, r1c3Hitbox.width, r1c3Hitbox.height, null);
-
-                // Row 2 (Desc 2): Locket, Watch, Bouquet
-//                    if (locketInv != null)
-//                        g2.drawImage(locketInv, r2c1Hitbox.x, r2c1Hitbox.y, r2c1Hitbox.width, r2c1Hitbox.height, null);
-//                    if (watchInv != null)
-//                        g2.drawImage(watchInv, r2c2Hitbox.x, r2c2Hitbox.y, r2c2Hitbox.width, r2c2Hitbox.height, null);
-//                    if (bouquetInv != null)
-//                        g2.drawImage(bouquetInv, r2c3Hitbox.x, r2c3Hitbox.y, r2c3Hitbox.width, r2c3Hitbox.height, null);
-
-                // Navigation (Only Next on Page 1)
-                if (nextBtn != null)
-                    g2.drawImage(nextBtn, nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height, null);
-            }
-            // PAGE 2
-            else if (introPuzzlePage == 2 && listScreen2 != null) {
-                g2.drawImage(listScreen2, 230, 100, 420, 480, null);
-
-                // Row 1 (Desc 3): Watch, Locket, Bouquet
-//                    if (watchInv != null)
-//                        g2.drawImage(watchInv, r1c1Hitbox.x, r1c1Hitbox.y, r1c1Hitbox.width, r1c1Hitbox.height, null);
-//                    if (locketInv != null)
-//                        g2.drawImage(locketInv, r1c2Hitbox.x, r1c2Hitbox.y, r1c2Hitbox.width, r1c2Hitbox.height, null);
-//                    if (bouquetInv != null)
-//                        g2.drawImage(bouquetInv, r1c3Hitbox.x, r1c3Hitbox.y, r1c3Hitbox.width, r1c3Hitbox.height, null);
-
-                // Row 2 (Desc 4): Jar, Bouquet, Locket
-//                    if (jarInv != null)
-//                        g2.drawImage(jarInv, r2c1Hitbox.x, r2c1Hitbox.y, r2c1Hitbox.width, r2c1Hitbox.height, null);
-//                    if (bouquetInv != null)
-//                        g2.drawImage(bouquetInv, r2c2Hitbox.x, r2c2Hitbox.y, r2c2Hitbox.width, r2c2Hitbox.height, null);
-//                    if (locketInv != null)
-//                        g2.drawImage(locketInv, r2c3Hitbox.x, r2c3Hitbox.y, r2c3Hitbox.width, r2c3Hitbox.height, null);
-
-                // Navigation (Both on Page 2)
-                if (prevBtn != null)
-                    g2.drawImage(prevBtn, prevButtonHitbox.x, prevButtonHitbox.y, prevButtonHitbox.width, prevButtonHitbox.height, null);
-                if (nextBtn != null)
-                    g2.drawImage(nextBtn, nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height, null);
-            }
-            // PAGE 3
-            else if (introPuzzlePage == 3 && gibberishFrames[gibberishFrameIndex] != null) {
-
-                // Draw the current animated frame
-                g2.drawImage(gibberishFrames[gibberishFrameIndex], 230, 100, 420, 480, null);
-
-                // Navigation (Both on Page 3)
-                if (prevBtn != null)
-                    g2.drawImage(prevBtn, prevButtonHitbox.x, prevButtonHitbox.y, prevButtonHitbox.width, prevButtonHitbox.height, null);
-                if (nextBtn != null)
-                    g2.drawImage(nextBtn, nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height, null);
-            }
-
-//            if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
-
-            // debug hitboxes
-            g2.setColor(new Color(255, 255, 0, 150));
-            g2.fillRect(r1c1Hitbox.x, r1c1Hitbox.y, r1c1Hitbox.width, r1c1Hitbox.height);
-            g2.fillRect(r1c2Hitbox.x, r1c2Hitbox.y, r1c2Hitbox.width, r1c2Hitbox.height);
-            g2.fillRect(r1c3Hitbox.x, r1c3Hitbox.y, r1c3Hitbox.width, r1c3Hitbox.height);
-            g2.fillRect(r2c1Hitbox.x, r2c1Hitbox.y, r2c1Hitbox.width, r2c1Hitbox.height);
-            g2.fillRect(r2c2Hitbox.x, r2c2Hitbox.y, r2c2Hitbox.width, r2c2Hitbox.height);
-            g2.fillRect(r2c3Hitbox.x, r2c3Hitbox.y, r2c3Hitbox.width, r2c3Hitbox.height);
-            g2.fillRect(nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height);
-        }
-
-        if (currentQuest >= 1 && currentQuest <= 5) {
-            int tabX = screenWidth - 230; // Top right corner
-            int tabY = 30;
-
-            if (currentQuest == 1 && objTab1 != null) g2.drawImage(objTab1, tabX, tabY, 200, 120, null);
-            else if (currentQuest == 2 && objTab2 != null) g2.drawImage(objTab2, tabX, tabY, 200, 120, null);
-            else if (currentQuest == 3 && objTab3 != null) g2.drawImage(objTab3, tabX, tabY, 200, 120, null);
-            else if (currentQuest == 4 && objTab4 != null) g2.drawImage(objTab4, tabX, tabY, 200, 120, null);
-            else if (currentQuest == 5 && objTab5 != null) g2.drawImage(objTab5, tabX, tabY, 200, 120, null);
-        }
-
-        // --- NEW: DRAW END SCREEN ---
-        if (currentQuest == 6) {
-            // Dim background heavily
-            g2.setColor(new Color(0, 0, 0, 200));
-            g2.fillRect(0, 0, screenWidth, screenHeight);
-
-            // Draw End Screen and Again Button
-            if (endScreen != null)
-                g2.drawImage(endScreen, screenWidth / 2 - 250, screenHeight / 2 - 150, 500, 200, null);
-            if (againBtn != null)
-                g2.drawImage(againBtn, againBtnHitbox.x, againBtnHitbox.y, againBtnHitbox.width, againBtnHitbox.height, null);
-
-            // Debug Hitbox for Again Button
-            g2.setColor(new Color(255, 255, 0, 150));
-            g2.fillRect(againBtnHitbox.x, againBtnHitbox.y, againBtnHitbox.width, againBtnHitbox.height);
-        }
-
-
-        // DRAW DIALOGUE BOX ---
-        // --- UPDATED: DRAW DIALOGUE BOX ---
-        if (isDialogueActive) {
-            g2.setColor(new Color(40, 40, 40, 220));
-            g2.fillRect(0, screenHeight - 185, 864, 185);
-
-            // Text Styling (Default)
-            g2.setColor(Color.WHITE);
-            g2.setFont(new Font("Arial", Font.PLAIN, 22));
-
-            // Special Styling for round 10 of Dialogue 2
-            if ((currentDialogueArray == houseDialogue2 && currentDialogueListIndex == 9) ||
-                    (currentDialogueArray == houseDialogue3 && (currentDialogueListIndex == 4 || currentDialogueListIndex == 8))) {
-                g2.setColor(new Color(220, 50, 50)); // Red
-                g2.setFont(new Font("Arial", Font.BOLD, 24));
-            }
-
-            int textX = 40;
-            int textY = screenHeight - 130;
-
-            for (String line : currentDialogue.split("\n")) {
-                g2.drawString(line, textX, textY);
-                textY += g2.getFontMetrics().getHeight() + 8;
-            }
-
-            if (nextBtn != null) {
-                g2.drawImage(nextBtn, dialogueNextHitbox.x, dialogueNextHitbox.y, dialogueNextHitbox.width, dialogueNextHitbox.height, null);
-            }
-        }
-
-        if (showEndingGibberish) {
-            g2.setColor(new Color(0, 0, 0, 200));
-            g2.fillRect(0, 0, screenWidth, screenHeight);
-
-            if (endingGibberishFrames[endingGibberishIndex] != null) {
-                g2.drawImage(endingGibberishFrames[endingGibberishIndex], 230, 100, 420, 480, null);
-            }
-            if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
-        }
-
-        // --- NEW: Draw Choice Screen (Prepared) ---
-        if (showChoiceScreen) {
-            g2.setColor(new Color(0, 0, 0, 200));
-            g2.fillRect(0, 0, screenWidth, screenHeight);
-
-            if (acceptBtn != null) g2.drawImage(acceptBtn, acceptHitbox.x, acceptHitbox.y, acceptHitbox.width, acceptHitbox.height, null);
-            if (rejectBtn != null) g2.drawImage(rejectBtn, rejectHitbox.x, rejectHitbox.y, rejectHitbox.width, rejectHitbox.height, null);
-        }
-
-        if (currentMap != MAP_MAIN_MENU && !playingAcceptCutscene && !playingRejectCutscene && !showTheEndText) {
-
-            // Draw the eye icon in the top left
-            if (settingsBtn != null) {
-                g2.drawImage(settingsBtn, settingsBtnHitbox.x, settingsBtnHitbox.y, settingsBtnHitbox.width, settingsBtnHitbox.height, null);
-            }
-
-            // Draw the pop-up window if opened
-            if (isSettingsOpen) {
-                // Dim the background
+            if (passwordUIOpen) {
                 g2.setColor(new Color(0, 0, 0, 150));
                 g2.fillRect(0, 0, screenWidth, screenHeight);
-
-                // Draw the window (Centered 400x300)
-                if (settingsWindow != null) {
-                    g2.drawImage(settingsWindow, 232, 186, 400, 300, null);
+                int uiX = screenWidth / 2 - 250;
+                int uiY = screenHeight / 2 - 200;
+                if (passwordUI != null) g2.drawImage(passwordUI, uiX, uiY, 500, 400, null);
+                if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
+                g2.setFont(new Font("Arial", Font.BOLD, 36));
+                g2.setColor(Color.WHITE);
+                int textX = uiX + 100;
+                int textY = uiY + 260;
+                g2.drawString(keyH.currentInput, textX, textY);
+                g2.setColor(Color.MAGENTA);
+                g2.fillPolygon(new int[]{textX, textX - 15, textX + 15}, new int[]{textY, textY + 20, textY + 20}, 3);
+                if (keyH.showDebug) {
+                    g2.setColor(new Color(255, 255, 0, 150));
+                    g2.fillRect(submitButtonHitbox.x, submitButtonHitbox.y, submitButtonHitbox.width, submitButtonHitbox.height);
+                    g2.fillRect(backButtonHitbox.x, backButtonHitbox.y, backButtonHitbox.width, backButtonHitbox.height);
                 }
-
-                // Debug hitboxes (Uncomment these to see where the buttons actually are so you can adjust the coordinates!)
-                 g2.setColor(new Color(255, 255, 0, 100));
-                 g2.fillRect(resumeHitbox.x, resumeHitbox.y, resumeHitbox.width, resumeHitbox.height);
-                 g2.fillRect(exitMenuHitbox.x, exitMenuHitbox.y, exitMenuHitbox.width, exitMenuHitbox.height);
-            }
-        }
-
-        if (playingAcceptCutscene || playingRejectCutscene) {
-            g2.setColor(Color.BLACK);
-            g2.fillRect(0, 0, screenWidth, screenHeight); // Black background
-
-            BufferedImage currentFrame = null;
-            if (playingAcceptCutscene && acceptCutscene[cutsceneFrameIndex] != null) {
-                currentFrame = acceptCutscene[cutsceneFrameIndex];
-            } else if (playingRejectCutscene && rejectCutscene[cutsceneFrameIndex] != null) {
-                currentFrame = rejectCutscene[cutsceneFrameIndex];
             }
 
-            if (currentFrame != null) {
-                g2.drawImage(currentFrame, 0, 0, screenWidth, screenHeight, null);
+            if (clue1_Open || clue2_Open || clue3_Open || clue0_Open) {
+                g2.setColor(new Color(0, 0, 0, 150));
+                g2.fillRect(0, 0, screenWidth, screenHeight);
+                int uiX = screenWidth / 2 - 250;
+                int uiY = screenHeight / 2 - 200;
+                if (clue1_Open && openClue1 != null) g2.drawImage(openClue1, uiX + 50, uiY + 70, 440, 220, null);
+                if (clue2_Open && openClue2 != null) g2.drawImage(openClue2, uiX + 110, uiY + 70, 270, 295, null);
+                if (clue3_Open && openClue3 != null) g2.drawImage(openClue3, uiX + 150, uiY + 70, 200, 330, null);
+                if (clue0_Open && openClue0 != null) g2.drawImage(openClue0, uiX + 50, uiY + 10, 420, 480, null);
+                if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
+                if (keyH.showDebug) {
+                    g2.setColor(new Color(255, 255, 0, 150));
+                    g2.fillRect(backButtonHitbox.x, backButtonHitbox.y, backButtonHitbox.width, backButtonHitbox.height);
+                }
             }
 
-            if (showTheEndText) {
+            if (statue_Open) {
+                g2.setColor(new Color(0, 0, 0, 150));
+                g2.fillRect(0, 0, screenWidth, screenHeight);
+                g2.drawImage(getStatueImage(statue1State), uiStatue1Hitbox.x, uiStatue1Hitbox.y, uiStatue1Hitbox.width, uiStatue1Hitbox.height, null);
+                g2.drawImage(getStatueImage(statue2State), uiStatue2Hitbox.x, uiStatue2Hitbox.y, uiStatue2Hitbox.width, uiStatue2Hitbox.height, null);
+                g2.drawImage(getStatueImage(statue3State), uiStatue3Hitbox.x, uiStatue3Hitbox.y, uiStatue3Hitbox.width, uiStatue3Hitbox.height, null);
+                if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
+                if (keyH.showDebug) {
+                    g2.setColor(new Color(0, 255, 0, 100));
+                    g2.fillRect(uiStatue1Hitbox.x, uiStatue1Hitbox.y, uiStatue1Hitbox.width, uiStatue1Hitbox.height);
+                    g2.fillRect(uiStatue2Hitbox.x, uiStatue2Hitbox.y, uiStatue2Hitbox.width, uiStatue2Hitbox.height);
+                    g2.fillRect(uiStatue3Hitbox.x, uiStatue3Hitbox.y, uiStatue3Hitbox.width, uiStatue3Hitbox.height);
+                }
+            }
+
+            if (introPuzzleOpen) {
+                g2.setColor(new Color(0, 0, 0, 150));
+                g2.fillRect(0, 0, screenWidth, screenHeight);
+                if (introPuzzlePage == 1 && listScreen1 != null) {
+                    g2.drawImage(listScreen1, 230, 100, 420, 480, null);
+                    if (nextBtn != null)
+                        g2.drawImage(nextBtn, nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height, null);
+                } else if (introPuzzlePage == 2 && listScreen2 != null) {
+                    g2.drawImage(listScreen2, 230, 100, 420, 480, null);
+                    if (prevBtn != null)
+                        g2.drawImage(prevBtn, prevButtonHitbox.x, prevButtonHitbox.y, prevButtonHitbox.width, prevButtonHitbox.height, null);
+                    if (nextBtn != null)
+                        g2.drawImage(nextBtn, nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height, null);
+                } else if (introPuzzlePage == 3 && gibberishFrames[gibberishFrameIndex] != null) {
+                    g2.drawImage(gibberishFrames[gibberishFrameIndex], 230, 100, 420, 480, null);
+                    if (prevBtn != null)
+                        g2.drawImage(prevBtn, prevButtonHitbox.x, prevButtonHitbox.y, prevButtonHitbox.width, prevButtonHitbox.height, null);
+                    if (nextBtn != null)
+                        g2.drawImage(nextBtn, nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height, null);
+                }
+                if (keyH.showDebug) {
+                    g2.setColor(new Color(255, 255, 0, 150));
+                    g2.fillRect(r1c1Hitbox.x, r1c1Hitbox.y, r1c1Hitbox.width, r1c1Hitbox.height);
+                    g2.fillRect(r1c2Hitbox.x, r1c2Hitbox.y, r1c2Hitbox.width, r1c2Hitbox.height);
+                    g2.fillRect(r1c3Hitbox.x, r1c3Hitbox.y, r1c3Hitbox.width, r1c3Hitbox.height);
+                    g2.fillRect(r2c1Hitbox.x, r2c1Hitbox.y, r2c1Hitbox.width, r2c1Hitbox.height);
+                    g2.fillRect(r2c2Hitbox.x, r2c2Hitbox.y, r2c2Hitbox.width, r2c2Hitbox.height);
+                    g2.fillRect(r2c3Hitbox.x, r2c3Hitbox.y, r2c3Hitbox.width, r2c3Hitbox.height);
+                    g2.fillRect(nextButtonHitbox.x, nextButtonHitbox.y, nextButtonHitbox.width, nextButtonHitbox.height);
+                }
+            }
+
+            if (currentQuest >= 1 && currentQuest <= 5) {
+                int tabX = screenWidth - 230;
+                int tabY = 30;
+                if (currentQuest == 1 && objTab1 != null) g2.drawImage(objTab1, tabX, tabY, 200, 120, null);
+                else if (currentQuest == 2 && objTab2 != null) g2.drawImage(objTab2, tabX, tabY, 200, 120, null);
+                else if (currentQuest == 3 && objTab3 != null) g2.drawImage(objTab3, tabX, tabY, 200, 120, null);
+                else if (currentQuest == 4 && objTab4 != null) g2.drawImage(objTab4, tabX, tabY, 200, 120, null);
+                else if (currentQuest == 5 && objTab5 != null) g2.drawImage(objTab5, tabX, tabY, 200, 120, null);
+            }
+
+            if (currentQuest == 6) {
+                g2.setColor(new Color(0, 0, 0, 200));
+                g2.fillRect(0, 0, screenWidth, screenHeight);
+                if (endScreen != null)
+                    g2.drawImage(endScreen, screenWidth / 2 - 250, screenHeight / 2 - 150, 500, 200, null);
+                if (againBtn != null)
+                    g2.drawImage(againBtn, againBtnHitbox.x, againBtnHitbox.y, againBtnHitbox.width, againBtnHitbox.height, null);
+                if (keyH.showDebug) {
+                    g2.setColor(new Color(255, 255, 0, 150));
+                    g2.fillRect(againBtnHitbox.x, againBtnHitbox.y, againBtnHitbox.width, againBtnHitbox.height);
+                }
+            }
+
+            if (isDialogueActive) {
+                g2.setColor(new Color(40, 40, 40, 220));
+                g2.fillRect(0, screenHeight - 185, 864, 185);
+                g2.setColor(Color.WHITE);
+                g2.setFont(new Font("Arial", Font.PLAIN, 22));
+                if ((currentDialogueArray == houseDialogue2 && currentDialogueListIndex == 9) || (currentDialogueArray == houseDialogue3 && (currentDialogueListIndex == 4 || currentDialogueListIndex == 8))) {
+                    g2.setColor(new Color(220, 50, 50));
+                    g2.setFont(new Font("Arial", Font.BOLD, 24));
+                }
+                int textX = 40;
+                int textY = screenHeight - 130;
+                for (String line : currentDialogue.split("\n")) {
+                    g2.drawString(line, textX, textY);
+                    textY += g2.getFontMetrics().getHeight() + 8;
+                }
+                if (nextBtn != null)
+                    g2.drawImage(nextBtn, dialogueNextHitbox.x, dialogueNextHitbox.y, dialogueNextHitbox.width, dialogueNextHitbox.height, null);
+            }
+
+            if (showEndingGibberish) {
+                g2.setColor(new Color(0, 0, 0, 200));
+                g2.fillRect(0, 0, screenWidth, screenHeight);
+                if (endingGibberishFrames[endingGibberishIndex] != null)
+                    g2.drawImage(endingGibberishFrames[endingGibberishIndex], 230, 100, 420, 480, null);
+                if (backBtn != null) g2.drawImage(backBtn, 50, 50, 60, 60, null);
+            }
+
+            if (showChoiceScreen) {
+                g2.setColor(new Color(0, 0, 0, 200));
+                g2.fillRect(0, 0, screenWidth, screenHeight);
+                if (acceptBtn != null)
+                    g2.drawImage(acceptBtn, acceptHitbox.x, acceptHitbox.y, acceptHitbox.width, acceptHitbox.height, null);
+                if (rejectBtn != null)
+                    g2.drawImage(rejectBtn, rejectHitbox.x, rejectHitbox.y, rejectHitbox.width, rejectHitbox.height, null);
+            }
+
+            if (currentMap != MAP_MAIN_MENU && !playingAcceptCutscene && !playingRejectCutscene && !showTheEndText) {
+                if (settingsBtn != null)
+                    g2.drawImage(settingsBtn, settingsBtnHitbox.x, settingsBtnHitbox.y, settingsBtnHitbox.width, settingsBtnHitbox.height, null);
+                if (isSettingsOpen) {
+                    g2.setColor(new Color(0, 0, 0, 150));
+                    g2.fillRect(0, 0, screenWidth, screenHeight);
+                    if (settingsWindow != null) g2.drawImage(settingsWindow, 232, 186, 400, 300, null);
+                    if (keyH.showDebug) {
+                        g2.setColor(new Color(255, 255, 0, 100));
+                        g2.fillRect(resumeHitbox.x, resumeHitbox.y, resumeHitbox.width, resumeHitbox.height);
+                        g2.fillRect(exitMenuHitbox.x, exitMenuHitbox.y, exitMenuHitbox.width, exitMenuHitbox.height);
+                    }
+                }
+            }
+
+            if (playingAcceptCutscene || playingRejectCutscene) {
                 g2.setColor(Color.BLACK);
-                g2.setFont(new Font("Arial", Font.BOLD, 48));
-                // Center the text
-                int textX = screenWidth / 2 + 100;
-                int textY = screenHeight / 2;
-                g2.drawString(currentTheEndText, textX, textY);
+                g2.fillRect(0, 0, screenWidth, screenHeight);
+                BufferedImage currentFrame = null;
+                if (playingAcceptCutscene && acceptCutscene[cutsceneFrameIndex] != null)
+                    currentFrame = acceptCutscene[cutsceneFrameIndex];
+                else if (playingRejectCutscene && rejectCutscene[cutsceneFrameIndex] != null)
+                    currentFrame = rejectCutscene[cutsceneFrameIndex];
+                if (currentFrame != null) g2.drawImage(currentFrame, 0, 0, screenWidth, screenHeight, null);
+                if (showTheEndText) {
+                    g2.setColor(Color.BLACK);
+                    g2.setFont(new Font("Arial", Font.BOLD, 48));
+                    g2.drawString(currentTheEndText, screenWidth / 2 + 100, screenHeight / 2);
+                }
+                if (showMenuButton && menuBtn != null)
+                    g2.drawImage(menuBtn, menuBtnHitbox.x, menuBtnHitbox.y, menuBtnHitbox.width, menuBtnHitbox.height, null);
             }
-
-            if (showMenuButton && menuBtn != null) {
-                g2.drawImage(menuBtn, menuBtnHitbox.x, menuBtnHitbox.y, menuBtnHitbox.width, menuBtnHitbox.height, null);
-            }
-        }
-
             g2.dispose();
         }
+
     }

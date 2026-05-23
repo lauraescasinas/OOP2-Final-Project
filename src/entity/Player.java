@@ -360,115 +360,26 @@ public class Player extends Entity{
         }
 
 
-        if (keyH.upPressed == true || keyH.downPressed == true ||
-                keyH.leftPressed == true || keyH.rightPressed == true) {
-
-            int nextX = x;
-            int nextY = y;
-
-            if (keyH.upPressed == true) {
-                direction = "up";
-                nextY -= speed;
-            } else if (keyH.downPressed == true) {
-                direction = "down";
-                nextY += speed;
-            } else if (keyH.leftPressed == true) {
-                direction = "left";
-                nextX -= speed;
-            } else if (keyH.rightPressed == true) {
-                direction = "right";
-                nextX += speed;
-            }
+        if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
+            int nextX = x; int nextY = y;
+            if (keyH.upPressed == true) { direction = "up"; nextY -= speed; }
+            else if (keyH.downPressed == true) { direction = "down"; nextY += speed; }
+            else if (keyH.leftPressed == true) { direction = "left"; nextX -= speed; }
+            else if (keyH.rightPressed == true) { direction = "right"; nextX += speed; }
 
             Rectangle nextHitbox = new Rectangle(nextX, nextY, gp.tileSize, gp.tileSize);
-            boolean collisionOn = false;
 
-            // 3. Check if the future hitbox hits any solid barriers
-            if (gp.currentMap == gp.MAP_ROOM) {
-                for (Rectangle wall : gp.roomWalls) {
-                    if (nextHitbox.intersects(wall)) {
-                        collisionOn = true;
-                        break; // Stop checking! We hit something, no need to check the rest.
-                    }
-                }
+            // --- NEW: Using the CollisionManager! ---
+            boolean collisionOn = gp.cManager.checkWallCollision(nextHitbox, gp.currentMap);
+            if (!collisionOn) {
+                collisionOn = gp.cManager.checkLockedDoors(nextHitbox, gp.currentMap, gp.currentQuest);
             }
 
-            if (gp.currentMap == gp.MAP_HOUSE) {
-                for (Rectangle wall : gp.houseWalls) {
-                    if (nextHitbox.intersects(wall)) {
-                        collisionOn = true;
-                        break; // Stop checking! We hit something, no need to check the rest.
-                    }
-                }
-
-                if (gp.currentQuest < 1 && nextHitbox.intersects(gp.houseDoorHitbox)) {
-                    collisionOn = true;
-                    System.out.println("The door is locked. I must finish the list first.");
-                }
-            }
-
-            if (gp.currentMap == gp.MAP_STREET) {
-                // Museum door locked until quest 3
-                if (gp.currentQuest < 3 && nextHitbox.intersects(gp.streetMuseumDoorHitbox)) {
-                    collisionOn = true;
-                }
-                // Greenhouse door locked until quest 2
-                if (gp.currentQuest < 2 && nextHitbox.intersects(gp.streetGreenhouseDoorHitbox)) {
-                    collisionOn = true;
-                }
-                // Workshop door locked until quest 1
-                if (gp.currentQuest < 1 && nextHitbox.intersects(gp.streetWorkshopDoorHitbox)) {
-                    collisionOn = true;
-                }
-
-                for (Rectangle wall : gp.streetWalls) {
-                    if (nextHitbox.intersects(wall)) {
-                        collisionOn = true;
-                        break; // Stop checking! We hit something, no need to check the rest.
-                    }
-                }
-
-            }
-
-            if (gp.currentMap == gp.MAP_WORKSHOP) {
-                for (Rectangle wall : gp.workshopWalls) {
-                    if (nextHitbox.intersects(wall)) {
-                        collisionOn = true;
-                        break; // Stop checking! We hit something, no need to check the rest.
-                    }
-                }
-            }
-
-            if (gp.currentMap == gp.MAP_GREENHOUSE) {
-                for (Rectangle wall : gp.greenhouseWalls) {
-                    if (nextHitbox.intersects(wall)) {
-                        collisionOn = true;
-                        break; // Stop checking! We hit something, no need to check the rest.
-                    }
-                }
-            }
-
-            if (gp.currentMap == gp.MAP_MUSEUM) {
-                for (Rectangle wall : gp.museumWalls) {
-                    if (nextHitbox.intersects(wall)) {
-                        collisionOn = true;
-                        break; // Stop checking! We hit something, no need to check the rest.
-                    }
-                }
-            }
-
-            if (collisionOn == false) {
-                x = nextX;
-                y = nextY;
-            }
+            if (collisionOn == false) { x = nextX; y = nextY; }
 
             spriteCounter++;
             if (spriteCounter > 25) {
-                if (spriteNum == 1) {
-                    spriteNum = 2;
-                } else if (spriteNum == 2) {
-                    spriteNum = 1;
-                }
+                spriteNum = (spriteNum == 1) ? 2 : 1;
                 spriteCounter = 0;
             }
         }
@@ -477,17 +388,77 @@ public class Player extends Entity{
 
         if (gp.currentMap == gp.MAP_HOUSE) {
             if (gp.currentQuest == 5 && gp.houseEventState < 7) {
-                // Ending Event Trigger
                 if (playerHitbox.intersects(gp.tempBtnHitbox)) {
-                    gp.houseEventState = 7;
-                    gp.demonVisible = true;
-                    gp.startDialogue(gp.houseDialogue3);
+                    gp.houseEventState = 7; gp.demonVisible = true; gp.startDialogue(gp.houseDialogue3);
                 }
             } else if (gp.houseEventState == 0) {
-                // Intro Event Trigger
                 if (playerHitbox.intersects(gp.tempBtnHitbox)) {
-                    gp.houseEventState = 1;
-                    gp.startDialogue(gp.houseDialogue1);
+                    gp.houseEventState = 1; gp.startDialogue(gp.houseDialogue1);
+                }
+            }
+        }
+
+        // ----------------------------------------------------
+        // --- MAP DOOR TRANSITIONS (Using cManager) ---
+        // ----------------------------------------------------
+        if (gp.currentMap == gp.MAP_ROOM) {
+            if (playerHitbox.intersects(gp.cManager.bedroomDoorHitbox)) {
+                gp.currentMap = gp.MAP_HOUSE; direction = "right";
+                x = gp.cManager.outsideBedroomDoorHitbox.x + gp.cManager.outsideBedroomDoorHitbox.width + 10;
+                y = gp.cManager.outsideBedroomDoorHitbox.y + (gp.cManager.outsideBedroomDoorHitbox.height / 2) - (gp.tileSize / 2);
+            }
+        } else if (gp.currentMap == gp.MAP_HOUSE) {
+            if (playerHitbox.intersects(gp.cManager.houseDoorHitbox)) {
+                if (gp.currentQuest >= 1) {
+                    gp.currentMap = gp.MAP_STREET; direction = "down";
+                    x = gp.cManager.streetHouseDoorHitbox.x + (gp.cManager.streetHouseDoorHitbox.width / 2) - (gp.tileSize / 2);
+                    y = gp.cManager.streetHouseDoorHitbox.y + gp.cManager.streetHouseDoorHitbox.height + 10;
+                }
+            } else if (playerHitbox.intersects(gp.cManager.outsideBedroomDoorHitbox)) {
+                gp.currentMap = gp.MAP_ROOM; direction = "left";
+                x = gp.cManager.bedroomDoorHitbox.x - gp.tileSize - 10;
+                y = gp.cManager.bedroomDoorHitbox.y + (gp.cManager.bedroomDoorHitbox.height / 2) - (gp.tileSize / 2);
+            }
+        } else if (gp.currentMap == gp.MAP_WORKSHOP) {
+            if (playerHitbox.intersects(gp.cManager.workshopDoorHitbox)) {
+                gp.currentMap = gp.MAP_STREET; direction = "left";
+                x = gp.cManager.streetWorkshopDoorHitbox.x + gp.cManager.streetWorkshopDoorHitbox.width + 10;
+                y = gp.cManager.streetWorkshopDoorHitbox.y + (gp.cManager.streetWorkshopDoorHitbox.height / 2) - (gp.tileSize / 2);
+            }
+        } else if (gp.currentMap == gp.MAP_GREENHOUSE) {
+            if (playerHitbox.intersects(gp.cManager.greenhouseDoorHitbox)) {
+                gp.currentMap = gp.MAP_STREET; direction = "right";
+                x = gp.cManager.streetGreenhouseDoorHitbox.x - gp.tileSize - 10;
+                y = gp.cManager.streetGreenhouseDoorHitbox.y + (gp.cManager.streetGreenhouseDoorHitbox.height / 2) - (gp.tileSize / 2);
+            }
+        } else if (gp.currentMap == gp.MAP_MUSEUM) {
+            if (playerHitbox.intersects(gp.cManager.museumDoorHitbox)) {
+                gp.currentMap = gp.MAP_STREET; direction = "down";
+                x = gp.cManager.streetMuseumDoorHitbox.x + (gp.cManager.streetMuseumDoorHitbox.width / 2) - (gp.tileSize / 2);
+                y = gp.cManager.streetMuseumDoorHitbox.y + gp.cManager.streetMuseumDoorHitbox.height + 10;
+            }
+        } else if (gp.currentMap == gp.MAP_STREET) {
+            if (playerHitbox.intersects(gp.cManager.streetHouseDoorHitbox)) {
+                gp.currentMap = gp.MAP_HOUSE; direction = "up";
+                x = gp.cManager.houseDoorHitbox.x - gp.tileSize - 10;
+                y = gp.cManager.houseDoorHitbox.y + (gp.cManager.houseDoorHitbox.height / 2) - (gp.tileSize / 2);
+            } else if (playerHitbox.intersects(gp.cManager.streetMuseumDoorHitbox)) {
+                if (gp.currentQuest >= 3) {
+                    gp.currentMap = gp.MAP_MUSEUM; direction = "up";
+                    x = gp.cManager.museumDoorHitbox.x + (gp.cManager.museumDoorHitbox.width / 2) - (gp.tileSize / 2);
+                    y = gp.cManager.museumDoorHitbox.y - gp.tileSize - 5;
+                }
+            } else if (playerHitbox.intersects(gp.cManager.streetWorkshopDoorHitbox)) {
+                if (gp.currentQuest >= 1) {
+                    gp.currentMap = gp.MAP_WORKSHOP; direction = "up";
+                    x = gp.cManager.workshopDoorHitbox.x + (gp.cManager.workshopDoorHitbox.width / 2) - (gp.tileSize / 2);
+                    y = gp.cManager.workshopDoorHitbox.y - gp.tileSize - 10;
+                }
+            } else if (playerHitbox.intersects(gp.cManager.streetGreenhouseDoorHitbox)) {
+                if (gp.currentQuest >= 2) {
+                    gp.currentMap = gp.MAP_GREENHOUSE; direction = "up";
+                    x = gp.cManager.greenhouseDoorHitbox.x + (gp.cManager.greenhouseDoorHitbox.width / 2) - (gp.tileSize / 2);
+                    y = gp.cManager.greenhouseDoorHitbox.y - gp.tileSize - 10;
                 }
             }
         }
@@ -690,6 +661,6 @@ public class Player extends Entity{
                 break;
         }
 
-        g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null);
+        g2.drawImage(image, x, y, gp.tileSize + 10, gp.tileSize + 10, null);
     }
 }

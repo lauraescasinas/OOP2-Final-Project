@@ -9,6 +9,8 @@ public class KeyHandler implements KeyListener {
 
     public String currentInput = "";
 
+    public boolean showDebug = false;
+
     @Override
     public void keyTyped(KeyEvent e) {
         char c = e.getKeyChar();
@@ -39,6 +41,8 @@ public class KeyHandler implements KeyListener {
         if(code == KeyEvent.VK_D){
             rightPressed = true;
         }
+
+        if(code == KeyEvent.VK_T){ showDebug = !showDebug; }
     }
 
     @Override
