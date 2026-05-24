@@ -135,6 +135,7 @@ public class InteractionManager {
                 } else if (gp.gsManager.isPasswordUIOpen() && mouseHitbox.intersects(gp.submitButtonHitbox)) {
                     if (gp.keyH.currentInput.equals("1984")) {
                         gp.soundManager.playCorrectPasswordSFX();
+                        gp.soundManager.playGoHomeSFX();
                         gp.gsManager.setLocketUnlocked(true); gp.gsManager.setPasswordUIOpen(false);
                         if (gp.gsManager.getCurrentQuest() == 4) gp.gsManager.setCurrentQuest(5);
                         System.out.println("Success! Locket Unlocked.");
@@ -251,6 +252,7 @@ public class InteractionManager {
 
         gp.soundManager.stopOutdoorMusic();
         gp.soundManager.stopRoomMusic();
+        gp.soundManager.stopFinalMusic();
         gp.soundManager.loadAudio();
         gp.soundManager.playMenuMusic();
     }

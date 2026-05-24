@@ -14,6 +14,8 @@ public class SoundManager {
     public Clip museumMusic;
     public Clip workshopMusic;
     public Clip gardenMusic;
+    public Clip goHomeMusic;
+    public Clip finalMusic;
 
     public void loadAudio() {
         try {
@@ -189,6 +191,45 @@ public class SoundManager {
         }
     }
 
+
+    public void playGoHomeSFX() {
+        try {
+            URL url = getClass().getResource("/Music/GoHome.wav");
+            if (url != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(url);
+                Clip clip = AudioSystem.getClip();
+                clip.open(ais);
+                clip.addLineListener(event -> {
+                    if (event.getType() == javax.sound.sampled.LineEvent.Type.STOP) {
+                        clip.close();
+                    }
+                });
+                clip.start();
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    public void playFinalMusic() {
+        try {
+            URL url = getClass().getResource("/Music/Final.wav");
+            if (url != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(url);
+                finalMusic = AudioSystem.getClip();
+                finalMusic.open(ais);
+                finalMusic.loop(Clip.LOOP_CONTINUOUSLY);
+                finalMusic.start();
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    public void stopFinalMusic() {
+        if (finalMusic != null) {
+            finalMusic.stop();
+            finalMusic.close();
+            finalMusic = null;
+        }
+    }
+
     public void playDemonAppearanceSFX() {
         try {
             URL demonURL = getClass().getResource("/Music/DemonAppearance.wav");
@@ -342,5 +383,21 @@ public class SoundManager {
         }
     }
 
+    public void playRejectSFX() {
+        try {
+            URL url = getClass().getResource("/Music/Reject.wav");
+            if (url != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(url);
+                Clip clip = AudioSystem.getClip();
+                clip.open(ais);
+                clip.addLineListener(event -> {
+                    if (event.getType() == javax.sound.sampled.LineEvent.Type.STOP) {
+                        clip.close();
+                    }
+                });
+                clip.start();
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
 
 }

@@ -345,10 +345,12 @@ public class GamePanel extends JPanel implements Runnable {
         }
 
         // Reject Button Hover Logic
+        // Reject Button Hover Logic
         if (gsManager.isShowChoiceScreen()) {
             Rectangle mouseHitbox = new Rectangle(mouseH.mouseX, mouseH.mouseY, 1, 1);
             if (rejectHoverCount < 5 && mouseHitbox.intersects(rejectHitbox)) {
                 rejectHoverCount++;
+                soundManager.playRejectSFX(); // ← ADD THIS
                 if (rejectHoverCount == 1) {
                     rejectHitbox.x = 100;
                     rejectHitbox.y = 150;

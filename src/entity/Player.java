@@ -153,6 +153,7 @@ public class Player extends Entity{
         } else if (gp.gsManager.getCurrentMap() == gp.MAP_HOUSE) {
             if (playerHitbox.intersects(gp.cManager.houseDoorHitbox) && gp.gsManager.getCurrentQuest() >= 1) {
                 gp.soundManager.stopRoomMusic();
+                gp.soundManager.stopFinalMusic();
                 gp.soundManager.playOutdoorMusic();
                 gp.gsManager.setCurrentMap(gp.MAP_STREET);
                 direction = "down";
@@ -194,7 +195,12 @@ public class Player extends Entity{
         } else if (gp.gsManager.getCurrentMap() == gp.MAP_STREET) {
             if (playerHitbox.intersects(gp.cManager.streetHouseDoorHitbox)) {
                 gp.soundManager.stopOutdoorMusic();
-                gp.soundManager.playRoomMusic();
+                // Play Final music if quest 5, otherwise normal room music
+                if (gp.gsManager.getCurrentQuest() >= 5) {
+                    gp.soundManager.playFinalMusic();
+                } else {
+                    gp.soundManager.playRoomMusic();
+                }
                 gp.gsManager.setCurrentMap(gp.MAP_HOUSE);
                 direction = "up";
                 x = gp.cManager.houseDoorHitbox.x - Constants.tileSize - 10;
