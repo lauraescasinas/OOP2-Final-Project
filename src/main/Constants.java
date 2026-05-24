@@ -1,7 +1,7 @@
 package main;
 
 public class Constants {
-    // Screen Settings
+    // window / screen
     public static final int originalTileSize = 16;    // 16x16 tile for characters
     public static final int scale = 3;
 //
@@ -11,7 +11,7 @@ public class Constants {
     public static final int screenWidth = tileSize * maxScreenCol;  // 864 pixels
     public static final int screenHeight = tileSize * maxScreenRow;  // 672
 
-    // FPS Settings
+    // FPS
     public static final int FPS = 60;
 
 }

@@ -20,7 +20,7 @@ public class DialogueManager {
             "Demon: A man who kept a jar of dead men's eyes on his desk. A man who\ntalked to taxidermied foxes. And you send him off like he was an accountant.", // 6
             "Elara: Shut up.", // 7
             "Demon: His soul is... restless, Elara. Unsettled. And if no one does\nanything about that—", // 8
-            "Demon: I'll just take it with me.", // 9 (Will be styled RED and BOLD)
+            "Demon: I'll just take it with me.", // 9 (RED and BOLD)
             "Demon: Unless...you do something for me.", // 10
             "Demon: There are items — strange ones, specific ones — scattered around\nthis house and the places he loved. Collect them. Arrange them. And his\nsoul goes free.", // 11
             "Demon: I've been kind enough to write most of them down.", // 12

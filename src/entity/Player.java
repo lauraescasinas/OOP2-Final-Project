@@ -38,13 +38,13 @@ public class Player extends Entity{
 
     public void getPlayerImage(){
         try{
-            // Loading Profiles (Idle States)
+            // idle state
             frontImage = ImageIO.read(getClass().getResourceAsStream("/Entity/Player/FrontProfile.png"));
             backImage = ImageIO.read(getClass().getResourceAsStream("/Entity/Player/BackProfile.png"));
             leftImage = ImageIO.read(getClass().getResourceAsStream("/Entity/Player/LeftSideProfile.png"));
             rightImage = ImageIO.read(getClass().getResourceAsStream("/Entity/Player/RightSideProfile.png"));
 
-            // Loading Walking Frames
+            // walking frames
             frontWalk1 = ImageIO.read(getClass().getResourceAsStream("/Entity/Player/FrontWalk_1.png"));
             frontWalk2 = ImageIO.read(getClass().getResourceAsStream("/Entity/Player/FrontWalk_2.png"));
             backWalk1 = ImageIO.read(getClass().getResourceAsStream("/Entity/Player/BackWalk_1.png"));
@@ -59,13 +59,10 @@ public class Player extends Entity{
     }
 
     public void update() {
-            // 1. Hand off all mouse interactions to the Manager.
-            // If a menu is open (it returns true), freeze the player's movement!
             if (gp.iManager.checkInteractions()) {
                 return;
             }
 
-            // 2. Player WASD Movement
             if (keyH.upPressed == true || keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true) {
                 int nextX = x; int nextY = y;
                 if (keyH.upPressed == true) { direction = "up"; nextY -= speed; }
@@ -76,9 +73,8 @@ public class Player extends Entity{
                 Rectangle nextHitbox = new Rectangle(nextX, nextY, Constants.tileSize, Constants.tileSize);
                 boolean collisionOn = false;
 
-                // Wall Collisions
                 if (gp.gsManager.getCurrentMap()  == gp.MAP_ROOM) {
-                    for (Rectangle wall : gp.cManager.mapBarrier.roomWalls) { // Changed gp to gp.cManager
+                    for (Rectangle wall : gp.cManager.mapBarrier.roomWalls) {
                         if (nextHitbox.intersects(wall)) {
                             collisionOn = true;
                             break;
@@ -87,14 +83,14 @@ public class Player extends Entity{
                 }
 
                 if (gp.gsManager.getCurrentMap()  == gp.MAP_HOUSE) {
-                    for (Rectangle wall : gp.cManager.mapBarrier.houseWalls) { // Changed gp to gp.cManager
+                    for (Rectangle wall : gp.cManager.mapBarrier.houseWalls) {
                         if (nextHitbox.intersects(wall)) {
                             collisionOn = true;
                             break;
                         }
                     }
 
-                    if (gp.gsManager.getCurrentQuest()  < 1 && nextHitbox.intersects(gp.cManager.houseDoorHitbox)) { // Changed gp to gp.cManager
+                    if (gp.gsManager.getCurrentQuest()  < 1 && nextHitbox.intersects(gp.cManager.houseDoorHitbox)) {
                         collisionOn = true;
                         System.out.println("The door is locked. I must finish the list first.");
                     }
@@ -108,7 +104,7 @@ public class Player extends Entity{
                 }
 
                 if (gp.gsManager.getCurrentMap() == gp.MAP_WORKSHOP) {
-                    for (Rectangle wall : gp.cManager.mapBarrier.workshopWalls) { // Changed gp to gp.cManager
+                    for (Rectangle wall : gp.cManager.mapBarrier.workshopWalls) {
                         if (nextHitbox.intersects(wall)) {
                             collisionOn = true;
                             break;
@@ -117,7 +113,7 @@ public class Player extends Entity{
                 }
 
                 if (gp.gsManager.getCurrentMap()  == gp.MAP_GREENHOUSE) {
-                    for (Rectangle wall : gp.cManager.mapBarrier.greenhouseWalls) { // Changed gp to gp.cManager
+                    for (Rectangle wall : gp.cManager.mapBarrier.greenhouseWalls) {
                         if (nextHitbox.intersects(wall)) {
                             collisionOn = true;
                             break;
@@ -126,7 +122,7 @@ public class Player extends Entity{
                 }
 
                 if (gp.gsManager.getCurrentMap()  == gp.MAP_MUSEUM) {
-                    for (Rectangle wall : gp.cManager.mapBarrier.museumWalls) { // Changed gp to gp.cManager
+                    for (Rectangle wall : gp.cManager.mapBarrier.museumWalls) {
                         if (nextHitbox.intersects(wall)) {
                             collisionOn = true;
                             break;
@@ -148,7 +144,7 @@ public class Player extends Entity{
                 }
             }
 
-            // 3. Invisible Event Triggers
+           // event triggerrs
             Rectangle playerHitbox = new Rectangle(x, y, Constants.tileSize, Constants.tileSize);
             if (gp.gsManager.getCurrentMap() == gp.MAP_HOUSE) {
                 if (gp.gsManager.getCurrentQuest() == 5 && gp.gsManager.getHouseEventState() < 7) {
@@ -162,7 +158,7 @@ public class Player extends Entity{
                 }
             }
 
-            // 4. Map Door Transitions
+            //door transitions
             if (gp.gsManager.getCurrentMap() == gp.MAP_ROOM) {
                 if (playerHitbox.intersects(gp.cManager.bedroomDoorHitbox)) {
                     gp.gsManager.setCurrentMap(gp.MAP_HOUSE); direction = "right";
@@ -217,7 +213,7 @@ public class Player extends Entity{
                 }
             }
 
-            // Boundaries
+            // boundaries
             if (x < 0) x = 0; if (y < 0) y = 0;
             if (x > Constants.screenWidth - Constants.tileSize) x = Constants.screenWidth - Constants.tileSize;
             if (y > Constants.screenHeight - Constants.tileSize && gp.gsManager.getCurrentMap() == gp.MAP_STREET) y = Constants.screenHeight - Constants.tileSize;
@@ -232,22 +228,22 @@ public class Player extends Entity{
 
         switch(direction){
             case "up":
-                if (!isMoving) image = backImage; // Standing still
+                if (!isMoving) image = backImage;
                 else if (spriteNum == 1) image = backWalk1;
                 else image = backWalk2;
                 break;
             case "down":
-                if (!isMoving) image = frontImage; // Standing still
+                if (!isMoving) image = frontImage;
                 else if (spriteNum == 1) image = frontWalk1;
                 else image = frontWalk2;
                 break;
             case "left":
-                if (!isMoving) image = leftImage; // Standing still
+                if (!isMoving) image = leftImage;
                 else if (spriteNum == 1) image = leftWalk1;
                 else image = leftWalk2;
                 break;
             case "right":
-                if (!isMoving) image = rightImage; // Standing still
+                if (!isMoving) image = rightImage;
                 else if (spriteNum == 1) image = rightWalk1;
                 else image = rightWalk2;
                 break;

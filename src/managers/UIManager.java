@@ -51,7 +51,7 @@ public class UIManager {
     }
 
     private void drawInteractables(Graphics2D g2) {
-        // Password Screen
+        // password screen
         if (gp.gsManager.isPasswordUIOpen()) {
             g2.setColor(new Color(0, 0, 0, 150));
             g2.fillRect(0, 0, Constants.screenWidth, Constants.screenHeight);
@@ -74,7 +74,7 @@ public class UIManager {
             }
         }
 
-        // Clue Screens
+        // clue screens
         if (gp.gsManager.isClueOpen(1) || gp.gsManager.isClueOpen(2) || gp.gsManager.isClueOpen(3) || gp.gsManager.isClueOpen(0)) {
             g2.setColor(new Color(0, 0, 0, 150));
             g2.fillRect(0, 0, Constants.screenWidth, Constants.screenHeight);
@@ -91,7 +91,7 @@ public class UIManager {
             }
         }
 
-        // Statue Screen
+        // statue screen
         if (gp.gsManager.isStatue_Open()) {
             g2.setColor(new Color(0, 0, 0, 150));
             g2.fillRect(0, 0, Constants.screenWidth, Constants.screenHeight);
@@ -107,7 +107,7 @@ public class UIManager {
             }
         }
 
-        // Intro Puzzle Screen
+        // intro puzzle screen (w the lists)
         if (gp.gsManager.isIntroPuzzleOpen()) {
             g2.setColor(new Color(0, 0, 0, 150));
             g2.fillRect(0, 0, Constants.screenWidth, Constants.screenHeight);
@@ -137,19 +137,19 @@ public class UIManager {
     }
 
     private void drawCinematics(Graphics2D g2) {
-        // End Quest (Game Over) Screen
+        // end quest screen
         if (gp.gsManager.getCurrentQuest() == 6) {
             g2.setColor(new Color(0, 0, 0, 200));
             g2.fillRect(0, 0, Constants.screenWidth, Constants.screenHeight);
             if (gp.asManager.endScreen != null) g2.drawImage(gp.asManager.endScreen, Constants.screenWidth / 2 - 250, Constants.screenHeight / 2 - 150, 500, 200, null);
-            if (gp.asManager.againBtn != null) g2.drawImage(gp.asManager.againBtn, gp.againBtnHitbox.x, gp.againBtnHitbox.y, gp.againBtnHitbox.width, gp.againBtnHitbox.height, null);
-            if (gp.keyH.showDebug) {
-                g2.setColor(new Color(255, 255, 0, 150));
-                g2.fillRect(gp.againBtnHitbox.x, gp.againBtnHitbox.y, gp.againBtnHitbox.width, gp.againBtnHitbox.height);
-            }
+//            if (gp.asManager.againBtn != null) g2.drawImage(gp.asManager.againBtn, gp.againBtnHitbox.x, gp.againBtnHitbox.y, gp.againBtnHitbox.width, gp.againBtnHitbox.height, null);
+//            if (gp.keyH.showDebug) {
+//                g2.setColor(new Color(255, 255, 0, 150));
+//                g2.fillRect(gp.againBtnHitbox.x, gp.againBtnHitbox.y, gp.againBtnHitbox.width, gp.againBtnHitbox.height);
+//            }
         }
 
-        // Dialogue Box
+        // dialogue box
         if (gp.dlgManager.isDialogueActive) {
             g2.setColor(new Color(40, 40, 40, 220));
             g2.fillRect(0, Constants.screenHeight - 185, 864, 185);
@@ -171,7 +171,7 @@ public class UIManager {
             if (gp.asManager.nextBtn != null) g2.drawImage(gp.asManager.nextBtn, gp.dialogueNextHitbox.x, gp.dialogueNextHitbox.y, gp.dialogueNextHitbox.width, gp.dialogueNextHitbox.height, null);
         }
 
-        // Ending Gibberish Transition
+        // gibberish screen @ ending transition
         if (gp.gsManager.isShowEndingGibberish()) {
             g2.setColor(new Color(0, 0, 0, 200));
             g2.fillRect(0, 0, Constants.screenWidth, Constants.screenHeight);
@@ -181,7 +181,7 @@ public class UIManager {
             if (gp.asManager.backBtn != null) g2.drawImage(gp.asManager.backBtn, 50, 50, 60, 60, null);
         }
 
-        // Final Choice Screen
+        // final choice screen
         if (gp.gsManager.isShowChoiceScreen()) {
             g2.setColor(new Color(0, 0, 0, 200));
             g2.fillRect(0, 0, Constants.screenWidth, Constants.screenHeight);
@@ -189,7 +189,7 @@ public class UIManager {
             if (gp.asManager.rejectBtn != null) g2.drawImage(gp.asManager.rejectBtn, gp.rejectHitbox.x, gp.rejectHitbox.y, gp.rejectHitbox.width, gp.rejectHitbox.height, null);
         }
 
-        // Cutscene Player
+        // cutscene player
         if (gp.gsManager.isPlayingAcceptCutscene() || gp.gsManager.isPlayingRejectCutscene()) {
             g2.setColor(Color.BLACK);
             g2.fillRect(0, 0, Constants.screenWidth, Constants.screenHeight);

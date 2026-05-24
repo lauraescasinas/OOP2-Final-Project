@@ -33,13 +33,13 @@ public class InteractionManager {
             if (gp.gsManager.isSettingsOpen()) return true;
         }
 
-        if (gp.gsManager.getCurrentQuest() == 6) {
-            if (gp.mouseH.leftClicked && mouseHitbox.intersects(gp.againBtnHitbox)) {
-                resetGame();
-                gp.mouseH.leftClicked = false;
-            }
-            return true;
-        }
+//        if (gp.gsManager.getCurrentQuest() == 6) {
+//            if (gp.mouseH.leftClicked && mouseHitbox.intersects(gp.againBtnHitbox)) {
+//                resetGame();
+//                gp.mouseH.leftClicked = false;
+//            }
+//            return true;
+//        }
 
         if (gp.dlgManager.isDialogueActive) {
             if (gp.mouseH.leftClicked && mouseHitbox.intersects(gp.dialogueNextHitbox)) {
@@ -113,7 +113,6 @@ public class InteractionManager {
                     gp.gsManager.setStatue_Open(false);
                     gp.gsManager.setIntroPuzzleOpen(false); gp.gsManager.setIntroPuzzlePage(1);
                 } else if (gp.gsManager.isStatue_Open() && !gp.gsManager.isChronosWatchUnlocked()) {
-                    // Update statue states using array indices
                     if (mouseHitbox.intersects(gp.uiStatue1Hitbox)) gp.gsManager.setStatueState(0, (gp.gsManager.getStatueState(0) + 1) % 4);
                     else if (mouseHitbox.intersects(gp.uiStatue2Hitbox)) gp.gsManager.setStatueState(1, (gp.gsManager.getStatueState(1) + 1) % 4);
                     else if (mouseHitbox.intersects(gp.uiStatue3Hitbox)) gp.gsManager.setStatueState(2, (gp.gsManager.getStatueState(2) + 1) % 4);

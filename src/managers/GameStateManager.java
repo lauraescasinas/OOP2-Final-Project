@@ -5,12 +5,20 @@ import main.GamePanel;
 public class GameStateManager {
     GamePanel gp;
 
-    // --- Map & Progress ---
+//    public final int MAP_HOUSE = 0;
+//    public final int MAP_STREET = 1;
+//    public final int MAP_WORKSHOP = 2;
+//    public final int MAP_GREENHOUSE = 3;
+//    public final int MAP_MUSEUM = 4;
+//    public final int MAP_ROOM = 5;
+//    public final int MAP_MAIN_MENU = -1;
+
+    // map
     private int currentMap = -1;
     private int currentQuest = 0;
     private int houseEventState = 0;
 
-    // --- UI/Menu Flags ---
+    // ui / menu
     private boolean isSettingsOpen = false;
     private boolean passwordUIOpen = false;
     private boolean statue_Open = false;
@@ -20,7 +28,7 @@ public class GameStateManager {
     private boolean showTheEndText = false;
     private boolean showMenuButton = false;
 
-    // --- Gameplay Flags ---
+    // gameplay
     private boolean locketUnlocked = false;
     private boolean chronosWatchUnlocked = false;
     private boolean demonVisible = false;
@@ -29,14 +37,14 @@ public class GameStateManager {
     private boolean playingRejectCutscene = false;
     private boolean playingIntroCutscene = false;
 
-    // --- Array States (The Clean Way!) ---
-    // Index 0=Clue0, 1=Clue1, 2=Clue2, 3=Clue3
+    // array states
+    // index 0=Clue0, 1=Clue1, 2=Clue2, 3=Clue3
     private boolean[] clueOpen = new boolean[4];
 
-    // Index 0=Statue1, 1=Statue2, 2=Statue3. (Initial states: 0, 3, 2)
+    // index 0=Statue1, 1=Statue2, 2=Statue3. (Initial states: 0, 3, 2)
     private int[] statueState = {0, 3, 2};
 
-    // Index 0=Ans1, 1=Ans2, 2=Ans3, 3=Ans4
+    // index 0=Ans1, 1=Ans2, 2=Ans3, 3=Ans4
     private boolean[] introAns = new boolean[4];
     private int introPuzzlePage = 1;
 
@@ -44,7 +52,6 @@ public class GameStateManager {
         this.gp = gp;
     }
 
-    // --- Array Getters & Setters ---
 
     public boolean isClueOpen(int index) { return clueOpen[index]; }
     public void setClueOpen(int index, boolean isOpen) { this.clueOpen[index] = isOpen; }
@@ -55,7 +62,6 @@ public class GameStateManager {
     public boolean isIntroAns(int index) { return introAns[index]; }
     public void setIntroAns(int index, boolean isAns) { this.introAns[index] = isAns; }
 
-    // --- Standard Getters & Setters ---
 
     public int getCurrentMap() { return currentMap; }
     public void setCurrentMap(int map) { if (map >= -1 && map <= 5) this.currentMap = map; else System.out.println("Warning: Invalid map ID attempted: " + map); }

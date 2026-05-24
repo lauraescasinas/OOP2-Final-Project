@@ -9,11 +9,10 @@ import java.io.IOException;
 public class AssetManager {
     GamePanel gp;
 
-    // 1. Move all your BufferedImage declarations here from GamePanel
     public BufferedImage roomBg;
     public BufferedImage houseBg;
     public BufferedImage streetBg1, streetBg2;
-    public BufferedImage workshopBg1, workshopBg2, toolboxWorkshop, sofaWorkshop;
+    public BufferedImage workshopBg1, workshopBg2, toolboxWorkshop, sofaWorkshop, counterWorkshop;
     public BufferedImage greenhouseBg1, greenhouseBg2;
     public BufferedImage museumBg, tableMuseum, glasscaseMuseum;
     public BufferedImage bouquetInv;
@@ -24,7 +23,7 @@ public class AssetManager {
     public BufferedImage statueRotateScreen, statueLeft, statueBackLeft, statueBackRight, statueRight;
     public BufferedImage tempBtn, listScreen1, listScreen2, listScreen3, nextBtn, prevBtn;
     public BufferedImage objTab1, objTab2, objTab3, objTab4, objTab5;
-    public BufferedImage endScreen, againBtn; // Add all your images here
+    public BufferedImage endScreen, againBtn;
     public BufferedImage settingsBtn, settingsWindow;
     public BufferedImage[] acceptCutscene = new BufferedImage[8];
     public BufferedImage[] rejectCutscene = new BufferedImage[8];
@@ -84,6 +83,7 @@ public class AssetManager {
             // overlay items
             toolboxWorkshop = ImageIO.read(getClass().getResourceAsStream("/Objects/Overlays/toolbox_Workshop_bg.png"));
             sofaWorkshop = ImageIO.read(getClass().getResourceAsStream("/Objects/Overlays/sofa_Workshop_bg.png"));
+            counterWorkshop = ImageIO.read(getClass().getResourceAsStream("/Objects/Overlays/counter_Workshop.png"));
             tableMuseum = ImageIO.read(getClass().getResourceAsStream("/Objects/Overlays/table_Museum_bg.png"));
             glasscaseMuseum = ImageIO.read(getClass().getResourceAsStream("/Objects/Overlays/glasscase_Museum_bg.png"));
 
