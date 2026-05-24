@@ -113,10 +113,9 @@ public class InteractionManager {
                     gp.gsManager.setStatue_Open(false);
                     gp.gsManager.setIntroPuzzleOpen(false); gp.gsManager.setIntroPuzzlePage(1);
                 } else if (gp.gsManager.isStatue_Open() && !gp.gsManager.isChronosWatchUnlocked()) {
-                    // Update statue states using array indices
-                    if (mouseHitbox.intersects(gp.uiStatue1Hitbox)) gp.gsManager.setStatueState(0, (gp.gsManager.getStatueState(0) + 1) % 4);
-                    else if (mouseHitbox.intersects(gp.uiStatue2Hitbox)) gp.gsManager.setStatueState(1, (gp.gsManager.getStatueState(1) + 1) % 4);
-                    else if (mouseHitbox.intersects(gp.uiStatue3Hitbox)) gp.gsManager.setStatueState(2, (gp.gsManager.getStatueState(2) + 1) % 4);
+                    if (mouseHitbox.intersects(gp.uiStatue1Hitbox)) { gp.gsManager.setStatueState(0, (gp.gsManager.getStatueState(0) + 1) % 4); gp.soundManager.playStatueRotationSFX(); }
+                    else if (mouseHitbox.intersects(gp.uiStatue2Hitbox)) { gp.gsManager.setStatueState(1, (gp.gsManager.getStatueState(1) + 1) % 4); gp.soundManager.playStatueRotationSFX(); }
+                    else if (mouseHitbox.intersects(gp.uiStatue3Hitbox)) { gp.gsManager.setStatueState(2, (gp.gsManager.getStatueState(2) + 1) % 4); gp.soundManager.playStatueRotationSFX(); }
 
                     if (gp.gsManager.getStatueState(0) == 3 && gp.gsManager.getStatueState(1) == 1 && gp.gsManager.getStatueState(2) == 0) {
                         gp.gsManager.setChronosWatchUnlocked(true); gp.gsManager.setStatue_Open(false);
@@ -125,10 +124,12 @@ public class InteractionManager {
                     }
                 } else if (gp.gsManager.isPasswordUIOpen() && mouseHitbox.intersects(gp.submitButtonHitbox)) {
                     if (gp.keyH.currentInput.equals("1984")) {
+                        gp.soundManager.playCorrectPasswordSFX(); // ADD THIS
                         gp.gsManager.setLocketUnlocked(true); gp.gsManager.setPasswordUIOpen(false);
                         if (gp.gsManager.getCurrentQuest() == 4) gp.gsManager.setCurrentQuest(5);
                         System.out.println("Success! Locket Unlocked.");
                     } else {
+                        gp.soundManager.playErrorSFX();
                         System.out.println("Access Denied. Wrong Password."); gp.keyH.currentInput = "";
                     }
                 } else if (gp.gsManager.isIntroPuzzleOpen()) {
@@ -160,7 +161,9 @@ public class InteractionManager {
             } else if (gp.gsManager.getCurrentMap() == gp.MAP_GREENHOUSE) {
                 for (int i = 0; i < gp.objManager.obj.length; i++) {
                     if (gp.objManager.obj[i] != null && mouseHitbox.intersects(gp.objManager.obj[i].hitbox)) {
+                        System.out.println("Rose picked up!");
                         gp.objManager.obj[i] = null; gp.player.blackRosesCollected++;
+                        gp.soundManager.playRoseSFX();
                         if (gp.player.blackRosesCollected >= 5 && gp.gsManager.getCurrentQuest() == 2) {
                             gp.gsManager.setCurrentQuest(3);
                             System.out.println("Black Roses collected! Quest updated to 3.");
@@ -171,6 +174,7 @@ public class InteractionManager {
                 for (int i = 0; i < gp.objManager.obj.length; i++) {
                     if (gp.objManager.obj[i] != null && gp.objManager.obj[i].name.equals("Glass Eye") && mouseHitbox.intersects(gp.objManager.obj[i].hitbox)) {
                         gp.objManager.obj[i] = null; gp.player.glassEyesCollected++;
+                        gp.soundManager.playGlassEyeSFX(); // ADD THIS
                         if (gp.player.glassEyesCollected >= 5 && gp.gsManager.getCurrentQuest() == 1) {
                             gp.gsManager.setCurrentQuest(2);
                             System.out.println("Glass Eyes collected! Quest updated to 2.");

@@ -145,6 +145,7 @@ public class Player extends Entity{
                 if (spriteCounter > 25) {
                     spriteNum = (spriteNum == 1) ? 2 : 1;
                     spriteCounter = 0;
+                    gp.soundManager.playWalkSFX(); // ADD THIS
                 }
             }
 

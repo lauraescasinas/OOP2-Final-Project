@@ -24,6 +24,7 @@ public class SoundManager {
                 clickSFX = AudioSystem.getClip();
                 clickSFX.open(ais2);
             }
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -47,6 +48,140 @@ public class SoundManager {
         if (clickSFX != null) {
             clickSFX.setFramePosition(0);
             clickSFX.start();
+        }
+    }
+
+    public void playDunSFX() {
+        try {
+            URL dunURL = getClass().getResource("/Music/Dun.wav");
+            if (dunURL != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(dunURL);
+                Clip clip = AudioSystem.getClip();
+                clip.open(ais);
+                clip.addLineListener(event -> {
+                    if (event.getType() == javax.sound.sampled.LineEvent.Type.STOP) {
+                        clip.close();
+                    }
+                });
+                clip.start();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void playWalkSFX() {
+        try {
+            URL walkURL = getClass().getResource("/Music/Walk.wav");
+            if (walkURL != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(walkURL);
+                Clip clip = AudioSystem.getClip();
+                clip.open(ais);
+                clip.addLineListener(event -> {
+                    if (event.getType() == javax.sound.sampled.LineEvent.Type.STOP) {
+                        clip.close();
+                    }
+                });
+                clip.start();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void playGlassEyeSFX() {
+        try {
+            URL glassEyeURL = getClass().getResource("/Music/GlassEye.wav");
+            if (glassEyeURL != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(glassEyeURL);
+                Clip clip = AudioSystem.getClip();
+                clip.open(ais);
+                clip.addLineListener(event -> {
+                    if (event.getType() == javax.sound.sampled.LineEvent.Type.STOP) {
+                        clip.close();
+                    }
+                });
+                clip.start();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void playRoseSFX() {
+        try {
+            URL roseURL = getClass().getResource("/Music/Rose.wav");
+            System.out.println("Rose URL: " + roseURL); // ADD THIS
+            if (roseURL != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(roseURL);
+                Clip clip = AudioSystem.getClip();
+                clip.open(ais);
+                clip.addLineListener(event -> {
+                    if (event.getType() == javax.sound.sampled.LineEvent.Type.STOP) {
+                        clip.close();
+                    }
+                });
+                clip.start();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void playStatueRotationSFX() {
+        try {
+            URL statueURL = getClass().getResource("/Music/StatueRotation.wav");
+            if (statueURL != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(statueURL);
+                Clip clip = AudioSystem.getClip();
+                clip.open(ais);
+                clip.addLineListener(event -> {
+                    if (event.getType() == javax.sound.sampled.LineEvent.Type.STOP) {
+                        clip.close();
+                    }
+                });
+                clip.start();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void playErrorSFX() {
+        try {
+            URL errorURL = getClass().getResource("/Music/WrongPassword.wav");
+            if (errorURL != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(errorURL);
+                Clip clip = AudioSystem.getClip();
+                clip.open(ais);
+                clip.addLineListener(event -> {
+                    if (event.getType() == javax.sound.sampled.LineEvent.Type.STOP) {
+                        clip.close();
+                    }
+                });
+                clip.start();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void playCorrectPasswordSFX() {
+        try {
+            URL correctURL = getClass().getResource("/Music/CorrectPassword.wav");
+            if (correctURL != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(correctURL);
+                Clip clip = AudioSystem.getClip();
+                clip.open(ais);
+                clip.addLineListener(event -> {
+                    if (event.getType() == javax.sound.sampled.LineEvent.Type.STOP) {
+                        clip.close();
+                    }
+                });
+                clip.start();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 }

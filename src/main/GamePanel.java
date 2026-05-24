@@ -218,17 +218,23 @@ public class GamePanel extends JPanel implements Runnable {
 
         if (gsManager.isPlayingIntroCutscene()) {
             introCutsceneTimer++;
-            if (introCutsceneTimer >= 80) { // 60 frames = 1 second at 60 FPS
+            if (introCutsceneFrameIndex < 8) {
+                if (introCutsceneTimer >= 120) { // all frames slightly longer
+                    introCutsceneFrameIndex++;
+                    introCutsceneTimer = 0;
+                    if (introCutsceneFrameIndex == 8) {
+                        soundManager.playDunSFX();
+                    }
+                }
+            } else if (introCutsceneTimer >= 200) { // last frame still lingers extra
                 introCutsceneFrameIndex++;
                 introCutsceneTimer = 0;
             }
-
-            // Once the 9th frame (index 8) is done, go to the room!
             if (introCutsceneFrameIndex >= 9) {
                 gsManager.setPlayingIntroCutscene(false);
-                gsManager.setCurrentMap(MAP_ROOM); // NOW we teleport to the room
+                gsManager.setCurrentMap(MAP_ROOM);
             }
-            return; // Skip all other game logic while the intro plays
+            return;
         }
 
         mapFrameCounter++;
