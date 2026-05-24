@@ -8,6 +8,12 @@ import java.net.URL;
 public class SoundManager {
     public Clip menuMusic;
     public Clip clickSFX;
+    public Clip introMusic;
+    public Clip roomMusic;
+    public Clip outdoorMusic;
+    public Clip museumMusic;
+    public Clip workshopMusic;
+    public Clip gardenMusic;
 
     public void loadAudio() {
         try {
@@ -41,6 +47,138 @@ public class SoundManager {
         if (menuMusic != null) {
             menuMusic.stop();
             menuMusic.close();
+            menuMusic = null; // must null this out so loadAudio() can re-open it later
+        }
+    }
+
+    public void playIntroMusic() {
+        try {
+            URL introURL = getClass().getResource("/Music/Intro.wav");
+            if (introURL != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(introURL);
+                introMusic = AudioSystem.getClip();
+                introMusic.open(ais);
+                introMusic.start(); // plays once, no loop
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void stopIntroMusic() {
+        if (introMusic != null) {
+            introMusic.stop();
+            introMusic.close();
+            introMusic = null;
+        }
+    }
+
+    public void playRoomMusic() {
+        try {
+            URL roomURL = getClass().getResource("/Music/Room.wav");
+            if (roomURL != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(roomURL);
+                roomMusic = AudioSystem.getClip();
+                roomMusic.open(ais);
+                roomMusic.loop(Clip.LOOP_CONTINUOUSLY);
+                roomMusic.start();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void stopRoomMusic() {
+        if (roomMusic != null) {
+            roomMusic.stop();
+            roomMusic.close();
+            roomMusic = null;
+        }
+    }
+
+    public void playMuseumMusic() {
+        try {
+            URL url = getClass().getResource("/Music/Museum.wav");
+            if (url != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(url);
+                museumMusic = AudioSystem.getClip();
+                museumMusic.open(ais);
+                museumMusic.loop(Clip.LOOP_CONTINUOUSLY);
+                museumMusic.start();
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    public void stopMuseumMusic() {
+        if (museumMusic != null) {
+            museumMusic.stop();
+            museumMusic.close();
+            museumMusic = null;
+        }
+    }
+
+    public void playWorkshopMusic() {
+        try {
+            URL url = getClass().getResource("/Music/Workshop.wav");
+            if (url != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(url);
+                workshopMusic = AudioSystem.getClip();
+                workshopMusic.open(ais);
+                workshopMusic.loop(Clip.LOOP_CONTINUOUSLY);
+                workshopMusic.start();
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    public void stopWorkshopMusic() {
+        if (workshopMusic != null) {
+            workshopMusic.stop();
+            workshopMusic.close();
+            workshopMusic = null;
+        }
+    }
+
+    public void playGardenMusic() {
+        try {
+            URL url = getClass().getResource("/Music/Garden.wav");
+            if (url != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(url);
+                gardenMusic = AudioSystem.getClip();
+                gardenMusic.open(ais);
+                gardenMusic.loop(Clip.LOOP_CONTINUOUSLY);
+                gardenMusic.start();
+            }
+        } catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    public void stopGardenMusic() {
+        if (gardenMusic != null) {
+            gardenMusic.stop();
+            gardenMusic.close();
+            gardenMusic = null;
+        }
+    }
+
+    public void playOutdoorMusic() {
+        try {
+            URL outdoorURL = getClass().getResource("/Music/Outdoor.wav");
+            if (outdoorURL != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(outdoorURL);
+                outdoorMusic = AudioSystem.getClip();
+                outdoorMusic.open(ais);
+                outdoorMusic.loop(Clip.LOOP_CONTINUOUSLY);
+                outdoorMusic.start();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void stopOutdoorMusic() {
+        if (outdoorMusic != null) {
+            outdoorMusic.stop();
+            outdoorMusic.close();
+            outdoorMusic = null;
         }
     }
 
@@ -48,6 +186,25 @@ public class SoundManager {
         if (clickSFX != null) {
             clickSFX.setFramePosition(0);
             clickSFX.start();
+        }
+    }
+
+    public void playDemonAppearanceSFX() {
+        try {
+            URL demonURL = getClass().getResource("/Music/DemonAppearance.wav");
+            if (demonURL != null) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(demonURL);
+                Clip clip = AudioSystem.getClip();
+                clip.open(ais);
+                clip.addLineListener(event -> {
+                    if (event.getType() == javax.sound.sampled.LineEvent.Type.STOP) {
+                        clip.close();
+                    }
+                });
+                clip.start();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -111,7 +268,7 @@ public class SoundManager {
     public void playRoseSFX() {
         try {
             URL roseURL = getClass().getResource("/Music/Rose.wav");
-            System.out.println("Rose URL: " + roseURL); // ADD THIS
+            System.out.println("Rose URL: " + roseURL);
             if (roseURL != null) {
                 AudioInputStream ais = AudioSystem.getAudioInputStream(roseURL);
                 Clip clip = AudioSystem.getClip();
@@ -184,4 +341,6 @@ public class SoundManager {
             ex.printStackTrace();
         }
     }
+
+
 }

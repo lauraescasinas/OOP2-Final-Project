@@ -1,7 +1,6 @@
 package managers;
 
 import main.GamePanel;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -9,7 +8,6 @@ import java.io.IOException;
 public class AssetManager {
     GamePanel gp;
 
-    // 1. Move all your BufferedImage declarations here from GamePanel
     public BufferedImage roomBg;
     public BufferedImage houseBg;
     public BufferedImage streetBg1, streetBg2;
@@ -24,7 +22,7 @@ public class AssetManager {
     public BufferedImage statueRotateScreen, statueLeft, statueBackLeft, statueBackRight, statueRight;
     public BufferedImage tempBtn, listScreen1, listScreen2, listScreen3, nextBtn, prevBtn;
     public BufferedImage objTab1, objTab2, objTab3, objTab4, objTab5;
-    public BufferedImage endScreen, againBtn; // Add all your images here
+    public BufferedImage endScreen, againBtn;
     public BufferedImage settingsBtn, settingsWindow;
     public BufferedImage[] acceptCutscene = new BufferedImage[8];
     public BufferedImage[] rejectCutscene = new BufferedImage[8];
@@ -36,8 +34,8 @@ public class AssetManager {
     public BufferedImage acceptBtn, rejectBtn;
     public BufferedImage[] introCutscene = new BufferedImage[9];
 
-    private javax.sound.sampled.Clip menuMusic;
-    private javax.sound.sampled.Clip clickSFX;
+    // FIX: Removed duplicate private menuMusic and clickSFX fields.
+    // Audio is now managed entirely by SoundManager.
 
     public AssetManager(GamePanel gp) {
         this.gp = gp;
@@ -50,25 +48,8 @@ public class AssetManager {
                 menuFrames[i] = ImageIO.read(getClass().getResourceAsStream("/Objects/MainMenu_" + (i + 1) + ".png"));
             }
 
-            try {
-                java.net.URL musicURL = getClass().getResource("/Music/MainMenu.wav");
-                if (musicURL != null) {
-                    javax.sound.sampled.AudioInputStream ais =
-                            javax.sound.sampled.AudioSystem.getAudioInputStream(musicURL);
-                    menuMusic = javax.sound.sampled.AudioSystem.getClip();
-                    menuMusic.open(ais);
-                }
-
-                java.net.URL sfxURL = getClass().getResource("/Music/Button.wav");
-                if (sfxURL != null) {
-                    javax.sound.sampled.AudioInputStream ais2 =
-                            javax.sound.sampled.AudioSystem.getAudioInputStream(sfxURL);
-                    clickSFX = javax.sound.sampled.AudioSystem.getClip();
-                    clickSFX.open(ais2);
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            // FIX: Removed the duplicate audio loading block that was here.
+            // SoundManager.loadAudio() handles all audio loading.
 
             // maps & their frames
             houseBg = ImageIO.read(getClass().getResourceAsStream("/Maps/House_bg.png"));
@@ -99,7 +80,7 @@ public class AssetManager {
             demon1 = ImageIO.read(getClass().getResourceAsStream("/Entity/Player/Demon_1.png"));
             demon2 = ImageIO.read(getClass().getResourceAsStream("/Entity/Player/Demon_2.png"));
 
-            // bouquet roses, glass eyes, locket, watch in inventory once collected || quest items loaded
+            // collectibles
             bouquetInv = ImageIO.read(getClass().getResourceAsStream("/Objects/Collectibles/bouquet_roses.png"));
             jarInv = ImageIO.read(getClass().getResourceAsStream("/Objects/Collectibles/jar_eyes.png"));
             locketInv = ImageIO.read(getClass().getResourceAsStream("/Objects/Collectibles/memento_locket.png"));
@@ -133,6 +114,7 @@ public class AssetManager {
             objTab3 = ImageIO.read(getClass().getResourceAsStream("/Objects/Overlays/objective_tab3.png"));
             objTab4 = ImageIO.read(getClass().getResourceAsStream("/Objects/Overlays/objective_tab4.png"));
             objTab5 = ImageIO.read(getClass().getResourceAsStream("/Objects/Overlays/objective_tab5.png"));
+
             endScreen = ImageIO.read(getClass().getResourceAsStream("/Ending/end_screen.png"));
             againBtn = ImageIO.read(getClass().getResourceAsStream("/Buttons/again_button.png"));
 
@@ -151,7 +133,6 @@ public class AssetManager {
             acceptBtn = ImageIO.read(getClass().getResourceAsStream("/Buttons/accept_button.png"));
             rejectBtn = ImageIO.read(getClass().getResourceAsStream("/Buttons/reject_button.png"));
             menuBtn = ImageIO.read(getClass().getResourceAsStream("/Buttons/MenuButton.png"));
-
             settingsBtn = ImageIO.read(getClass().getResourceAsStream("/Objects/Overlays/Settings.png"));
             settingsWindow = ImageIO.read(getClass().getResourceAsStream("/Objects/Overlays/SettingsWindow.png"));
 
@@ -160,14 +141,9 @@ public class AssetManager {
                 rejectCutscene[i] = ImageIO.read(getClass().getResourceAsStream("/Ending/good_Ending/GoodEnding_" + (i + 1) + ".png"));
             }
 
-
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        if (menuMusic != null) {
-            menuMusic.loop(javax.sound.sampled.Clip.LOOP_CONTINUOUSLY);
-            menuMusic.start();
-        }
     }
 }

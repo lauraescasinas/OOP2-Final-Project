@@ -18,13 +18,16 @@ public class InteractionManager {
             if (gp.mouseH.leftClicked) {
                 if (gp.gsManager.isSettingsOpen()) {
                     if (mouseHitbox.intersects(gp.resumeHitbox)) {
+                        gp.soundManager.playClickSFX(); // resume
                         gp.gsManager.setSettingsOpen(false);
                     } else if (mouseHitbox.intersects(gp.exitMenuHitbox)) {
+                        gp.soundManager.playClickSFX(); // back to menu
                         resetToMainMenu();
                     }
                     gp.mouseH.leftClicked = false;
                     return true;
                 } else if (mouseHitbox.intersects(gp.settingsBtnHitbox)) {
+                    gp.soundManager.playClickSFX(); // settings button
                     gp.gsManager.setSettingsOpen(true);
                     gp.mouseH.leftClicked = false;
                     return true;
@@ -35,6 +38,7 @@ public class InteractionManager {
 
         if (gp.gsManager.getCurrentQuest() == 6) {
             if (gp.mouseH.leftClicked && mouseHitbox.intersects(gp.againBtnHitbox)) {
+                gp.soundManager.playClickSFX(); // again button
                 resetGame();
                 gp.mouseH.leftClicked = false;
             }
@@ -43,6 +47,7 @@ public class InteractionManager {
 
         if (gp.dlgManager.isDialogueActive) {
             if (gp.mouseH.leftClicked && mouseHitbox.intersects(gp.dialogueNextHitbox)) {
+                gp.soundManager.playClickSFX(); // dialogue next
                 if (gp.dlgManager.dialogueCharIndex < gp.dlgManager.fullDialogue.length()) {
                     gp.dlgManager.currentDialogue = gp.dlgManager.fullDialogue;
                     gp.dlgManager.dialogueCharIndex = gp.dlgManager.fullDialogue.length();
@@ -70,6 +75,7 @@ public class InteractionManager {
 
         if (gp.gsManager.isShowEndingGibberish()) {
             if (gp.mouseH.leftClicked && mouseHitbox.intersects(gp.backButtonHitbox)) {
+                gp.soundManager.playClickSFX(); // back button on ending gibberish
                 gp.gsManager.setShowEndingGibberish(false); gp.gsManager.setHouseEventState(12); gp.dlgManager.isDialogueActive = true;
                 gp.dlgManager.currentDialogueListIndex = 7; gp.dlgManager.fullDialogue = gp.dlgManager.houseDialogue3[7];
                 gp.dlgManager.currentDialogue = ""; gp.dlgManager.dialogueCharIndex = 0;
@@ -81,9 +87,11 @@ public class InteractionManager {
         if (gp.gsManager.isShowChoiceScreen()) {
             if (gp.mouseH.leftClicked) {
                 if (mouseHitbox.intersects(gp.acceptHitbox)) {
+                    gp.soundManager.playClickSFX(); // accept
                     gp.gsManager.setShowChoiceScreen(false); gp.gsManager.setPlayingAcceptCutscene(true);
                     gp.cutsceneFrameIndex = 0; gp.cutsceneTimer = 0;
                 } else if (mouseHitbox.intersects(gp.rejectHitbox) && gp.rejectHoverCount >= 5) {
+                    gp.soundManager.playClickSFX(); // reject
                     gp.gsManager.setShowChoiceScreen(false); gp.gsManager.setPlayingRejectCutscene(true);
                     gp.cutsceneFrameIndex = 0; gp.cutsceneTimer = 0;
                 }
@@ -94,6 +102,7 @@ public class InteractionManager {
 
         if (gp.gsManager.isPlayingAcceptCutscene() || gp.gsManager.isPlayingRejectCutscene()) {
             if (gp.gsManager.isShowMenuButton() && gp.mouseH.leftClicked && mouseHitbox.intersects(gp.menuBtnHitbox)) {
+                gp.soundManager.playClickSFX(); // menu button after ending
                 gp.gsManager.setPlayingAcceptCutscene(false); gp.gsManager.setPlayingRejectCutscene(false);
                 gp.gsManager.setShowTheEndText(false); gp.gsManager.setShowMenuButton(false);
                 gp.currentTheEndText = ""; gp.theEndCharIndex = 0;
@@ -107,6 +116,7 @@ public class InteractionManager {
         if (gp.gsManager.isPasswordUIOpen() || gp.gsManager.isClueOpen(0) || gp.gsManager.isClueOpen(1) || gp.gsManager.isClueOpen(2) || gp.gsManager.isClueOpen(3) || gp.gsManager.isStatue_Open() || gp.gsManager.isIntroPuzzleOpen()) {
             if (gp.mouseH.leftClicked) {
                 if (mouseHitbox.intersects(gp.backButtonHitbox)) {
+                    gp.soundManager.playClickSFX(); // back button on puzzle/clue/statue screens
                     gp.gsManager.setPasswordUIOpen(false);
                     gp.gsManager.setClueOpen(0, false); gp.gsManager.setClueOpen(1, false);
                     gp.gsManager.setClueOpen(2, false); gp.gsManager.setClueOpen(3, false);
@@ -124,7 +134,7 @@ public class InteractionManager {
                     }
                 } else if (gp.gsManager.isPasswordUIOpen() && mouseHitbox.intersects(gp.submitButtonHitbox)) {
                     if (gp.keyH.currentInput.equals("1984")) {
-                        gp.soundManager.playCorrectPasswordSFX(); // ADD THIS
+                        gp.soundManager.playCorrectPasswordSFX();
                         gp.gsManager.setLocketUnlocked(true); gp.gsManager.setPasswordUIOpen(false);
                         if (gp.gsManager.getCurrentQuest() == 4) gp.gsManager.setCurrentQuest(5);
                         System.out.println("Success! Locket Unlocked.");
@@ -134,16 +144,35 @@ public class InteractionManager {
                     }
                 } else if (gp.gsManager.isIntroPuzzleOpen()) {
                     if (gp.gsManager.getIntroPuzzlePage() == 1) {
-                        if (mouseHitbox.intersects(gp.nextButtonHitbox)) gp.gsManager.setIntroPuzzlePage(2);
-                        else if (mouseHitbox.intersects(gp.r1c1Hitbox)) gp.gsManager.setIntroAns(0, true);
-                        else if (mouseHitbox.intersects(gp.r2c3Hitbox)) gp.gsManager.setIntroAns(1, true);
+                        if (mouseHitbox.intersects(gp.nextButtonHitbox)) {
+                            gp.soundManager.playClickSFX(); // next page
+                            gp.gsManager.setIntroPuzzlePage(2);
+                        } else if (mouseHitbox.intersects(gp.r1c1Hitbox)) {
+                            gp.soundManager.playClickSFX(); // choice
+                            gp.gsManager.setIntroAns(0, true);
+                        } else if (mouseHitbox.intersects(gp.r2c3Hitbox)) {
+                            gp.soundManager.playClickSFX(); // choice
+                            gp.gsManager.setIntroAns(1, true);
+                        }
                     } else if (gp.gsManager.getIntroPuzzlePage() == 2) {
-                        if (mouseHitbox.intersects(gp.nextButtonHitbox)) gp.gsManager.setIntroPuzzlePage(3);
-                        else if (mouseHitbox.intersects(gp.prevButtonHitbox)) gp.gsManager.setIntroPuzzlePage(1);
-                        else if (mouseHitbox.intersects(gp.r1c1Hitbox)) gp.gsManager.setIntroAns(2, true);
-                        else if (mouseHitbox.intersects(gp.r2c3Hitbox)) gp.gsManager.setIntroAns(3, true);
+                        if (mouseHitbox.intersects(gp.nextButtonHitbox)) {
+                            gp.soundManager.playClickSFX(); // next page
+                            gp.gsManager.setIntroPuzzlePage(3);
+                        } else if (mouseHitbox.intersects(gp.prevButtonHitbox)) {
+                            gp.soundManager.playClickSFX(); // prev page
+                            gp.gsManager.setIntroPuzzlePage(1);
+                        } else if (mouseHitbox.intersects(gp.r1c1Hitbox)) {
+                            gp.soundManager.playClickSFX(); // choice
+                            gp.gsManager.setIntroAns(2, true);
+                        } else if (mouseHitbox.intersects(gp.r2c3Hitbox)) {
+                            gp.soundManager.playClickSFX(); // choice
+                            gp.gsManager.setIntroAns(3, true);
+                        }
                     } else if (gp.gsManager.getIntroPuzzlePage() == 3) {
-                        if (mouseHitbox.intersects(gp.prevButtonHitbox)) gp.gsManager.setIntroPuzzlePage(2);
+                        if (mouseHitbox.intersects(gp.prevButtonHitbox)) {
+                            gp.soundManager.playClickSFX(); // prev page
+                            gp.gsManager.setIntroPuzzlePage(2);
+                        }
                     }
                     if (gp.gsManager.isIntroAns(0) && gp.gsManager.isIntroAns(1) && gp.gsManager.isIntroAns(2) && gp.gsManager.isIntroAns(3) && gp.gsManager.getCurrentQuest() == 0) {
                         gp.gsManager.setCurrentQuest(1); gp.gsManager.setIntroPuzzleOpen(false);
@@ -174,7 +203,7 @@ public class InteractionManager {
                 for (int i = 0; i < gp.objManager.obj.length; i++) {
                     if (gp.objManager.obj[i] != null && gp.objManager.obj[i].name.equals("Glass Eye") && mouseHitbox.intersects(gp.objManager.obj[i].hitbox)) {
                         gp.objManager.obj[i] = null; gp.player.glassEyesCollected++;
-                        gp.soundManager.playGlassEyeSFX(); // ADD THIS
+                        gp.soundManager.playGlassEyeSFX();
                         if (gp.player.glassEyesCollected >= 5 && gp.gsManager.getCurrentQuest() == 1) {
                             gp.gsManager.setCurrentQuest(2);
                             System.out.println("Glass Eyes collected! Quest updated to 2.");
@@ -219,5 +248,10 @@ public class InteractionManager {
         gp.gsManager.setIntroPuzzleOpen(false); gp.gsManager.setPasswordUIOpen(false); gp.gsManager.setStatue_Open(false);
         gp.gsManager.setShowEndingGibberish(false); gp.gsManager.setShowChoiceScreen(false);
         gp.objManager.setObjects(); gp.player.setDefaultValues(); gp.gsManager.setCurrentMap(gp.MAP_MAIN_MENU);
+
+        gp.soundManager.stopOutdoorMusic();
+        gp.soundManager.stopRoomMusic();
+        gp.soundManager.loadAudio();
+        gp.soundManager.playMenuMusic();
     }
 }

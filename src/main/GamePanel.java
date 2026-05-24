@@ -7,9 +7,13 @@ import inputs.MouseHandler;
 import managers.*;
 import managers.UIManager;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.net.URL;
 
 public class GamePanel extends JPanel implements Runnable {
 
@@ -31,60 +35,58 @@ public class GamePanel extends JPanel implements Runnable {
 
     public int introCutsceneFrameIndex = 0;
     public int introCutsceneTimer = 0;
+    public boolean dunPlayed = false; // track so we only play it once
 
     public int rejectHoverCount = 0;
 
-    // Hitboxes (Coordinates estimated based on a centered 400x300 window)
-    public Rectangle settingsBtnHitbox = new Rectangle(20, 20, 48, 48); // Top left
-    public Rectangle resumeHitbox = new Rectangle(332, 300, 200, 50);   // Adjust these later!
-    public Rectangle exitMenuHitbox = new Rectangle(332, 390, 200, 50); // Adjust these later!
+    // Hitboxes
+    public Rectangle settingsBtnHitbox = new Rectangle(20, 20, 48, 48);
+    public Rectangle resumeHitbox = new Rectangle(332, 300, 200, 50);
+    public Rectangle exitMenuHitbox = new Rectangle(332, 390, 200, 50);
 
     public int cutsceneFrameIndex = 0;
     public int cutsceneTimer = 0;
 
-    public Rectangle menuBtnHitbox = new Rectangle(50, 550, 235, 56); // Bottom left
+    public Rectangle menuBtnHitbox = new Rectangle(50, 550, 235, 56);
     public String targetTheEndText = "the end.";
     public String currentTheEndText = "";
     public int theEndCharIndex = 0;
     public int theEndTimer = 0;
 
     // map animation variables
-    public int mapFrameIndex = 0; // Toggles between 0 and 1
+    public int mapFrameIndex = 0;
     public int mapFrameCounter = 0;
     public int mapAnimSpeed = 45;
 
-    // --- Animated Gibberish Variables ---
-    public int gibberishFrameIndex = 0; // Tracks which frame is currently showing
-    public int gibberishCounter = 0;    // Timer counter
-    public int gibberishSpeed = 6;      // Speed of animation (lower = faster)
+    // Animated Gibberish Variables
+    public int gibberishFrameIndex = 0;
+    public int gibberishCounter = 0;
+    public int gibberishSpeed = 6;
 
     public int menuFrameIndex = 0;
     public int menuFrameCounter = 0;
-    public final int menuFrameSpeed = 36; // ~600ms at 60 FPS
+    public final int menuFrameSpeed = 36;
     public Rectangle playButtonHitbox = new Rectangle(600, 375, 100, 40);
     public Rectangle exitButtonHitbox = new Rectangle(600, 425, 100, 40);
 
-    // --- NEW: Demon Animation & Event Variables ---
-
+    // Demon Animation & Event Variables
     public int demonFrameIndex = 0;
     public int demonCounter = 0;
-    public int demonSpeed = 10; // Animation speed
+    public int demonSpeed = 10;
     public int demonVanishTimer = 0;
 
-    // Event State: 0=Not Started, 1=Dialog1, 2=Wait 1s, 3=Wait 2s, 4=Dialog2, 5=Wait 2s, 6=Done
     public int eventTimer = 0;
     public int startTimer = 0;
 
     public int endingGibberishIndex = 0;
     public int endingGibberishTimer = 0;
 
-    public Rectangle acceptHitbox = new Rectangle(200, 300, 235, 56); // Adjust later
-    public Rectangle rejectHitbox = new Rectangle(480, 300, 235, 65); // Adjust later
-    public Rectangle debugIntroHitbox = new Rectangle(780, 20, 60, 60); // NEW Debug hitbox top right
+    public Rectangle acceptHitbox = new Rectangle(200, 300, 235, 56);
+    public Rectangle rejectHitbox = new Rectangle(480, 300, 235, 65);
+    public Rectangle debugIntroHitbox = new Rectangle(780, 20, 60, 60);
 
-    // hitboxs
+    // hitboxes
     public Rectangle dialogueNextHitbox = new Rectangle(760, 580, 60, 60);
-
     public Rectangle glassCaseHitbox = new Rectangle(170, 280, Constants.tileSize + 2, Constants.tileSize + 2);
     public Rectangle backButtonHitbox = new Rectangle(50, 50, 60, 60);
     public Rectangle submitButtonHitbox = new Rectangle(560, 360, 60, 60);
@@ -102,21 +104,18 @@ public class GamePanel extends JPanel implements Runnable {
     public Rectangle uiStatue2Hitbox = new Rectangle(350, 250, 150, 200);
     public Rectangle uiStatue3Hitbox = new Rectangle(580, 250, 150, 200);
 
-    // temporary button hitbox
-    public Rectangle tempBtnHitbox = new Rectangle(416, 300, 48, 48);
     // button hitboxes
+    public Rectangle tempBtnHitbox = new Rectangle(416, 300, 48, 48);
     public Rectangle nextButtonHitbox = new Rectangle(680, 350, 60, 80);
     public Rectangle prevButtonHitbox = new Rectangle(140, 350, 60, 80);
-    // list screen1 row1
-    public Rectangle r1c1Hitbox = new Rectangle(293, 280, 60, 60); // Jar
-    public Rectangle r1c2Hitbox = new Rectangle(413, 280, 60, 60); // Bouquet
-    public Rectangle r1c3Hitbox = new Rectangle(533, 280, 60, 60); // Watch
-    //list screen1 row2
-    public Rectangle r2c1Hitbox = new Rectangle(293, 435, 60, 60); // Locket
-    public Rectangle r2c2Hitbox = new Rectangle(413, 435, 60, 60); // Watch
-    public Rectangle r2c3Hitbox = new Rectangle(533, 435, 60, 60); // Bouquet
+    // list screen rows
+    public Rectangle r1c1Hitbox = new Rectangle(293, 280, 60, 60);
+    public Rectangle r1c2Hitbox = new Rectangle(413, 280, 60, 60);
+    public Rectangle r1c3Hitbox = new Rectangle(533, 280, 60, 60);
+    public Rectangle r2c1Hitbox = new Rectangle(293, 435, 60, 60);
+    public Rectangle r2c2Hitbox = new Rectangle(413, 435, 60, 60);
+    public Rectangle r2c3Hitbox = new Rectangle(533, 435, 60, 60);
 
-    // again button -- TEMPORARY!
     public Rectangle againBtnHitbox = new Rectangle(Constants.screenWidth / 2 - 80, Constants.screenHeight / 2 + 80, 160, 80);
 
     int FPS = 60;
@@ -138,6 +137,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.setFocusable(true);
         objManager.setObjects();
         soundManager.loadAudio();
+        soundManager.playMenuMusic();
     }
 
     public void startGameThread() {
@@ -155,7 +155,6 @@ public class GamePanel extends JPanel implements Runnable {
         int drawCount = 0;
 
         while (gameThread != null) {
-
             currentTime = System.nanoTime();
             delta += (currentTime - lastTime) / drawInterval;
             timer += (currentTime - lastTime);
@@ -192,68 +191,60 @@ public class GamePanel extends JPanel implements Runnable {
                 menuFrameIndex = (menuFrameIndex + 1) % 4;
                 menuFrameCounter = 0;
             }
-            // Handle Play button click
             if (mouseH.leftClicked) {
                 Rectangle mouseHitbox = new Rectangle(mouseH.mouseX, mouseH.mouseY, 1, 1);
                 if (mouseHitbox.intersects(playButtonHitbox)) {
-                    if (soundManager.clickSFX != null) {
-                        soundManager.clickSFX.setFramePosition(0); // rewind to start
-                        soundManager.clickSFX.start();
-                    }
-                    if (soundManager.menuMusic != null) {
-                        soundManager.menuMusic.stop();
-                        soundManager.menuMusic.close();
-                    }
+                    soundManager.playClickSFX();
+                    soundManager.stopMenuMusic();
+                    soundManager.playIntroMusic();
                     gsManager.setPlayingIntroCutscene(true);
-                    gsManager.setCurrentMap(MAP_ROOM); // <--- ADD THIS LINE to escape the menu trap!
+                    gsManager.setCurrentMap(MAP_ROOM);
                     mouseH.leftClicked = false;
                 } else if (mouseHitbox.intersects(exitButtonHitbox)) {
-                    if (soundManager.clickSFX != null) soundManager.clickSFX.start();
-                    System.exit(0); // This command closes the application!
+                    soundManager.playClickSFX();
+                    System.exit(0);
                 }
                 mouseH.leftClicked = false;
             }
-            return; // skip all other update logic while on menu
+            return;
         }
 
         if (gsManager.isPlayingIntroCutscene()) {
             introCutsceneTimer++;
-            if (introCutsceneFrameIndex < 8) {
-                if (introCutsceneTimer >= 120) { // all frames slightly longer
-                    introCutsceneFrameIndex++;
-                    introCutsceneTimer = 0;
-                    if (introCutsceneFrameIndex == 8) {
-                        soundManager.playDunSFX();
-                    }
-                }
-            } else if (introCutsceneTimer >= 200) { // last frame still lingers extra
+            if (introCutsceneTimer >= 240) { // 4 seconds at 60 FPS
                 introCutsceneFrameIndex++;
                 introCutsceneTimer = 0;
+            }
+            // Play dun SFX exactly once when the last frame (index 8) is reached
+            if (introCutsceneFrameIndex == 8 && !dunPlayed) {
+                soundManager.playDunSFX();
+                dunPlayed = true;
             }
             if (introCutsceneFrameIndex >= 9) {
                 gsManager.setPlayingIntroCutscene(false);
                 gsManager.setCurrentMap(MAP_ROOM);
+                soundManager.stopIntroMusic();
+                soundManager.playRoomMusic();
+                dunPlayed = false; // reset for next playthrough
             }
             return;
         }
 
         mapFrameCounter++;
         if (mapFrameCounter >= mapAnimSpeed) {
-            mapFrameIndex = (mapFrameIndex == 0) ? 1 : 0; // Flip back and forth between 0 and 1
+            mapFrameIndex = (mapFrameIndex == 0) ? 1 : 0;
             mapFrameCounter = 0;
         }
 
         if (gsManager.getCurrentMap() == MAP_ROOM && !gsManager.isIntroDialogueTriggered()) {
             startTimer++;
-            // 120 frames at 60 FPS = 2 seconds
             if (startTimer >= 120) {
-                // --- NEW: Use startDialogue instead of manually setting it ---
                 dlgManager.startDialogue(dlgManager.roomDialogue);
                 gsManager.setIntroDialogueTriggered(true);
             }
         }
 
-        // --- NEW: Typewriter Animation Logic ---
+        // Typewriter Animation Logic
         if (dlgManager.isDialogueActive) {
             if (dlgManager.dialogueCharIndex < dlgManager.fullDialogue.length()) {
                 dlgManager.typewriterCounter++;
@@ -270,44 +261,45 @@ public class GamePanel extends JPanel implements Runnable {
             if (gibberishCounter >= gibberishSpeed) {
                 gibberishFrameIndex++;
                 if (gibberishFrameIndex >= 10) {
-                    gibberishFrameIndex = 0; // Loop back to the first frame
+                    gibberishFrameIndex = 0;
                 }
-                gibberishCounter = 0; // Reset timer
+                gibberishCounter = 0;
             }
         }
 
-        // --- NEW: Event State Machine ---
+        // Event State Machine
         if (gsManager.getHouseEventState() == 2) {
             eventTimer++;
-            if (eventTimer >= 60) { // 1 second (60 frames)
+            if (eventTimer >= 60) {
                 gsManager.setDemonVisible(true);
+                soundManager.playDemonAppearanceSFX(); // <-- add this
                 gsManager.setHouseEventState(3);
                 eventTimer = 0;
             }
         } else if (gsManager.getHouseEventState() == 3) {
             eventTimer++;
-            if (eventTimer >= 120) { // 2 seconds
+            if (eventTimer >= 120) {
                 gsManager.setHouseEventState(4);
                 dlgManager.startDialogue(dlgManager.houseDialogue2);
                 eventTimer = 0;
             }
         } else if (gsManager.getHouseEventState() == 5) {
             eventTimer++;
-            if (eventTimer >= 60) { // 1 second
+            if (eventTimer >= 60) {
                 gsManager.setIntroPuzzleOpen(true);
                 gsManager.setHouseEventState(6);
                 eventTimer = 0;
             }
         } else if (gsManager.getHouseEventState() == 8) {
             eventTimer++;
-            if (eventTimer >= 60) { // 1 second
-                gsManager.setCurrentQuest(6); // Trigger End Screen
-                gsManager.setHouseEventState(9); // Finish state machine
+            if (eventTimer >= 60) {
+                gsManager.setCurrentQuest(6);
+                gsManager.setHouseEventState(9);
                 eventTimer = 0;
             }
         }
 
-        // --- Demon Animation ---
+        // Demon Animation
         if (gsManager.isDemonVisible()) {
             demonCounter++;
             if (demonCounter >= demonSpeed) {
@@ -320,45 +312,43 @@ public class GamePanel extends JPanel implements Runnable {
         if (dlgManager.isDialogueActive && dlgManager.currentDialogueArray == dlgManager.houseDialogue3) {
             // (Commented code omitted for brevity)
         } else if (gsManager.getHouseEventState() == 0) {
-            // Reset the timer when the game restarts so it works on future playthroughs
             demonVanishTimer = 0;
         }
 
         if (gsManager.getHouseEventState() == 10) {
             eventTimer++;
-            if (eventTimer >= 60) { // 1 second after line 6
+            if (eventTimer >= 60) {
                 gsManager.setShowEndingGibberish(true);
                 endingGibberishIndex = 0;
                 endingGibberishTimer = 0;
-                gsManager.setHouseEventState(11); // Waiting for player to close gibberish
+                gsManager.setHouseEventState(11);
                 eventTimer = 0;
             }
         } else if (gsManager.getHouseEventState() == 13) {
             eventTimer++;
-            if (eventTimer >= 60) { // 1 second after line 9
+            if (eventTimer >= 60) {
                 gsManager.setShowChoiceScreen(true);
-                gsManager.setHouseEventState(14); // Waiting for choice
+                gsManager.setHouseEventState(14);
                 eventTimer = 0;
             }
         }
 
-        // --- NEW: Ending Gibberish Animation (0.5s per frame, stops at 11) ---
+        // Ending Gibberish Animation (0.5s per frame, stops at 11)
         if (gsManager.isShowEndingGibberish()) {
             endingGibberishTimer++;
-            if (endingGibberishTimer >= 30) { // 0.5s at 60 FPS
-                if (endingGibberishIndex < 10) { // Max index is 10 (Gibberish_11)
+            if (endingGibberishTimer >= 30) {
+                if (endingGibberishIndex < 10) {
                     endingGibberishIndex++;
                 }
                 endingGibberishTimer = 0;
             }
         }
 
-        // --- NEW: Reject Button Hover Logic ---
+        // Reject Button Hover Logic
         if (gsManager.isShowChoiceScreen()) {
             Rectangle mouseHitbox = new Rectangle(mouseH.mouseX, mouseH.mouseY, 1, 1);
-            if (rejectHoverCount < 5 && mouseHitbox.intersects(rejectHitbox)) { // <-- Increased limit to 5
+            if (rejectHoverCount < 5 && mouseHitbox.intersects(rejectHitbox)) {
                 rejectHoverCount++;
-                // Move the button to predefined random locations
                 if (rejectHoverCount == 1) {
                     rejectHitbox.x = 100;
                     rejectHitbox.y = 150;
@@ -367,20 +357,19 @@ public class GamePanel extends JPanel implements Runnable {
                     rejectHitbox.y = 450;
                 } else if (rejectHoverCount == 3) {
                     rejectHitbox.x = 200;
-                    rejectHitbox.y = 500; // New jump spot
+                    rejectHitbox.y = 500;
                 } else if (rejectHoverCount == 4) {
                     rejectHitbox.x = 650;
-                    rejectHitbox.y = 100; // Another jump spot
+                    rejectHitbox.y = 100;
                 } else if (rejectHoverCount == 5) {
                     rejectHitbox.x = 480;
-                    rejectHitbox.y = 300; // Returns to a clickable spot
+                    rejectHitbox.y = 300;
                 }
             }
         }
 
-        // --- NEW: Cutscene & Ending Typewriter Logic ---
+        // Cutscene & Ending Typewriter Logic
         if (gsManager.isPlayingAcceptCutscene() || gsManager.isPlayingRejectCutscene()) {
-            // Cutscene Frame Timer (1 second per frame = 60 frames)
             if (cutsceneFrameIndex < 7) {
                 cutsceneTimer++;
                 if (cutsceneTimer >= 60) {
@@ -388,11 +377,9 @@ public class GamePanel extends JPanel implements Runnable {
                     cutsceneTimer = 0;
                 }
             } else {
-                // On the 8th frame (index 7), freeze and show text
                 gsManager.setShowTheEndText(true);
             }
 
-            // "the end." Typewriter (0.5s per letter = 30 frames)
             if (gsManager.isShowTheEndText() && theEndCharIndex < targetTheEndText.length()) {
                 theEndTimer++;
                 if (theEndTimer >= 30) {
@@ -424,12 +411,13 @@ public class GamePanel extends JPanel implements Runnable {
             return;
         }
 
+        // --- INTRO CUTSCENE: draw only, no timer logic here ---
         if (gsManager.isPlayingIntroCutscene()) {
             if (introCutsceneFrameIndex < 9 && asManager.introCutscene[introCutsceneFrameIndex] != null) {
                 g2.drawImage(asManager.introCutscene[introCutsceneFrameIndex], 0, 0, Constants.screenWidth, Constants.screenHeight, null);
             }
             g2.dispose();
-            return; // Don't draw the rest of the game yet
+            return;
         }
 
         if (gsManager.getCurrentMap() == MAP_ROOM && asManager.roomBg != null) {
@@ -498,7 +486,6 @@ public class GamePanel extends JPanel implements Runnable {
             if (asManager.clue3 != null) g2.drawImage(asManager.clue3, 705, 320, Constants.tileSize - 10, Constants.tileSize - 9, null);
             if (asManager.clue0 != null) g2.drawImage(asManager.clue0, 230, 538, Constants.tileSize - 7, Constants.tileSize - 6, null);
 
-            // FIXED: Added the proper indexes to getStatueState()
             g2.drawImage(getStatueImage(gsManager.getStatueState(0)), 560, 250, 70, 100, null);
             g2.drawImage(getStatueImage(gsManager.getStatueState(1)), 630, 340, 70, 100, null);
             g2.drawImage(getStatueImage(gsManager.getStatueState(2)), 670, 228, 70, 100, null);
