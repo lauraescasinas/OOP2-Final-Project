@@ -1,5 +1,6 @@
 package object;
 
+import main.Constants;
 import main.GamePanel;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -17,14 +18,14 @@ public class SuperObject {
         if (width > 0) {
             drawWidth = width;
         } else {
-            drawWidth = gp.tileSize;
+            drawWidth = Constants.tileSize;
         }
 
         int drawHeight;
         if (height > 0) {
             drawHeight = height;
         } else {
-            drawHeight = gp.tileSize;
+            drawHeight = Constants.tileSize;
         }
         g2.drawImage(image, x, y, drawWidth, drawHeight, null);
     }

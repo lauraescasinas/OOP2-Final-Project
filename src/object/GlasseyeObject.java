@@ -8,7 +8,7 @@ public class GlasseyeObject extends SuperObject{
         name = "Glass Eye";
 
         try{
-            image = ImageIO.read(getClass().getResourceAsStream("/Objects/glass_eyes.png"));
+            image = ImageIO.read(getClass().getResourceAsStream("/Objects/Collectibles/glass_eyes.png"));
         } catch (IOException e){
             e.printStackTrace();
         }
